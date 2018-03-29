@@ -1,0 +1,38 @@
+[
+	{
+		"baseSymbol": "BTC",
+		"counterSymbol": "LTC",
+		"baseAmount": "10000",
+		"counterAmount": "1000000",
+		"side": "BID",
+		"payTo": "ln:123455678",
+		"status": "PLACED"
+	},
+	{
+		"baseSymbol": "BTC",
+		"counterSymbol": "LTC",
+		"baseAmount": "10000",
+		"counterAmount": "1000000",
+		"side": "BID",
+		"payTo": "ln:123455678",
+		"status": "FILLING"
+	},
+	{
+		"baseSymbol": "BTC",
+		"counterSymbol": "LTC",
+		"baseAmount": "10000",
+		"counterAmount": "1000000",
+		"side": "BID",
+		"payTo": "ln:123455678",
+		"status": "FILLED"
+	},
+	{
+		"baseSymbol": "BTC",
+		"counterSymbol": "LTC",
+		"baseAmount": "10000",
+		"counterAmount": "1000000",
+		"side": "BID",
+		"payTo": "ln:123455678",
+		"status": "CANCELLED"
+	}
+]
