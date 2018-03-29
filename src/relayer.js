@@ -4,7 +4,7 @@ import leveldown from 'leveldown'
 import path from 'path'
 import EventEmitter from 'events'
 import grpc from 'grpc'
-const DESCRIPTOR_PATH = path.join(__dirname, 'relayer_client.proto')
+const DESCRIPTOR_PATH = require.resolve('relayer-proto')
 const RELAYER_CLIENT_PROTO = grpc.load(DESCRIPTOR_PATH, 'proto', {
   convertFieldsToCamelCase: true,
   binaryAsBase64: true,

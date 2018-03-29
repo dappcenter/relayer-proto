@@ -1,6 +1,6 @@
 import grpc from 'grpc'
 import path from 'path'
-const DESCRIPTOR_PATH = path.join(__dirname, '..', 'src', 'relayer_client.proto')
+const DESCRIPTOR_PATH = require.resolve('relayer-proto')
 const RELAYER_CLIENT_PROTO = grpc.load(DESCRIPTOR_PATH, 'proto', {
   convertFieldsToCamelCase: true,
   binaryAsBase64: true,
