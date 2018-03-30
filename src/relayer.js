@@ -20,8 +20,12 @@ const Order = {
       order = Object.assign({}, json)
     }
 
-    order.baseAmount = new BigNumber(order.baseAmount)
-    order.counterAmount = new BigNumber(order.counterAmount)
+    if(order.baseAmount) {
+      order.baseAmount = new BigNumber(order.baseAmount)
+    }
+    if(order.counterAmount) {
+      order.counterAmount = new BigNumber(order.counterAmount)
+    }
 
     if(order.fillAmount) {
       order.fillAmount = new BigNumber(order.fillAmount)
@@ -40,8 +44,12 @@ const Order = {
   toWire(obj) {
     let json = Object.assign({}, obj)
 
-    json.baseAmount = obj.baseAmount.toFixed(0)
-    json.counterAmount = obj.counterAmount.toFixed(0)
+    if(obj.baseAmount) {
+      json.baseAmount = obj.baseAmount.toFixed(0)
+    }
+    if(obj.counterAmount) {
+      json.counterAmount = obj.counterAmount.toFixed(0)
+    }
 
     if(obj.fillAmount) {
       json.fillAmount = obj.fillAmount.toFixed(0)
@@ -125,12 +133,14 @@ class Relayer extends EventEmitter {
     })
 
     call.on('error', (err) => {
+      // TODO: cancel any open placed orders
       // TODO
     })
 
     call.on('end', () => {
       // TODO
       call.end()
+      // TODO: cancel open orders
     })
   }
 
@@ -247,7 +257,6 @@ class Relayer extends EventEmitter {
       if(order.baseSymbol === baseSymbol && order.counterSymbol == counterSymbol) {
         call.write({
           orderId,
-          // TODO: enum of order status
           orderStatus: 'PLACED',
           order: Order.toWire({
             baseSymbol: order.baseSymbol,
@@ -263,7 +272,6 @@ class Relayer extends EventEmitter {
       if(order.baseSymbol === baseSymbol && order.counterSymbol == counterSymbol) {
         call.write({
           orderId,
-          // TODO: enum of order status
           orderStatus: 'CANCELLED'
         })
       }
@@ -273,7 +281,6 @@ class Relayer extends EventEmitter {
       if(order.baseSymbol === baseSymbol && order.counterSymbol == counterSymbol) {
         call.write({
           orderId,
-          // TODO: enum of order status
           orderStatus: 'FILLED',
           ...Order.toWire({ fillAmount: order.fillAmount })
         })
@@ -291,7 +298,13 @@ class Relayer extends EventEmitter {
       await this.storage.get(orderId)
     } catch(e) {
       if(e.notFound) {
-        await this.storage.put(orderId, Order.toDb({ ...order, status: 'PLACED' }))
+        await this.storage.put(orderId, Order.toDb({
+          ...order,
+          ...Order.fromWire({
+            payTo: request.payTo,
+            status: 'PLACED'
+          })
+        }))
         this.emit('order:created', orderId, order)
         return [ 'PLACED', {} ]
       }
@@ -316,13 +329,19 @@ class Relayer extends EventEmitter {
 
     // TODO: check that preimage matches swap hash
 
-    await this.storage.put(orderId, Order.toDb({ ...order, swapPreimage: request.swapPreimage }))
+    await this.storage.put(orderId, Order.toDb({
+      ...order,
+      ...Order.fromWire({
+        swapPreimage: request.swapPreimage
+      })
+    }))
     // emit this here or after everything is all done?
-    this.emit('order:filled', orderId, order)
+    this.emit('order:completed', orderId, order)
 
     return ['FILLED', {}]
   }
 
+  // TODO: this will have to change dramatically when payments get implemented
   async _fillOrder(orderId, request) {
     let order = await this._getOrderWithStatus(orderId, 'PLACED')
 
@@ -332,12 +351,15 @@ class Relayer extends EventEmitter {
 
     await this.storage.put(orderId, Order.toDb({
       ...order,
-      swapHash: request.fill.swapHash,
-      fillAmount: request.fill.fillAmount,
-      status: 'FILLING'
+      ...Order.fromWire({
+        swapHash: request.fill.swapHash,
+        fillAmount: request.fill.fillAmount,
+        status: 'FILLING'
+      })
     }))
-    // emit this here or after everything is all done?
-    this.emit('order:filling', orderId, order)
+
+    // I don't like re-pulling from the database just to get the new combined version of the data
+    this.emit('order:filled', orderId, await this._getOrderWithStatus(orderId, 'FILLING'))
 
     await this._request(orderId, 'maker', 'executeOrder', {
       fill: request.fill

@@ -5,6 +5,7 @@ import delay from 'timeout-as-promise'
 import createStub from './stub'
 import createSeeds from './seed'
 import uuid from 'uuid/v4'
+import { BigNumber } from 'bignumber.js'
 
 describe('Relayer', function () {
 	let relayer
@@ -32,7 +33,7 @@ describe('Relayer', function () {
 				counterSymbol: 'LTC'
 			}, function (err, orders) {
 				assert.ifError(err)
-				assert.equal(orders.length, 2)
+				assert.strictEqual(orders.length, 2)
 			})
 		})
 
@@ -47,32 +48,177 @@ describe('Relayer', function () {
 
 				const keys = Object.keys(orderUpdates[0])
 
-				assert.equal(keys.length, 3)
-				assert.deepEqual(keys, ['orderId', 'orderStatus', 'order'])
+				assert.strictEqual(keys.length, 3)
+				assert.deepStrictEqual(keys, ['orderId', 'orderStatus', 'order'])
 
 				const orderKeys = Object.keys(orderUpdates[0].order)
 
-				assert.equal(orderKeys.length, 5)
-				assert.deepEqual(orderKeys, ['baseSymbol', 'counterSymbol', 'baseAmount', 'counterAmount', 'side'])
+				assert.strictEqual(orderKeys.length, 5)
+				assert.deepStrictEqual(orderKeys, ['baseSymbol', 'counterSymbol', 'baseAmount', 'counterAmount', 'side'])
 			})
 		})
 	})
 
 	describe('#subscribeOrders', function () {
-		// let stub = createStub('localhost:50078')
 
-		// let call = stub.subscribeOrders({
-		// 	baseSymbol: 'BTC',
-		// 	counterSymbol: 'LTC'
-		// })
+		it('sends new orders to subscribers', function (done) {
 
-		// call.on('')
+			const order = {
+				"baseSymbol": "BTC",
+				"counterSymbol": "LTC",
+				"baseAmount": "60000",
+				"counterAmount": "8000000",
+				"side": "ASK",
+				"payTo": "ln:8917819845"
+			}
+
+			const orderId = uuid()
+
+			const stub = createStub('localhost:50078')
+
+			let call = stub.subscribeOrders({
+				baseSymbol: 'BTC',
+				counterSymbol: 'LTC'
+			})
+
+			call.on('data', function (orderUpdate) {
+				const orderUpdateKeys = Object.keys(orderUpdate)
+
+				assert.strictEqual(orderUpdateKeys.length, 4)
+
+				assert.strictEqual(orderUpdate.orderId, orderId)
+				assert.strictEqual(orderUpdate.orderStatus, 'PLACED')
+				// TODO: not sure that I like fillAmount being on these orders when they are not filled...
+				assert.strictEqual(orderUpdate.fillAmount, '0')
+
+				const orderKeys = Object.keys(orderUpdate.order)
+
+				assert.strictEqual(orderKeys.length, 5)
+				assert.strictEqual(orderUpdate.order.baseSymbol, order.baseSymbol)
+				assert.strictEqual(orderUpdate.order.counterSymbol, order.counterSymbol)
+				assert.strictEqual(orderUpdate.order.baseAmount, order.baseAmount)
+				assert.strictEqual(orderUpdate.order.counterAmount, order.counterAmount)
+				assert.strictEqual(orderUpdate.order.side, order.side)
+
+				call.cancel()
+			})
+
+			call.on('error', function (err) {
+				assert.strictEqual(err.code, 1)
+				assert.strictEqual(err.details, 'Cancelled')
+				done()
+			})
+
+			setTimeout(function () {
+				relayer._placeOrder(orderId, { order }).catch(done)
+			}, 50)
+		})
+
+		it('sends cancels to subscribers', function (done) {
+			const stub = createStub('localhost:50078')
+			const { orderId, order } = seeds.placed.pop()
+
+			let call = stub.subscribeOrders({
+				baseSymbol: 'BTC',
+				counterSymbol: 'LTC'
+			})
+
+			call.on('data', function (orderUpdate) {
+				const orderUpdateKeys = Object.keys(orderUpdate)
+
+				assert.strictEqual(orderUpdateKeys.length, 4)
+
+				assert.strictEqual(orderUpdate.orderId, orderId)
+				assert.strictEqual(orderUpdate.orderStatus, 'CANCELLED')
+				assert.strictEqual(orderUpdate.fillAmount, '0')
+				assert.strictEqual(orderUpdate.order, null)
+
+				call.cancel()
+			})
+
+			call.on('error', function (err) {
+				assert.strictEqual(err.code, 1)
+				assert.strictEqual(err.details, 'Cancelled')
+				done()
+			})
+
+			setTimeout(function () {
+				relayer._cancelOrder(orderId).catch(done)
+			}, 50)
+		})
+
+		it('sends fills to subscribers', function (done) {
+			const stub = createStub('localhost:50078')
+			const order = {
+				"baseSymbol": "BTC",
+				"counterSymbol": "LTC",
+				"baseAmount": "50000",
+				"counterAmount": "2000000",
+				"side": "ASK"
+			}
+
+			const orderId = uuid()
+
+			let call = stub.subscribeOrders({
+				baseSymbol: 'BTC',
+				counterSymbol: 'LTC'
+			})
+
+			const makerStub = createStub('localhost:50078')
+			const makerCall = makerStub.maker()
+
+			makerCall.write({
+				orderId: orderId,
+				placeOrderRequest: {
+					order,
+					"payTo": "ln:8912312345"
+				}
+			})
+
+			let callCount = 0
+
+			call.on('data', function (orderUpdate) {
+				callCount++
+
+				if(callCount === 1) return
+
+				const orderUpdateKeys = Object.keys(orderUpdate)
+
+				console.log(order, orderId, orderUpdate)
+
+				assert.strictEqual(orderUpdateKeys.length, 4)
+
+				assert.strictEqual(orderUpdate.orderId, orderId)
+				assert.strictEqual(orderUpdate.orderStatus, 'FILLED')
+				assert.strictEqual(orderUpdate.fillAmount, (new BigNumber(order.baseAmount)).dividedBy(10).toFixed(0))
+				assert.strictEqual(orderUpdate.order, null)
+
+				call.cancel()
+
+				makerCall.cancel()
+			})
+
+			call.on('error', function (err) {
+				assert.strictEqual(err.code, 1)
+				assert.strictEqual(err.details, 'Cancelled')
+				done()
+			})
+
+			setTimeout(function () {
+
+				relayer._fillOrder(orderId, {
+					fill: {
+						swapHash: "anVzdCB0ZXN0aW5n",
+						fillAmount: (new BigNumber(order.baseAmount)).dividedBy(10).toFixed(0)
+					}
+				}).catch(done)
+			}, 50)
+		})
 
 		it('represents numbers larger than javascript\'s max')
 	})
 
 	describe('#maker', function () {
-		let call
 
 		beforeEach(function () {
 			let stub = createStub('localhost:50078')
@@ -84,7 +230,7 @@ describe('Relayer', function () {
 			call.on('data', function () {})
 
 			call.on('error', function (err) {
-				assert.equal(err.details, "No order with id 123")
+				assert.strictEqual(err.details, "No order with id 123")
 				done()
 			})
 
@@ -94,7 +240,7 @@ describe('Relayer', function () {
 			})
 		})
 
-		describe.only('placeOrder', function () {
+		describe('placeOrder', function () {
 
 			it('creates an order and returns the id', function (done) {
 
@@ -103,8 +249,7 @@ describe('Relayer', function () {
 					"counterSymbol": "LTC",
 					"baseAmount": "50000",
 					"counterAmount": "2000000",
-					"side": "BID",
-					"payTo": "ln:8912312345"
+					"side": "BID"
 				}
 
 				const orderId = uuid()
@@ -118,23 +263,23 @@ describe('Relayer', function () {
 					assert.ok(msg)
 
 					const msgKeys = Object.keys(msg)
-					assert.deepEqual(msgKeys, ['orderId',
+					assert.deepStrictEqual(msgKeys, ['orderId',
 						'orderStatus',
 						'placeOrderResponse',
 						'cancelOrderResponse',
 						'executeOrderRequest',
 						'completeOrderResponse'
 					])
-					assert.equal(msg.orderId, orderId)
-					assert.equal(msg.orderStatus, 'PLACED')
+					assert.strictEqual(msg.orderId, orderId)
+					assert.strictEqual(msg.orderStatus, 'PLACED')
 
-					assert.equal(msg.cancelOrderResponse, null)
-					assert.equal(msg.executeOrderRequest, null)
-					assert.equal(msg.completeOrderResponse, null)
+					assert.strictEqual(msg.cancelOrderResponse, null)
+					assert.strictEqual(msg.executeOrderRequest, null)
+					assert.strictEqual(msg.completeOrderResponse, null)
 
 					const { placeOrderResponse } = msg
 					const placeOrderResponseKeys = Object.keys(placeOrderResponse)
-					assert.deepEqual(placeOrderResponseKeys, [])
+					assert.deepStrictEqual(placeOrderResponseKeys, [])
 
 					call.end()
 				})
@@ -146,7 +291,8 @@ describe('Relayer', function () {
 				call.write({
 					orderId: orderId,
 					placeOrderRequest: {
-						order
+						order,
+						"payTo": "ln:8912312345"
 					}
 				})
 			})
@@ -156,7 +302,7 @@ describe('Relayer', function () {
 
 			it('cancels an order', function (done) {
 
-				let seed = seeds[0]
+				let seed = seeds.placed.pop().orderId
 
 				call.on('error', function (err) {
 					assert.ifError(err)
@@ -167,23 +313,23 @@ describe('Relayer', function () {
 					assert.ok(msg)
 
 					const msgKeys = Object.keys(msg)
-					assert.deepEqual(msgKeys, ['orderId',
+					assert.deepStrictEqual(msgKeys, ['orderId',
 						'orderStatus',
 						'placeOrderResponse',
 						'cancelOrderResponse',
 						'executeOrderRequest',
 						'completeOrderResponse'
 					])
-					assert.equal(msg.orderId, seed)
-					assert.equal(msg.orderStatus, 'CANCELLED')
+					assert.strictEqual(msg.orderId, seed)
+					assert.strictEqual(msg.orderStatus, 'CANCELLED')
 
-					assert.equal(msg.placeOrderResponse, null)
-					assert.equal(msg.executeOrderRequest, null)
-					assert.equal(msg.completeOrderResponse, null)
+					assert.strictEqual(msg.placeOrderResponse, null)
+					assert.strictEqual(msg.executeOrderRequest, null)
+					assert.strictEqual(msg.completeOrderResponse, null)
 
 					const { cancelOrderResponse } = msg
 					const cancelOrderResponseKeys = Object.keys(cancelOrderResponse)
-					assert.deepEqual(cancelOrderResponseKeys, [])
+					assert.deepStrictEqual(cancelOrderResponseKeys, [])
 
 					call.end()
 				})

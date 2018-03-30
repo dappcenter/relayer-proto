@@ -11,6 +11,33 @@
 	{
 		"baseSymbol": "BTC",
 		"counterSymbol": "LTC",
+		"baseAmount": "11000",
+		"counterAmount": "1100000",
+		"side": "BID",
+		"payTo": "ln:123455678",
+		"status": "PLACED"
+	},
+	{
+		"baseSymbol": "BTC",
+		"counterSymbol": "LTC",
+		"baseAmount": "10100",
+		"counterAmount": "1010000",
+		"side": "BID",
+		"payTo": "ln:123455678",
+		"status": "PLACED"
+	},
+	{
+		"baseSymbol": "BTC",
+		"counterSymbol": "LTC",
+		"baseAmount": "10010",
+		"counterAmount": "1001000",
+		"side": "BID",
+		"payTo": "ln:123455678",
+		"status": "PLACED"
+	},
+	{
+		"baseSymbol": "BTC",
+		"counterSymbol": "LTC",
 		"baseAmount": "10000",
 		"counterAmount": "1000000",
 		"side": "BID",

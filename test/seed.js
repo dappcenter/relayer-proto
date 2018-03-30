@@ -7,10 +7,15 @@ import leveldown from 'leveldown'
 const storage = levelup(leveldown(path.join(__dirname, 'testdb', 'open')))
 
 async function createSeeds() {
-	let seeds = []
+	let seeds = {
+		placed: [],
+		filling: [],
+		filled: [],
+		cancelled: []
+	}
 	await Promise.all(orders.map( (order) => {
 		const id = uuid()
-		seeds.push(id)
+		seeds[order.status.toLowerCase()].push({ orderId: id, order })
 		return storage.put(id, JSON.stringify(order))
 	}))
 
