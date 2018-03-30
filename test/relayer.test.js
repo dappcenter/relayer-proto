@@ -220,6 +220,8 @@ describe('Relayer', function () {
 
 	describe('#maker', function () {
 
+		let call
+
 		beforeEach(function () {
 			let stub = createStub('localhost:50078')
 			call = stub.maker()
@@ -313,7 +315,8 @@ describe('Relayer', function () {
 					assert.ok(msg)
 
 					const msgKeys = Object.keys(msg)
-					assert.deepStrictEqual(msgKeys, ['orderId',
+					assert.deepStrictEqual(msgKeys, [
+						'orderId',
 						'orderStatus',
 						'placeOrderResponse',
 						'cancelOrderResponse',
@@ -346,7 +349,67 @@ describe('Relayer', function () {
 		})
 
 		describe('executeOrder', function () {
+			it('requests execution for placed orders', function (done) {
+				const order = {
+					"baseSymbol": "BTC",
+					"counterSymbol": "LTC",
+					"baseAmount": "50000",
+					"counterAmount": "2000000",
+					"side": "ASK"
+				}
+				const payTo = "ln:8912312345"
+				const fill = {
+					swapHash: "SWYgeW91IHRoaW5rIHRoaXMgaGFzIGEgaGFwcHkgZW5kaW5nLCB5b3UgaGF2ZW4ndCBiZWVuIHBheWluZyBhdHRlbnRpb24=",
+					fillAmount: (new BigNumber(order.baseAmount)).dividedBy(10).toFixed(0)
+				}
 
+				const orderId = uuid()
+
+				call.on('error', done)
+				call.on('end', done)
+				call.on('data', function (msg) {
+					if(msg.executeOrderRequest) {
+						assert.deepStrictEqual(Object.keys(msg), [
+							'orderId',
+							'orderStatus',
+							'placeOrderResponse',
+							'cancelOrderResponse',
+							'executeOrderRequest',
+							'completeOrderResponse'
+						])
+						assert.strictEqual(msg.orderId, orderId)
+						assert.strictEqual(msg.orderStatus, 'FILLING')
+
+						assert.strictEqual(msg.placeOrderResponse, null)
+						assert.strictEqual(msg.cancelOrderResponse, null)
+						assert.strictEqual(msg.completeOrderResponse, null)
+
+						assert.deepStrictEqual(msg.executeOrderRequest, { fill })
+
+						call.end()
+					}
+				})
+
+				call.write({
+					orderId: orderId,
+					placeOrderRequest: {
+						order,
+						payTo
+					}
+				})
+
+				const takerStub = createStub('localhost:50078')
+				const takerCall = takerStub.taker()
+
+				setTimeout(function () {
+					takerCall.write({
+						orderId,
+						fillOrderRequest: {
+							fill
+						}
+					})
+				}, 1000)
+			})
 		})
 
 		describe('completeOrder', function () {
@@ -355,7 +418,7 @@ describe('Relayer', function () {
 
 	})
 
-	describe.only('#taker', function () {
+	describe('#taker', function () {
 		describe('fillOrder', function () {
 
 			it('fills orders that have been placed', function (done) {
