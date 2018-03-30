@@ -355,9 +355,74 @@ describe('Relayer', function () {
 
 	})
 
-	describe ('#taker', function () {
+	describe.only('#taker', function () {
 		describe('fillOrder', function () {
 
+			it('fills orders that have been placed', function (done) {
+				const order = {
+					"baseSymbol": "BTC",
+					"counterSymbol": "LTC",
+					"baseAmount": "50000",
+					"counterAmount": "2000000",
+					"side": "ASK"
+				}
+				const payTo = "ln:8912312345"
+
+				const orderId = uuid()
+
+				const makerStub = createStub('localhost:50078')
+				const makerCall = makerStub.maker()
+
+				makerCall.on('data', function (msg) {
+					if(msg.executeOrderRequest) {
+						makerCall.write({
+							orderId: orderId,
+							executeOrderResponse: {}
+						})
+					}
+				})
+
+				makerCall.write({
+					orderId: orderId,
+					placeOrderRequest: {
+						order,
+						payTo
+					}
+				})
+
+				const stub = createStub('localhost:50078')
+				const call = stub.taker()
+
+				call.on('error', done)
+				call.on('end', done)
+				call.on('data', function (msg) {
+					const msgKeys = Object.keys(msg)
+					assert.deepStrictEqual(msgKeys, [
+						'orderId',
+						'fillOrderResponse'
+					])
+					assert.strictEqual(msg.orderId, orderId)
+
+					const { fillOrderResponse } = msg
+					const fillOrderResponseKeys = Object.keys(fillOrderResponse)
+					assert.deepStrictEqual(fillOrderResponseKeys, [ 'payTo' ])
+					assert.deepEqual(fillOrderResponse.payTo, payTo)
+
+					call.end()
+				})
+
+				setTimeout(function () {
+					call.write({
+						orderId: orderId,
+						fillOrderRequest: {
+							fill: {
+								swapHash: "SWYgeW91IHRoaW5rIHRoaXMgaGFzIGEgaGFwcHkgZW5kaW5nLCB5b3UgaGF2ZW4ndCBiZWVuIHBheWluZyBhdHRlbnRpb24=",
+								fillAmount: (new BigNumber(order.baseAmount)).dividedBy(10).toFixed(0)
+							}
+						}
+					})
+				}, 1000)
+			})
 		})
 	})
 })

@@ -152,8 +152,15 @@ class Relayer extends EventEmitter {
 
       if(responseType) {
         let response = {
-          orderId,
-          orderStatus
+          orderId
+        }
+
+        // This is hacky. Fills don't have statuses, but orders do.
+        // Query whether orders need statuses.... the request/response is a better status anyway
+        // Status is really only useful for subscriptions...
+        // TODO
+        if(orderStatus) {
+          response.orderStatus = orderStatus
         }
 
         response[`${responseType}Response`] = message
@@ -163,11 +170,12 @@ class Relayer extends EventEmitter {
     }
   }
 
-  _request(orderId, userType, requestType, message) {
+  _request(orderId, userType, requestType, orderStatus, message) {
     let call = this._streams[userType][orderId]
 
     let request = {
-      orderId
+      orderId,
+      orderStatus
     }
 
     request[`${requestType}Request`] = message
@@ -361,11 +369,11 @@ class Relayer extends EventEmitter {
     // I don't like re-pulling from the database just to get the new combined version of the data
     this.emit('order:filled', orderId, await this._getOrderWithStatus(orderId, 'FILLING'))
 
-    await this._request(orderId, 'maker', 'executeOrder', {
+    await this._request(orderId, 'maker', 'executeOrder', 'FILLING', {
       fill: request.fill
     })
 
-    return ['FILLING', { payTo: order.payTo }]
+    return [ null, { payTo: order.payTo } ]
   }
 
   async _getOrderWithStatus(orderId, status) {
