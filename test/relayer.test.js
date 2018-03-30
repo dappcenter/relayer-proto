@@ -19,9 +19,7 @@ describe('Relayer', function () {
 	})
 
 	describe('#listen', function () {
-		it.skip('should bind to the port and interface', async function () {
-			// TODO: check that it's bound to the port
-		})
+		it('should bind to the port and interface')
 	})
 
 	describe('#getOrders', function () {
@@ -413,9 +411,79 @@ describe('Relayer', function () {
 		})
 
 		describe('completeOrder', function () {
+			it('completes an order by sending the preimage', function (done) {
+				const order = {
+					"baseSymbol": "BTC",
+					"counterSymbol": "LTC",
+					"baseAmount": "50000",
+					"counterAmount": "2000000",
+					"side": "ASK"
+				}
+				const payTo = "ln:8912312345"
+				const fill = {
+					swapHash: "SWYgeW91IHRoaW5rIHRoaXMgaGFzIGEgaGFwcHkgZW5kaW5nLCB5b3UgaGF2ZW4ndCBiZWVuIHBheWluZyBhdHRlbnRpb24=",
+					fillAmount: (new BigNumber(order.baseAmount)).dividedBy(10).toFixed(0)
+				}
 
+				const orderId = uuid()
+
+				call.on('error', done)
+				call.on('end', done)
+				call.on('data', function (msg) {
+					if(msg.executeOrderRequest) {
+						call.write({
+							orderId,
+							completeOrderRequest: {
+								swapPreimage: "Ik5vdCBzdXJlIHdoYXQgdGhlIHJlYWwgcHJlaW1hZ2UgaXM="
+							}
+						})
+					}
+
+					if(msg.completeOrderResponse) {
+						assert.deepStrictEqual(Object.keys(msg), [
+							'orderId',
+							'orderStatus',
+							'placeOrderResponse',
+							'cancelOrderResponse',
+							'executeOrderRequest',
+							'completeOrderResponse'
+						])
+						assert.strictEqual(msg.orderId, orderId)
+						assert.strictEqual(msg.orderStatus, 'FILLED')
+
+						assert.strictEqual(msg.placeOrderResponse, null)
+						assert.strictEqual(msg.cancelOrderResponse, null)
+						assert.strictEqual(msg.executeOrderRequest, null)
+
+						assert.deepStrictEqual(msg.completeOrderResponse, {})
+
+						call.end()
+					}
+				})
+
+				call.write({
+					orderId: orderId,
+					placeOrderRequest: {
+						order,
+						payTo
+					}
+				})
+
+				const takerStub = createStub('localhost:50078')
+				const takerCall = takerStub.taker()
+
+				setTimeout(function () {
+					takerCall.write({
+						orderId,
+						fillOrderRequest: {
+							fill
+						}
+					})
+				}, 1000)
+			})
+
+			it('does not accept preimages that do not match the swap hash')
 		})
-
 	})
 
 	describe('#taker', function () {
