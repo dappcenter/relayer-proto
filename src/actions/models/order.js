@@ -12,9 +12,8 @@ const MARKET_SIDES = {
 };
 
 class Order {
-  constructor({ id, status, baseAmount, baseSymbol, counterAmount, counterSymbol, side}) {
+  constructor({ id, baseAmount, baseSymbol, counterAmount, counterSymbol, side}) {
     this.id = id;
-    this.status = status;
     this.baseAmount = baseAmount;
     this.baseSymbol = baseSymbol;
     this.counterAmount = counterAmount;

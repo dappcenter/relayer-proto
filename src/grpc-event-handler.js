@@ -47,18 +47,19 @@ class GrpcEventHandler extends EventEmitter {
    * - request
    *
    * TODO: change _wrap to be a type of object or something
+   * TODO: this wrap requires that all event functions need to have an orderId which may
+   *   not be the case
    * @param {Function} action
    * @returns {Promise}
    */
   _wrap(fn) {
-    return (orderId, request, respond) => {
+    return (orderId, request, cb) => {
       fn
         .call(this, orderId, request)
-        .then((response) => {
-          respond(null, ...response);
-        }, (err) => {
+        .then(response => cb(null, ...response))
+        .catch((err) => {
           this.logger.error('wire error', err);
-          respond(err);
+          cb(err);
         });
     };
   }

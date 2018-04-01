@@ -10,11 +10,11 @@ async function placeOrder(orderId, request) {
   // From the request, parse the raw order
   // Check if the orderId is already present in the db
   // if the order isn't present then place the order
-  const { rawOrder } = request;
+  const { order: rawOrder } = request;
   const order = new Order(rawOrder);
 
   if (order.valid() === false) {
-    this.eventHandler.emit('error', 'Invalid Order: Could not process');
+    this.logger.error('Invalid Order: Could not process');
     return ['REJECTED', {}];
   }
 

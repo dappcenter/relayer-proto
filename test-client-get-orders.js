@@ -1,11 +1,12 @@
 /**
- * Initializes a test client to use against our gRPC
+ * Proof-of-concept work for client implementation of Get Orders
  *
+ * TODO: This should be an action for maker/taker instead of its own thing
+ * TODO: Remove getOrders callback in favor of writing data to the stream OK
  * @author kinesis
  */
 
 const grpc = require('grpc');
-const path = require('path');
 
 const PROTO_PATH = require.resolve('relayer-proto');
 const PROTO_GRPC_TYPE = 'proto';
@@ -18,14 +19,14 @@ const RELAYER_CLIENT_PROTO = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_O
 const TEST_ADDRESS = process.env.GRPC_TEST_CLIENT_ADDRESS || '0.0.0.0:50078';
 
 function testAction() {
-  const client = new RELAYER_CLIENT_PROTO.RelayerClient(TEST_ADDRESS, grpc.credentials.createInsecure())
+  const client = new RELAYER_CLIENT_PROTO.RelayerClient(TEST_ADDRESS, grpc.credentials.createInsecure());
   return client.getOrders({
     baseSymbol: 'BTC',
-    counterSymbol: 'LTC'
+    counterSymbol: 'LTC',
   }, (err, res) => {
     if (err) {
       console.error('Error when testing actions', err);
-      throw(err);
+      throw (err);
     }
 
     return console.log(JSON.stringify(res, null, 2));

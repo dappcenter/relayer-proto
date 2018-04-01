@@ -20,10 +20,6 @@ const ACTIONS = [
 
   // Taker actions
   { name: 'request:fillOrder', fn: fillOrder },
-
-  // Error handlers
-  { name: 'request:error', fn: err => console.error(err) },
-  { name: 'error', fn: err => console.error(err) },
 ];
 
 module.exports = {
