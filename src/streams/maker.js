@@ -4,13 +4,7 @@
  * @author kinesis
  */
 
-const MAKERS = new Map();
-
-function _streamCallback(call, orderId, responseType) {
-  return (err, orderStatus, message) => {
-
-  };
-}
+const uuidV4 = require('uuid/v4');
 
 /**
  * Implements a stream for a particular client type
@@ -22,22 +16,21 @@ function _streamCallback(call, orderId, responseType) {
  * @returns {void}
  */
 async function stream(call) {
+  // this is a foolish way of doing things... should have some authoritative way to tell
+  // who the stream belongs to
   this.call = call;
+  this.ownerId = uuidV4();
 
-  call.on('data', (msg) => {
+  this.call.on('data', (msg) => {
     // Validate the order id. Because of proto, an orderId must be set, but can be a blank string
+    this.logger.info('Owner is making request', { uuid: this.ownerId });
+
     if (msg.orderId === '') {
       this.logger.error('Message arrived with no order id');
       return this.call.write('ERROR: Message arrived with no order id');
     }
 
     const { orderId } = msg;
-
-    // this is a foolish way of doing things... should have some authoritative way to tell
-    // who the stream belongs to
-    if (!MAKERS.get(orderId)) {
-      MAKERS.set({ [orderId]: call });
-    }
 
     Object.keys(msg).forEach((key) => {
       const requestType = key.slice(-1 * 'Request'.length) === 'Request' ? key.slice(0, -1 * 'Request'.length) : null;
