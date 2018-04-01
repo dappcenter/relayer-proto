@@ -10,4 +10,7 @@ services:
       - ./:/home/app
     expose:
       - "8081"
+    # In order for the npm i command to work, we need to make the proto
+    # file publically available or figure out another way to allow the container
+    # to read the file (preferably not through ssh w/ git)
     command: bash -c "npm i && npm start"
