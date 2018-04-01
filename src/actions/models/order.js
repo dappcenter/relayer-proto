@@ -6,12 +6,10 @@
 
 const BigNumber = require('bignumber.js');
 
-const SUPPORTED_SIDES = {
+const MARKET_SIDES = {
   ASK: 'ASK',
   BID: 'BID',
 };
-
-const SUPPORTED_SYMBOLS = {};
 
 class Order {
   constructor({ id, status, baseAmount, baseSymbol, counterAmount, counterSymbol, side}) {
@@ -30,19 +28,14 @@ class Order {
 
   valid() {
     return (
-      this.supportedSide() &&
-      this.supportedSymbol() &&
+      this.validMarketSide() &&
       this.validBaseAmount() &&
       this.validCounterAmount()
     );
   }
 
-  supportedSide() {
-    return Object.values(ALLOWED_SIDES).includes(this.side);
-  }
-
-  supportedSymbol() {
-    return true;
+  validMarketSide() {
+    return Object.values(MARKET_SIDES).includes(this.side);
   }
 
   validBaseAmount() {
@@ -77,7 +70,7 @@ class Order {
         baseAmount: this.baseAmount,
         counterAmount: this.counterAmount,
         side: this.side,
-      }
+      },
     };
   }
 

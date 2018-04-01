@@ -38,6 +38,32 @@ function makerCleanUp(call) {
   call.end();
 }
 
+function _streamCallback(call, orderId, responseType) {
+    return (err, orderStatus, message) => {
+      if(err) {
+        return call.emit('error', err)
+      }
+
+      if(responseType) {
+        let response = {
+          orderId
+        }
+
+        // This is hacky. Fills don't have statuses, but orders do.
+        // Query whether orders need statuses.... the request/response is a better status anyway
+        // Status is really only useful for subscriptions...
+        // TODO
+        if(orderStatus) {
+          response.orderStatus = orderStatus
+        }
+
+        response[`${responseType}Response`] = message
+
+        call.write(response)
+      }
+    }
+}
+
 /**
  * Implements a stream for a particular client type
  *

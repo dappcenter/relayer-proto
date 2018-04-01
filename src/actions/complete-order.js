@@ -13,7 +13,7 @@ async function completeOrder(orderId) {
   // TODO: Figure out if we emit this here, or we wait until the order is actually fulfilled.
   //   At the point of this code, we would be in-process of fulfilling the order, but there
   //   is a time delay to when the transactions will actually make it onto the ledger
-  this.emit('order:completed', order);
+  this.eventHandler.emit('order:completed', order);
   return ['FILLED', order];
 }
 

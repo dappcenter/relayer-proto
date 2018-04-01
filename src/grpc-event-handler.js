@@ -1,16 +1,13 @@
-/**
- * Event Handler for the Relayer
- *
- * @author kinesis
- */
 const { EventEmitter } = require('events');
 
 const { actions } = require('./actions');
 
 /**
+ * Event Handler for the Relayer
  *
+ * @author kinesis
  */
-class RelayEvents extends EventEmitter {
+class GrpcEventHandler extends EventEmitter {
   constructor(logger) {
     super();
 
@@ -20,7 +17,7 @@ class RelayEvents extends EventEmitter {
       this.registerEvents();
     } catch (e) {
       this.logger.error('Could not register events', { error: e });
-      throw(e);
+      throw (e);
     }
   }
 
@@ -34,7 +31,7 @@ class RelayEvents extends EventEmitter {
     return actions.forEach((action) => {
       this.logger.info('Registering event', { name: action.name });
       this.addEvent(action.name, action.fn);
-    })
+    });
   }
 
   addEvent(name, action) {
@@ -60,11 +57,11 @@ class RelayEvents extends EventEmitter {
         .then((response) => {
           respond(null, ...response);
         }, (err) => {
-          console.error('wire error', err);
+          this.logger.error('wire error', err);
           respond(err);
         });
     };
   }
 }
 
-module.exports = RelayEvents;
+module.exports = GrpcEventHandler;

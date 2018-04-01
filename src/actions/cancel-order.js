@@ -1,6 +1,7 @@
 /**
  * Given an order ID, cancel the specific order
  *
+ * TODO: Actually implement cancelling of orders w/ data store
  * @param {String} orderId
  * @param {Object} request
  * @returns {Array<STATUS, Object>} response
@@ -14,7 +15,7 @@ async function cancelOrder(orderId) {
   // emil cancelled event to all subscribers
   // return response
   const order = new Order({ id: orderId });
-  this.emit('order:cancelled', order);
+  this.eventHandler.emit('order:cancelled', order);
   return ['CANCELLED', order.export()];
 }
 

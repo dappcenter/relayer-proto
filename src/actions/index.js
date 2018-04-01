@@ -1,5 +1,4 @@
 const getOrders = require('./get-orders');
-const subscribeOrders = require('./subscribe-orders');
 const cancelOrder = require('./cancel-order');
 const completeOrder = require('./complete-order');
 const fillOrder = require('./fill-order');
@@ -31,5 +30,4 @@ module.exports = {
   actions: ACTIONS,
   actionTypes: ACTION_TYPES,
   getOrders,
-  subscribeOrders,
 };
