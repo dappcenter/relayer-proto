@@ -36,7 +36,7 @@ function testAction() {
   maker.on('data', msg => console.log(JSON.stringify(msg, null, 2)));
   maker.on('error', (msg) => {
     console.error('We need to handle the response codes here', msg.code);
-    console.error(JSON.stringify(msg, null, 2))
+    console.error(JSON.stringify(msg, null, 2));
   });
 }
 

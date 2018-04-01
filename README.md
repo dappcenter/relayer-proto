@@ -27,6 +27,19 @@ The following documents are materials that we have followed for developing this 
 
 ### Development
 
+There are 2 kinds of development that can be used for the relayer: Docker and non-Docker.
+
+It is recommended (not required) that users install [docker](https://www.docker.com/)
+
+##### Docker
+
+```
+docker-compose up -d
+docker-compose logs node --follow
+```
+
+##### Non-Docker
+
 You will need to open up 2 terminal windows.
 
 - In the first window, run the command `npm run dev`. This will start a gRPC server that will update as you change code
