@@ -20,14 +20,12 @@ class GrpcServer {
    *
    * @param {String} host
    * @param {String} port
-   * @returns {null}
+   * @returns {void}
    */
   listen(host = GRPC_HOST, port = GRPC_PORT) {
     this.server.bind(`${host}:${port}`, grpc.ServerCredentials.createInsecure());
     this.server.start();
     this.logger.info('gRPC server started', { host, port });
-
-    return null;
   }
 
   /**
@@ -36,7 +34,7 @@ class GrpcServer {
    * @param {String} name
    * @param {grpc.proto} service
    * @param {Object<action:handler>} implementations
-   * @returns {null}
+   * @returns {void}
    */
   addService(name, service, implementations = {}) {
     try {
@@ -44,8 +42,6 @@ class GrpcServer {
       this.logger.info('Successfull added implementations', { service: name });
     } catch (e) {
       this.logger.error('Failed to register implementations', { service: name, error: e.toString() });
-    } finally {
-      return null;
     }
   }
 }
