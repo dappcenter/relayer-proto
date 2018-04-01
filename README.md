@@ -42,6 +42,7 @@ You will need to open up 2 terminal windows.
 - Adjust proto? (trey)
 - Add tests for all modules
 - Cleanup formatting of comments for all pages
+- Setup Test runs and builds w/ Circle CI
 
 ### Additional Notes
 
