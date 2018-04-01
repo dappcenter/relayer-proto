@@ -22,6 +22,7 @@ The following documents are materials that we have followed for developing this 
 
 - [gRPC NodeJS](https://grpc.io/grpc/node/grpc.Server.html#addService)
 - [NodeJS Directory Structure Best Practices](https://blog.risingstack.com/node-hero-node-js-project-structure-tutorial/)
+- [gRPC basic - Bidirectional Streaming](https://grpc.io/docs/guides/concepts.html#bidirectional-streaming-rpc)
 
 ### Development
 
