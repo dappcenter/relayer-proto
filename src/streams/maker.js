@@ -45,7 +45,8 @@ async function stream(call) {
 
       if (requestType && msg[key] !== null) {
         this.logger.info('Starting a request', { requestType });
-        // I dont like the idea of a callback here
+        // Maybe there is something we can do instead of passing a callback, so that we can actually
+        // return a response from an event?
         this.eventHandler.emit(`request:${requestType}`, orderId, msg[key], (err, status, message) => {
           if (err) {
             return this.call.write(`ERROR: request failed: ${requestType}`);
