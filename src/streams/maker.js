@@ -32,7 +32,15 @@ async function stream(call) {
 
     const { orderId } = msg;
 
+    // Find a way to not have to parse all the keys for these actions
+    // Im worried that the object can be overloaded (large request) and kill
+    // the server or something
     Object.keys(msg).forEach((key) => {
+      // This takes parses all keys in the object for the key that ends in 'Request'
+      // then grabs the first portion of key.
+      //
+      // Example:
+      // someSampleRequest -> someSample -> request:someSample
       const requestType = key.slice(-1 * 'Request'.length) === 'Request' ? key.slice(0, -1 * 'Request'.length) : null;
 
       if (requestType && msg[key] !== null) {
