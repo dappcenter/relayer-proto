@@ -6,7 +6,7 @@ Install NVM and run `nvm install 8` to pick up the latest LTS version of node (w
 
 After nvm is installed, use `nvm use` to switch to the current node version for this project.
 
-Install dependencies w/ `npm i` and then run tests with `npm run tests`
+Install dependencies w/ `npm i` and then run tests with `npm run build`
 
 ### Terminology
 
@@ -23,7 +23,8 @@ The following documents are materials that we have followed for developing this 
 - [gRPC NodeJS](https://grpc.io/grpc/node/grpc.Server.html#addService)
 - [NodeJS Directory Structure Best Practices](https://blog.risingstack.com/node-hero-node-js-project-structure-tutorial/)
 - [gRPC basic - Bidirectional Streaming](https://grpc.io/docs/guides/concepts.html#bidirectional-streaming-rpc)
-- [Protocol Buffer basics](https://developers.google.com/protocol-buffers/docs/proto)
+- [Protocol Buffer 3 basics](https://developers.google.com/protocol-buffers/docs/proto3)
+- [Protocol Buffer dev guide](https://developers.google.com/protocol-buffers/docs/overview)
 
 ### Development
 
@@ -43,21 +44,19 @@ docker-compose logs node --follow
 You will need to open up 2 terminal windows.
 
 - In the first window, run the command `npm run dev`. This will start a gRPC server that will update as you change code
-- In the second window, run the command `npm run client`. This will use the `test-client` script and make a request (or in the future, open a utility) against the gRPC server
+- In additional windows, run any of the `test-client-*` files which perform
 
 ### TODOS
 
-- Figure out subscriptions (subscribe-orders)
-  - This also includes 'identifying' a client and their particular orders
 - Cancel Orders correctly (trey)
 - Fill Orders (Dan)
 - Add DB (postgres)
 - Add dev util to track dependencies (and when we should update them)
 - Add dev util to post test rpc commands
-- Adjust proto? (trey)
 - Add tests for all modules
 - Cleanup formatting of comments for all pages
 - Setup Test runs and builds w/ Circle CI
+- Replace eventemitter w/ servicebus? (or some kind of managed pubsub)
 
 ### Additional Notes
 

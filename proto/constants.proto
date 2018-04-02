@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+enum Side {
+  ASK = 0;
+  BID = 1;
+}
+
+enum OrderStatus {
+  NEW = 0;
+  PENDING = 1;
+  PLACED = 2;
+  FILLING = 3;
+  CANCELLED = 4;
+  FILLED = 5;
+  REJECTED = 6;
+}
+
+message Empty {}

@@ -4,7 +4,7 @@
  * TODO: check that preimage matches swap hash
  */
 
-const { Order } = require('./models');
+const { Order } = require('../models');
 
 async function completeOrder(orderId) {
   const order = new Order({ id: orderId });

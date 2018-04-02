@@ -5,7 +5,7 @@
  * TODO: Need to figure out how to notify the orders recip
  */
 
-const { Order } = require('./models');
+const { Order } = require('../models');
 
 /**
  * Fill an order from the specified order id

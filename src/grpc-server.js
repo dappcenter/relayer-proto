@@ -1,11 +1,13 @@
 const grpc = require('grpc');
+const path = require('path');
 
-const { maker, taker, subscribeOrders } = require('./streams');
-const { getOrders } = require('./actions');
+const GrpcAction = require('./grpc-action');
+const { placeOrder } = require('./maker');
+const { watch, watchMarket } = require('./orderbook');
 
 const GRPC_HOST = process.env.GRPC_HOST || '0.0.0.0';
 const GRPC_PORT = process.env.GRPC_PORT || '50078';
-const PROTO_PATH = require.resolve('relayer-proto');
+const PROTO_PATH = path.resolve('relayer.proto');
 const PROTO_GRPC_TYPE = 'proto';
 const PROTO_GRPC_OPTIONS = {
   convertFieldsToCamelCase: true,
@@ -24,13 +26,18 @@ class GrpcServer {
     this.eventHandler = eventHandler;
     this.server = new grpc.Server();
     this.proto = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS);
-    this.service = this.proto.RelayerClient.service;
 
-    this.server.addService(this.service, {
-      maker: maker.bind(this),
-      taker: taker.bind(this),
-      subscribeOrders: subscribeOrders.bind(this),
-      getOrders: getOrders.bind(this),
+    this.makerService = this.proto.Maker.service;
+    this.takerService = this.proto.Taker.service;
+    this.orderBookService = this.proto.OrderBook.service;
+
+    this.server.addService(this.makerService, {
+      placeOrder: placeOrder.bind(new GrpcAction(this.eventHandler, this.logger)),
+    });
+
+    this.server.addService(this.orderBookService, {
+      watch: watch.bind(new GrpcAction(this.eventHandler, this.logger)),
+      watchMarket: watchMarket.bind(new GrpcAction(this.eventHandler, this.logger)),
     });
   }
 

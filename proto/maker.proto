@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+import "constants.proto";
+
+message PlaceOrder {
+  required string pay_to = 0;
+	required string base_symbol = 1;
+	required string counter_symbol = 2;
+	required int64 base_amount = 3;
+	required int64 counter_amount = 4;
+}
+
+message CancelOrder {
+}
+
+message CompleteOrder {
+}
+
+message OrderResponse {
+  required string owner_uuid = 0;
+  required string order_id = 1;
+}
+
+service Maker {
+  rpc PlaceOrder (PlaceOrder) returns (OrderResponse);
+}

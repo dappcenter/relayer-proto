@@ -4,40 +4,48 @@
  * @author kinesis
  */
 const grpc = require('grpc');
+const path = require('path');
 
-const PROTO_PATH = require.resolve('relayer-proto');
+const PROTO_PATH = path.resolve('relayer.proto');
 const PROTO_GRPC_TYPE = 'proto';
 const PROTO_GRPC_OPTIONS = {
   convertFieldsToCamelCase: true,
   binaryAsBase64: true,
   longsAsStrings: true,
 };
-const RELAYER_CLIENT_PROTO = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS);
 const TEST_ADDRESS = process.env.GRPC_TEST_CLIENT_ADDRESS || '0.0.0.0:50078';
 
-function testAction() {
-  const client = new RELAYER_CLIENT_PROTO.RelayerClient(TEST_ADDRESS, grpc.credentials.createInsecure());
-  const maker = client.maker();
-  maker.write({
-    orderId: '1234',
-    placeOrderRequest: {
-      order: {
-        baseSymbol: 'BTC',
-        counterSymbol: 'LTC',
-        side: 'BID',
-        baseAmount: '10000',
-        counterAmount: '1000000',
-      },
-      payTo: 'ln:123455678',
-    },
-  });
+const proto = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS);
+const maker = new proto.Maker(TEST_ADDRESS, grpc.credentials.createInsecure());
 
-  // Handle communication from the maker
-  maker.on('data', msg => console.log(JSON.stringify(msg, null, 2)));
-  maker.on('error', (msg) => {
-    console.error('We need to handle the response codes here', msg.code);
-    console.error(JSON.stringify(msg, null, 2));
-  });
-}
+const order = {
+  baseSymbol: 'BTC',
+  counterSymbol: 'LTC',
+  baseAmount: '10000',
+  counterAmount: '1000000',
+  payTo: 'ln:123455678',
+};
 
-testAction();
+maker.placeOrder(order, (err, res) => {
+  if (err) {
+    return console.error(err);
+  }
+
+  console.log(res);
+});
+
+const order2 = {
+  baseSymbol: 'ETH',
+  counterSymbol: 'LTC',
+  baseAmount: '10000',
+  counterAmount: '1000000',
+  payTo: 'ln:123455678',
+};
+
+maker.placeOrder(order2, (err, res) => {
+  if (err) {
+    return console.error(err);
+  }
+
+  console.log(res);
+});

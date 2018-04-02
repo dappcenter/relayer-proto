@@ -6,14 +6,14 @@
  * @author kinesis
  */
 const GrpcServer = require('./grpc-server');
-const GrpcEventHandler = require('./grpc-event-handler');
+const { EventEmitter } = require('events');
 const { logger } = require('./utils');
 
 
 class Relayer {
   constructor(Server, EventHandler) {
     this.logger = logger;
-    this.eventHandler = new EventHandler(this.logger);
+    this.eventHandler = new EventHandler();
     this.server = new Server(this.logger, this.eventHandler);
 
     try {
@@ -31,5 +31,5 @@ class Relayer {
 
 module.exports = new Relayer(
   GrpcServer,
-  GrpcEventHandler,
+  EventEmitter,
 );

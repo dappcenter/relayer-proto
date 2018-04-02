@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+import "constants.proto";
+
+message Order {
+  required string order_id = 0;
+	required string base_symbol = 1;
+	required string counter_symbol = 2;
+  required OrderStatus status = 3;
+  required int64 fill_amount = 4;
+}
+
+message WatchMarket {
+	required string base_symbol = 0;
+	required string counter_symbol = 1;
+}
+
+service OrderBook {
+  rpc Watch (Empty) returns (stream Order);
+  rpc WatchMarket (WatchMarket) returns (stream Order);
+}

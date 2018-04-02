@@ -7,7 +7,7 @@
  * @returns {Array<STATUS, Object>} response
  */
 
-const { Order } = require('./models');
+const { Order } = require('../models');
 
 async function cancelOrder(orderId) {
   // Get an order w/ a placed status

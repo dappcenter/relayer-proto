@@ -4,7 +4,7 @@
  * @author kinesis
  */
 
-const uuidV4 = require('uuid/v4');
+const safeid = require('generate-safe-id');
 
 /**
  * Implements a stream for a particular client type
@@ -18,12 +18,11 @@ const uuidV4 = require('uuid/v4');
 async function stream(call) {
   // this is a foolish way of doing things... should have some authoritative way to tell
   // who the stream belongs to
-  this.call = call;
-  this.ownerId = uuidV4();
+  call.on('data', (msg) => {
+    this.ownerId = safeid();
 
-  this.call.on('data', (msg) => {
     // Validate the order id. Because of proto, an orderId must be set, but can be a blank string
-    this.logger.info('Owner is making request', { uuid: this.ownerId });
+    this.logger.info('Owner is making request', { requestId: this.ownerId });
 
     if (msg.orderId === '') {
       this.logger.error('Message arrived with no order id');
@@ -47,7 +46,13 @@ async function stream(call) {
         this.logger.info('Starting a request', { requestType });
         // Maybe there is something we can do instead of passing a callback, so that we can actually
         // return a response from an event?
-        this.eventHandler.emit(`request:${requestType}`, orderId, msg[key], (err, status, message) => {
+        this.eventHandler.emit(`request:${requestType}`, this.ownerId, orderId, msg[key]);
+
+        this.eventHandler.once(`request:${requestType}:${this.ownerId}:done`, (err, ownerId, orderId, status, message) => {
+          if (!this.ownerId === ownerId) {
+            return this.logger.info('ignore event');
+          }
+
           if (err) {
             return this.call.write(`ERROR: request failed: ${requestType}`);
           }
@@ -63,8 +68,14 @@ async function stream(call) {
           });
         });
       }
+
+      return null;
     });
+
+    return null;
   });
+
+  call.end('end', () => call.end());
 }
 
 module.exports = stream;

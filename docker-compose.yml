@@ -9,7 +9,7 @@ services:
     volumes:
       - ./:/home/app
     expose:
-      - "8081"
+      - "50078"
     # In order for the npm i command to work, we need to make the proto
     # file publically available or figure out another way to allow the container
     # to read the file (preferably not through ssh w/ git)
