@@ -16,6 +16,5 @@ message WatchMarket {
 }
 
 service OrderBook {
-  rpc Watch (Empty) returns (stream Order);
   rpc WatchMarket (WatchMarket) returns (stream Order);
 }

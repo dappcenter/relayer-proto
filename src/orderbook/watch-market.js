@@ -1,3 +1,14 @@
+/**
+ * Stream of current state of order book and then will give you updates to the
+ * order book.
+ *
+ * Orders
+ * .where(baseSymbol = baseSymbol)
+ * .where(counterSymbol = counterSymbol)
+ * .series('SELECT * FROM Orders WHERE orderId = orderId LIMIT 1)
+ * .where('status === 'PLACED' OR status === 'FILLING')
+ */
+
 const BigNumber = require('bignumber.js');
 
 async function watchMarket(call) {
@@ -16,6 +27,9 @@ async function watchMarket(call) {
       });
     }
   });
+
+  // this.eventHandler.on('order:cancelled', (order) => {
+  // this.eventHandler.on('order:filled', (orderId, order) => {
 }
 
 module.exports = watchMarket;

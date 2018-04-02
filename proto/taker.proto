@@ -1,6 +1,13 @@
 syntax = "proto3";
 
+import "google/protobuf/empty.proto";
 import "constants.proto";
 
+message FillOrderRequest {
+  required string pay_to = 0;
+  required int64 fill_amount = 1;
+}
+
 service Taker {
+  rpc FillOrder (FillOrderRequest) returns (google.protobuf.Empty);
 }

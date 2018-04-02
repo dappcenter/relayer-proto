@@ -9,7 +9,7 @@
     "test": "mocha",
     "dev": "nodemon ./src",
     "client": "node ./test-client.js",
-    "clean": "rm *.log",
+    "clean": "rm *.log -f",
     "protobuf": "pbjs -t proto3 constants.proto maker.proto taker.proto orderbook.proto -p ./proto -o ./relayer.proto",
     "build": "npm run clean && npm run protobuf && npm test"
   },

@@ -36,7 +36,6 @@ class GrpcServer {
     });
 
     this.server.addService(this.orderBookService, {
-      watch: watch.bind(new GrpcAction(this.eventHandler, this.logger)),
       watchMarket: watchMarket.bind(new GrpcAction(this.eventHandler, this.logger)),
     });
   }

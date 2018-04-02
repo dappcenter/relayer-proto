@@ -1,18 +1,12 @@
 syntax = "proto3";
 
 enum Side {
-  ASK = 0;
-  BID = 1;
+  BID = 0;
+  ASK = 1;
 }
 
 enum OrderStatus {
-  NEW = 0;
-  PENDING = 1;
-  PLACED = 2;
-  FILLING = 3;
-  CANCELLED = 4;
-  FILLED = 5;
-  REJECTED = 6;
+  PLACED = 0;
+  CANCELLED = 1;
+  FILLED = 2;
 }
-
-message Empty {}

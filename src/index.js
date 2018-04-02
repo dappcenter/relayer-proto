@@ -29,7 +29,4 @@ class Relayer {
   }
 }
 
-module.exports = new Relayer(
-  GrpcServer,
-  EventEmitter,
-);
+module.exports = new Relayer(GrpcServer, EventEmitter);

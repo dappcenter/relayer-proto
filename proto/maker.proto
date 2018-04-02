@@ -1,26 +1,29 @@
 syntax = "proto3";
 
+import "google/protobuf/empty.proto";
 import "constants.proto";
 
-message PlaceOrder {
-  required string pay_to = 0;
-	required string base_symbol = 1;
-	required string counter_symbol = 2;
-	required int64 base_amount = 3;
-	required int64 counter_amount = 4;
+message CreateOrderRequest {
+  string pay_to = 0;
+	string base_symbol = 1;
+	string counter_symbol = 2;
+	int64 base_amount = 3;
+	int64 counter_amount = 4;
+  Side side = 5;
 }
 
-message CancelOrder {
+message CreateOrderResponse {
+  string order_id = 0;
+  string fee_invoice = 1;
+  string deposit_invoice = 2;
 }
 
-message CompleteOrder {
-}
-
-message OrderResponse {
-  required string owner_uuid = 0;
-  required string order_id = 1;
+message PlaceOrderRequest {
+  string order_id = 0;
+  string refund_invoice = 1;
 }
 
 service Maker {
-  rpc PlaceOrder (PlaceOrder) returns (OrderResponse);
+  rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse);
+  rpc PlaceOrder (PlaceOrderRequest) returns (google.protobuf.Empty);
 }

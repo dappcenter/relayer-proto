@@ -57,6 +57,7 @@ You will need to open up 2 terminal windows.
 - Cleanup formatting of comments for all pages
 - Setup Test runs and builds w/ Circle CI
 - Replace eventemitter w/ servicebus? (or some kind of managed pubsub)
+- fix `npm run build` to not fail if logs exist
 
 ### Additional Notes
 

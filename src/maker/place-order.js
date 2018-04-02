@@ -1,6 +1,12 @@
 /**
  * Given an orderId and rqeuest, place an order in the relayer
  *
+ * This function returns an invoice for a fee and returns an invoice for the order
+ * 1. Send
+ * 2. Invoices
+ *   - deposit
+ *   - fee
+ *
  * TODO: Think through the formatting for an order request
  * TODO: Figure out how we want the client to know if the payload is bad
  */
