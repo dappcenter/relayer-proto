@@ -10,6 +10,16 @@ async function watch(call) {
       fillAmount: new BigNumber(0).toFixed(0),
     });
   });
+
+  this.eventHandler.on('order:cancelled', (order) => {
+    call.write({
+      orderId: order.id,
+      baseSymbol: order.baseSymbol,
+      counterSymbol: order.counterSymbol,
+      status: order.status,
+      fillAmount: new BigNumber(0).toFixed(0),
+    });
+  });
 }
 
 module.exports = watch;
