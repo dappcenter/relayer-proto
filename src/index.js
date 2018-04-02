@@ -7,14 +7,15 @@
  */
 const GrpcServer = require('./grpc-server');
 const { EventEmitter } = require('events');
-const { logger } = require('./utils');
+const { logger, db } = require('./utils');
 
 
 class Relayer {
   constructor(Server, EventHandler) {
+    this.db = db;
     this.logger = logger;
     this.eventHandler = new EventHandler();
-    this.server = new Server(this.logger, this.eventHandler);
+    this.server = new Server(this.logger, this.eventHandler, this.db);
 
     try {
       this.startServer();

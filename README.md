@@ -6,7 +6,9 @@ Install NVM and run `nvm install 8` to pick up the latest LTS version of node (w
 
 After nvm is installed, use `nvm use` to switch to the current node version for this project.
 
-Install dependencies w/ `npm i` and then run tests with `npm run build`
+Additionally, we use MongoDB as our data store. You will need to run `brew install mongodb` and then run the db initialzer script using `npm run db-init`
+
+Install dependencies w/ `npm i` and then build the project with `npm run build`. The former command will initialize the protocol buffers for LND and Relayer as well as run tests against the project to make sure everything is setup properly
 
 ### Terminology
 
@@ -25,6 +27,8 @@ The following documents are materials that we have followed for developing this 
 - [gRPC basic - Bidirectional Streaming](https://grpc.io/docs/guides/concepts.html#bidirectional-streaming-rpc)
 - [Protocol Buffer 3 basics](https://developers.google.com/protocol-buffers/docs/proto3)
 - [Protocol Buffer dev guide](https://developers.google.com/protocol-buffers/docs/overview)
+- [LND w/ NodeJS](https://github.com/lightningnetwork/lnd/blob/master/docs/grpc/javascript.md)
+- [LND API Reference](http://api.lightning.community/)
 
 ### Development
 
@@ -62,3 +66,7 @@ You will need to open up 2 terminal windows.
 ### Additional Notes
 
 - Always use uuid v4 (this is a random UUID, not the same as time-based)
+
+### Troubleshooting
+
+After installing mongodb, you need to start the service on mac by using the command `brew services start mongodb`

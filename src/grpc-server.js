@@ -2,8 +2,8 @@ const grpc = require('grpc');
 const path = require('path');
 
 const GrpcAction = require('./grpc-action');
-const { placeOrder } = require('./maker');
-const { watch, watchMarket } = require('./orderbook');
+const { createOrder, placeOrder } = require('./maker');
+const { watchMarket } = require('./orderbook');
 
 const GRPC_HOST = process.env.GRPC_HOST || '0.0.0.0';
 const GRPC_PORT = process.env.GRPC_PORT || '50078';
@@ -21,7 +21,8 @@ const PROTO_GRPC_OPTIONS = {
  * @author kinesis
  */
 class GrpcServer {
-  constructor(logger, eventHandler) {
+  constructor(logger, eventHandler, db) {
+    this.db = db;
     this.logger = logger;
     this.eventHandler = eventHandler;
     this.server = new grpc.Server();
@@ -31,12 +32,15 @@ class GrpcServer {
     this.takerService = this.proto.Taker.service;
     this.orderBookService = this.proto.OrderBook.service;
 
+    this.action = new GrpcAction(this.eventHandler, this.logger, this.db);
+
     this.server.addService(this.makerService, {
-      placeOrder: placeOrder.bind(new GrpcAction(this.eventHandler, this.logger)),
+      createOrder: createOrder.bind(this.action),
+      placeOrder: placeOrder.bind(this.action),
     });
 
     this.server.addService(this.orderBookService, {
-      watchMarket: watchMarket.bind(new GrpcAction(this.eventHandler, this.logger)),
+      watchMarket: watchMarket.bind(this.action),
     });
   }
 

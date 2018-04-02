@@ -3,15 +3,20 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "config": {
+    "lnd_proto": "https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/rpc.proto"
+  },
   "scripts": {
     "start": "node ./src",
     "pretest": "eslint --quiet --ignore-path .gitignore .; exit 0",
     "test": "mocha",
     "dev": "nodemon ./src",
     "client": "node ./test-client.js",
-    "clean": "rm *.log -f",
+    "clean": "rm -f *.log",
     "protobuf": "pbjs -t proto3 constants.proto maker.proto taker.proto orderbook.proto -p ./proto -o ./relayer.proto",
-    "build": "npm run clean && npm run protobuf && npm test"
+    "build": "npm run clean && npm run build-lnd-proto && npm run protobuf && npm test",
+    "build-lnd-proto": "wget $npm_package_config_lnd_proto -O lnd-rpc.proto",
+    "db-init": "node ./scripts/create-db.js"
   },
   "author": "",
   "license": "UNLICENSED",
@@ -19,8 +24,7 @@
     "bignumber.js": "6.0.0",
     "generate-safe-id": "1.0.2",
     "grpc": "1.10.0",
-    "leveldown": "3.0.0",
-    "levelup": "2.0.2",
+    "mongojs": "2.5.0",
     "relayer-proto": "github:treygriffith/relayer-proto",
     "uuid": "3.2.1",
     "winston": "3.0.0-rc3"
