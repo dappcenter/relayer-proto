@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
-const MONGODB_URL = process.env.MONGODB_CONNECTION_URL || 'mongodb://localhost:27017/relayer';
+// TODO: throw this in a try catch and provide decent errors for development
+const MONGODB_URL = process.env.MONGODB_CONNECTION_URL;
 
 mongoose.set('debug', () => (process.env.NODE_ENV === 'development'));
 

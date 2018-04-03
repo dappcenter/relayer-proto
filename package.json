@@ -16,6 +16,7 @@
     "protobuf": "pbjs -t proto3 constants.proto maker.proto taker.proto orderbook.proto -p ./proto -o ./relayer.proto",
     "build": "npm run clean && npm run build-lnd-proto && npm run protobuf && npm test",
     "build-lnd-proto": "wget $npm_package_config_lnd_proto -O lnd-rpc.proto && npm run prune-lnd-proto",
+    "build-lnd-docker": "svn export https://github.com/lightningnetwork/lnd/trunk/docker ./lnd-docker",
     "prune-lnd-proto": "sed -i '' 's|^import \"google/api/annotations.proto\";||' lnd-rpc.proto"
   },
   "author": "",
@@ -26,7 +27,6 @@
     "grpc": "1.10.0",
     "mongoose": "5.0.12",
     "mongoose-long": "0.2.0",
-    "relayer-proto": "github:treygriffith/relayer-proto",
     "uuid": "3.2.1",
     "winston": "3.0.0-rc3"
   },

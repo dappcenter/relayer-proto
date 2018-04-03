@@ -1,16 +1,93 @@
-version: "2"
+# we need to use DC v2 in order to support `extends`. Version 3 does not support
+# extends (https://github.com/moby/moby/issues/31101) yet.
+
+version: '2'
+
 services:
-  node:
-    image: "node:8"
-    user: "node"
-    working_dir: /home/app
+
+  # Relayer BB
+  relayer:
+    image: 'node:8'
+    user: 'node'
+    working_dir: '/home/app'
+    depends_on:
+      - mongo
     environment:
       - NODE_ENV=development
+      - GRPC_HOST=0.0.0.0
+      - GRPC_PORT=50078
+      - MONGODB_CONNECTION_URL=mongodb://mongo:27017/relayer
+      - LND_URL=localhost:10009
     volumes:
-      - ./:/home/app
+      - './:/home/app'
     expose:
-      - "50078"
+      - '50078'
+    ports:
+      - '50078:50078'
     # In order for the npm i command to work, we need to make the proto
     # file publically available or figure out another way to allow the container
     # to read the file (preferably not through ssh w/ git)
-    command: bash -c "npm i && npm start"
+    #
+    # FOR NOW: We have the proto generated on the kinesis-relayer
+    command: bash -c 'npm i && npm rebuild && npm start'
+
+  # Mongo DB
+  mongo:
+    image: 'mongo:3.6.3'
+    working_dir: '/home/db'
+    expose:
+      - '27017'
+
+  # Extensions of the official LND docker build found here:
+  # You can use `npm run build-lnd-docker` to update the LND docker files
+  btc:
+    extends:
+      file: ./lnd-docker/docker-compose.yml
+      service: btc
+  btcd:
+    extends:
+      file: ./lnd-docker/docker-compose.yml
+      service: btcd
+  # TODO: Cannot run until we resolve `links`
+  # btcctl:
+  #   extends:
+  #     file: ./lnd-docker/docker-compose.yml
+  #     service: btcctl
+  ltc:
+    extends:
+      file: ./lnd-docker/docker-compose.yml
+      service: ltc
+  ltcd:
+    extends:
+      file: ./lnd-docker/docker-compose.yml
+      service: ltcd
+  # TODO: Cannot run until we resolve `links`
+  # ltcctl:
+  #   extends:
+  #     file: ./lnd-docker/docker-compose.yml
+  #     service: ltcctl
+  # lnd:
+  #   extends:
+  #     file: ./lnd-docker/docker-compose.yml
+  #     service: lnd
+  # lnd_ltc:
+  #   extends:
+  #     file: ./lnd-docker/docker-compose.yml
+  #     service: lnd_ltc
+  # lnd_btc:
+  #   extends:
+  #     file: ./lnd-docker/docker-compose.yml
+  #     service: lnd_btc
+
+
+
+# This information was taken from the LND docker setup (found in ./lnd-docker)
+# AND can be very very brittle.
+# We need these volumes because there is not
+volumes:
+  bitcoin:
+    driver: local
+  shared:
+    driver: local
+  litecoin:
+    driver: local

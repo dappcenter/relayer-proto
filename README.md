@@ -31,6 +31,9 @@ The following documents are materials that we have followed for developing this 
 - [LND API Reference](http://api.lightning.community/)
 - [BigInteger so we can support int64](https://github.com/peterolson/BigInteger.js)
 - [Adding methods to mongoose schemas](http://mongoosejs.com/docs/2.7.x/docs/methods-statics.html)
+- [Mongo DB Compass](https://www.mongodb.com/download-center#compass)
+- [Creating a lightning network cluster w/ docker](https://github.com/lightningnetwork/lnd/tree/master/docker)
+- [Docker Compose v3 reference](https://docs.docker.com/compose/compose-file/)
 
 ### Development
 
@@ -54,6 +57,7 @@ You will need to open up 2 terminal windows.
 
 ### TODOS
 
+- Solve the docker-compose links issue by using networks from [here](https://docs.docker.com/compose/compose-file/compose-file-v2/#network_mode)
 - Add tests for all modules
 - Clone private repo for proto [info here](https://stackoverflow.com/questions/23391839/clone-private-git-repo-with-dockerfile)
 - Add LND to Docker container
