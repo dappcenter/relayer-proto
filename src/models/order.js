@@ -4,47 +4,46 @@
  * @author kinesis
  */
 
-const BigNumber = require('bignumber.js');
 const safeid = require('generate-safe-id');
+const mongoose = require('mongoose');
+require('mongoose-long')(mongoose);
+
+const { Schema } = mongoose;
+const { Types: SchemaTypes } = mongoose.Schema;
+const MARKET_SIDES = ['ASK', 'BID'];
+
+const orderSchema = new Schema({
+  orderId: { type: String, unique: true, default: () => safeid() },
+  // ownerId, in the case of LND, would be the user's LND public key
+  ownerId: { type: String, required: true },
+  side: { type: String, required: true, enum: MARKET_SIDES },
+  baseAmount: { type: SchemaTypes.Long, required: true },
+  baseSymbol: { type: String, required: true, maxlength: 3 },
+  counterAmount: { type: SchemaTypes.Long, required: true },
+  counterSymbol: { type: String, required: true, maxlength: 3 },
+  swapPreimage: { type: String, required: true },
+  swapHash: { type: String, required: true },
+});
+
+/**
+ * We only want the relayer to be able to set an orderId on the model. If there
+ * is ever an orderId passed into the schema, we will prevent the saving of the record
+ */
+orderSchema.pre('create', (next) => {
+  if (this.orderId) {
+    this.invalidate('orderId');
+  }
+  next();
+});
 
 class Order {
-  constructor({ baseAmount, baseSymbol, counterAmount, counterSymbol, swapPreimage = '', swapHash = '' }) {
-    this.id = safeid();
-    this.makerId = safeid();
-    this.side = 'BID';
-
-    // Figure out how to validate fields
-    this.baseAmount = new BigNumber(baseAmount);
-    this.baseSymbol = baseSymbol.toString('base64');
-    this.counterAmount = new BigNumber(counterAmount);
-    this.counterSymbol = counterSymbol.toString('base64');
-    this.preimage = swapPreimage.toString('base64');
-    this.hash = swapHash.toString('base64');
-
-    // payTo?
+  constructor(db) {
+    this.db = db;
+    this.order = this.db.model('Order', orderSchema);
   }
 
-  valid() {
-    return (
-      this.validBaseAmount() &&
-      this.validCounterAmount()
-    );
-  }
-
-  validBaseAmount() {
-    return (
-      BigNumber.isBigNumber(this.baseAmount) &&
-      this.baseAmount.isInteger() &&
-      !this.baseAmount.isLessThanOrEqualTo(0)
-    );
-  }
-
-  validCounterAmount() {
-    return (
-      BigNumber.isBigNumber(this.counterAmount) &&
-      this.counterAmount.isInteger() &&
-      !this.counterAmount.isLessThanOrEqualTo(0)
-    );
+  async create(params) {
+    return this.order.create(params);
   }
 }
 

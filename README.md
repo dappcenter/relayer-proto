@@ -29,6 +29,8 @@ The following documents are materials that we have followed for developing this 
 - [Protocol Buffer dev guide](https://developers.google.com/protocol-buffers/docs/overview)
 - [LND w/ NodeJS](https://github.com/lightningnetwork/lnd/blob/master/docs/grpc/javascript.md)
 - [LND API Reference](http://api.lightning.community/)
+- [BigInteger so we can support int64](https://github.com/peterolson/BigInteger.js)
+- [Adding methods to mongoose schemas](http://mongoosejs.com/docs/2.7.x/docs/methods-statics.html)
 
 ### Development
 
@@ -52,20 +54,21 @@ You will need to open up 2 terminal windows.
 
 ### TODOS
 
+- Add tests for all modules
+- Clone private repo for proto [info here](https://stackoverflow.com/questions/23391839/clone-private-git-repo-with-dockerfile)
+- Add LND to Docker container
+- Add mongo to Docker container
+- Setup Test runs and builds w/ Circle CI
 - Cancel Orders correctly (trey)
 - Fill Orders (Dan)
-- Add DB (postgres)
+- Replace eventemitter w/ servicebus? (or some kind of managed pubsub)
+  - This will need to happen to be able to run more than 1 relayer node
 - Add dev util to track dependencies (and when we should update them)
 - Add dev util to post test rpc commands
-- Add tests for all modules
-- Cleanup formatting of comments for all pages
-- Setup Test runs and builds w/ Circle CI
-- Replace eventemitter w/ servicebus? (or some kind of managed pubsub)
-- fix `npm run build` to not fail if logs exist
 
 ### Additional Notes
 
-- Always use uuid v4 (this is a random UUID, not the same as time-based)
+- All amounts come into the application as a string that represented a 64 bit integer. In order to support this in JS (js support is weird for 64 bit numbers) we use BigInteger AND mongoose long (64 type)
 
 ### Troubleshooting
 

@@ -8,14 +8,16 @@
 const GrpcServer = require('./grpc-server');
 const { EventEmitter } = require('events');
 const { logger, db } = require('./utils');
+const { LndEngine } = require('./payment-engines');
 
 
 class Relayer {
-  constructor(Server, EventHandler) {
+  constructor(Server, EventHandler, Engine) {
     this.db = db;
+    this.engine = new Engine();
     this.logger = logger;
     this.eventHandler = new EventHandler();
-    this.server = new Server(this.logger, this.eventHandler, this.db);
+    this.server = new Server(this.logger, this.eventHandler, this.db, this.engine);
 
     try {
       this.startServer();
@@ -30,4 +32,4 @@ class Relayer {
   }
 }
 
-module.exports = new Relayer(GrpcServer, EventEmitter);
+module.exports = new Relayer(GrpcServer, EventEmitter, LndEngine);

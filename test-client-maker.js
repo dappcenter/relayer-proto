@@ -5,6 +5,7 @@
  */
 const grpc = require('grpc');
 const path = require('path');
+const safeid = require('generate-safe-id');
 
 const PROTO_PATH = path.resolve('relayer.proto');
 const PROTO_GRPC_TYPE = 'proto';
@@ -19,30 +20,16 @@ const proto = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS);
 const maker = new proto.Maker(TEST_ADDRESS, grpc.credentials.createInsecure());
 
 const order = {
+  ownerId: 'ln:123455678',
   baseSymbol: 'BTC',
   counterSymbol: 'LTC',
   baseAmount: '10000',
   counterAmount: '1000000',
-  payTo: 'ln:123455678',
+  swapHash: safeid(),
+  swapPreimage: safeid(),
 };
 
-maker.placeOrder(order, (err, res) => {
-  if (err) {
-    return console.error(err);
-  }
-
-  console.log(res);
-});
-
-const order2 = {
-  baseSymbol: 'ETH',
-  counterSymbol: 'LTC',
-  baseAmount: '10000',
-  counterAmount: '1000000',
-  payTo: 'ln:123455678',
-};
-
-maker.placeOrder(order2, (err, res) => {
+maker.createOrder(order, (err, res) => {
   if (err) {
     return console.error(err);
   }

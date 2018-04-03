@@ -9,7 +9,7 @@
  * .where('status === 'PLACED' OR status === 'FILLING')
  */
 
-const BigNumber = require('bignumber.js');
+const bigInt = require('big-integer');
 
 async function watchMarket(call) {
   const { baseSymbol, counterSymbol } = call.request;
@@ -23,7 +23,7 @@ async function watchMarket(call) {
         status: order.status,
         baseSymbol: order.baseSymbol,
         counterSymbol: order.counterSymbol,
-        fillAmount: new BigNumber(0).toFixed(0),
+        fillAmount: bigInt(0),
       });
     }
   });

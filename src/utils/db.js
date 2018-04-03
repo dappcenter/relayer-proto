@@ -1,8 +1,7 @@
-const mongojs = require('mongojs');
+const mongoose = require('mongoose');
 
 const MONGODB_URL = process.env.MONGODB_CONNECTION_URL || 'mongodb://localhost:27017/relayer';
-const COLLECTION_NAME = 'marketevents';
 
-const db = mongojs(MONGODB_URL, [COLLECTION_NAME]);
+mongoose.set('debug', () => (process.env.NODE_ENV === 'development'));
 
-module.exports = db;
+module.exports = mongoose.createConnection(MONGODB_URL);

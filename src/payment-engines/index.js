@@ -1,3 +1,3 @@
-const lnd = require('./lnd');
+const LndEngine = require('./lnd');
 
-module.exports = { lnd };
+module.exports = { LndEngine };
