@@ -103,7 +103,6 @@ async function createOrder(call, cb) {
       fee: feeInvoice.invoiceId,
     });
 
-    // TODO: Need to fire an event here
     this.logger.info('order:created', { orderId: order.id });
 
     return cb(null, {
