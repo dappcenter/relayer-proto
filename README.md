@@ -57,6 +57,7 @@ You will need to open up 2 terminal windows.
 
 ### TODOS
 
+- Replace Glide w/ dep for docker lnd/btc/lnd-multichain (this should be done in the lnd repo too for the first contribution!!!!)
 - Add lnd-payment-driver to this repo
 - Add tests for all modules
 - Clone private repo for proto [info here](https://stackoverflow.com/questions/23391839/clone-private-git-repo-with-dockerfile)

@@ -42,30 +42,30 @@ services:
 
   # LND multi-swap
   # @author kinesis
-  lnd_btc_ltc:
-    image: lnd_btc_ltc
-    build:
-      context: ../
-      dockerfile: docker-multichain/lnd-multichain/Dockerfile
-    container_name: lnd_btc_ltc
-    environment:
-      - CHAINA
-      - CHAINB
-      - DEBUG
-      - NETWORK
-      - RPCUSERA
-      - RPCPASSA
-      - RPCUSERB
-      - RPCPASSB
-      - HOST
-    volumes:
-      - shared:/rpc
-      - lnd:/lnd
-    networks:
-      - multiswap
-    ports:
-      - "9735:9735"
-    entrypoint: ["./start-lnd-multichain.sh"]
+  # lnd_btc_ltc:
+  #   image: lnd_btc_ltc
+  #   build:
+  #     context: ../
+  #     dockerfile: docker-multichain/lnd-multichain/Dockerfile
+  #   container_name: lnd_btc_ltc
+  #   environment:
+  #     - CHAINA
+  #     - CHAINB
+  #     - DEBUG
+  #     - NETWORK
+  #     - RPCUSERA
+  #     - RPCPASSA
+  #     - RPCUSERB
+  #     - RPCPASSB
+  #     - HOST
+  #   volumes:
+  #     - shared:/rpc
+  #     - lnd:/lnd
+  #   networks:
+  #     - multiswap
+  #   ports:
+  #     - "9735:9735"
+  #   entrypoint: ["./start-lnd-multichain.sh"]
 
   # Extensions of the official LND docker build found here:
   # You can use `npm run build-lnd-docker` to update the LND docker files
