@@ -48,7 +48,7 @@ docker-compose up -d
 docker-compose logs node --follow
 ```
 
-##### Non-Docker
+##### Non-Docker (Deprecated: You need to have LND running and bunch of other stuff that is defined in the docker-compose file)
 
 You will need to open up 2 terminal windows.
 
@@ -57,14 +57,10 @@ You will need to open up 2 terminal windows.
 
 ### TODOS
 
-- Solve the docker-compose links issue by using networks from [here](https://docs.docker.com/compose/compose-file/compose-file-v2/#network_mode)
+- Add lnd-payment-driver to this repo
 - Add tests for all modules
 - Clone private repo for proto [info here](https://stackoverflow.com/questions/23391839/clone-private-git-repo-with-dockerfile)
-- Add LND to Docker container
-- Add mongo to Docker container
 - Setup Test runs and builds w/ Circle CI
-- Cancel Orders correctly (trey)
-- Fill Orders (Dan)
 - Replace eventemitter w/ servicebus? (or some kind of managed pubsub)
   - This will need to happen to be able to run more than 1 relayer node
 - Add dev util to track dependencies (and when we should update them)

@@ -16,7 +16,7 @@
     "protobuf": "pbjs -t proto3 constants.proto maker.proto taker.proto orderbook.proto -p ./proto -o ./relayer.proto",
     "build": "npm run clean && npm run build-lnd-proto && npm run protobuf && npm test",
     "build-lnd-proto": "wget $npm_package_config_lnd_proto -O lnd-rpc.proto && npm run prune-lnd-proto",
-    "build-lnd-docker": "svn export https://github.com/lightningnetwork/lnd/trunk/docker ./lnd-docker",
+    "build-lnd-docker": "svn export https://github.com/lightningnetwork/lnd/trunk/docker ./docker",
     "prune-lnd-proto": "sed -i '' 's|^import \"google/api/annotations.proto\";||' lnd-rpc.proto"
   },
   "author": "",
