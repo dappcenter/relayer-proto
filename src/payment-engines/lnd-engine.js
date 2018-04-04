@@ -50,6 +50,12 @@ class LndEngine {
   async addInvoice(params) {
     return promisefy(params, this.client.addInvoice);
   }
+
+  async getPayTo() {
+    const info = await promisefy({}, this.client.getInfo);
+    const pubKey = info.identityPubkey
+    return `ln:${pubKey}`
+  }
 }
 
 module.exports = LndEngine;
