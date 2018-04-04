@@ -21,8 +21,9 @@ const orderSchema = new Schema({
   baseSymbol: { type: String, required: true, maxlength: 3 },
   counterAmount: { type: SchemaTypes.Long, required: true },
   counterSymbol: { type: String, required: true, maxlength: 3 },
-  swapPreimage: { type: String, required: true },
-  swapHash: { type: String, required: true },
+  fillAmount: { type: SchemaTypes.Long, required: false },
+  swapHash: { type: String, required: false },
+  swapPreimage: { type: String, required: false },
 });
 
 /**

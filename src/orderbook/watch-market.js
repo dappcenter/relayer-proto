@@ -16,7 +16,7 @@ async function watchMarket(call) {
 
   this.logger.info('getOrders: Grabbing all orders with symbols', { baseSymbol, counterSymbol });
 
-  this.eventHandler.on('order:created', (order) => {
+  this.eventHandler.on('order:placed', (order) => {
     if (order.baseSymbol === baseSymbol && order.counterSymbol === counterSymbol) {
       call.write({
         orderId: order.id,

@@ -29,9 +29,7 @@ async function createOrder(call, cb) {
     baseSymbol,
     counterAmount,
     counterSymbol,
-    side,
-    swapPreimage,
-    swapHash,
+    side
   } = call.request;
 
   const params = {
@@ -40,9 +38,7 @@ async function createOrder(call, cb) {
     baseSymbol: String(baseSymbol),
     counterAmount: bigInt(counterAmount),
     counterSymbol: String(counterSymbol),
-    side: String(side),
-    swapPreimage: String(swapPreimage),
-    swapHash: String(swapHash),
+    side: String(side)
   };
 
   // TODO: We need to figure out a way to handle async calls AND only expose

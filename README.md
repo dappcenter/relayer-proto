@@ -6,9 +6,13 @@ Install NVM and run `nvm install 8` to pick up the latest LTS version of node (w
 
 After nvm is installed, use `nvm use` to switch to the current node version for this project.
 
-Additionally, we use MongoDB as our data store. You will need to run `brew install mongodb` and then run the db initialzer script using `npm run db-init`
+Additionally, we use MongoDB as our data store. You will need to run `brew install mongodb`.
+
+Additionally, Additionally, you will need to install `wget` to run the build command below. Install wget w/ brew `brew install wget`
 
 Install dependencies w/ `npm i` and then build the project with `npm run build`. The former command will initialize the protocol buffers for LND and Relayer as well as run tests against the project to make sure everything is setup properly
+
+After all of these steps! You can finally run `docker-compose up -d`
 
 ### Terminology
 
@@ -57,6 +61,7 @@ You will need to open up 2 terminal windows.
 
 ### TODOS
 
+- Fix sed command in relayer docker startup to work on unix (right now only works for mac LOL)
 - Replace Glide w/ dep for docker lnd/btc/lnd-multichain (this should be done in the lnd repo too for the first contribution!!!!)
 - Add lnd-payment-driver to this repo
 - Add tests for all modules
