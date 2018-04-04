@@ -4,8 +4,8 @@ import "google/protobuf/empty.proto";
 import "constants.proto";
 
 message FillOrderRequest {
-  required string pay_to = 0;
-  required int64 fill_amount = 1;
+  string pay_to = 0;
+  int64 fill_amount = 1;
 }
 
 service Taker {
