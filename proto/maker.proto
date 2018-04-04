@@ -5,12 +5,10 @@ import "constants.proto";
 
 message CreateOrderRequest {
   string owner_id = 0;
-	string base_symbol = 1;
-	string counter_symbol = 2;
-  string swap_hash = 3;
-  string swap_preimage = 4;
-	int64 base_amount = 5;
-	int64 counter_amount = 6;
+  string base_symbol = 1;
+  string counter_symbol = 2;
+  int64 base_amount = 5;
+  int64 counter_amount = 6;
   Side side = 7;
 }
 
@@ -25,7 +23,12 @@ message PlaceOrderRequest {
   string refund_invoice = 1;
 }
 
+message CancelOrderRequest {
+  string order_id = 0;
+}
+
 service Maker {
   rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse);
   rpc PlaceOrder (PlaceOrderRequest) returns (google.protobuf.Empty);
+  rpc CancelOrder (CancelOrderRequest) returns (google.protobuf.Empty);
 }
