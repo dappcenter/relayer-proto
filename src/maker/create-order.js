@@ -24,21 +24,21 @@ const { Order, Invoice } = require('../models');
  */
 async function createOrder(call, cb) {
   const {
-    ownerId,
+    payTo,
     baseAmount,
     baseSymbol,
     counterAmount,
     counterSymbol,
-    side
+    side,
   } = call.request;
 
   const params = {
-    ownerId: String(ownerId),
+    payTo: String(payTo),
     baseAmount: bigInt(baseAmount),
     baseSymbol: String(baseSymbol),
     counterAmount: bigInt(counterAmount),
     counterSymbol: String(counterSymbol),
-    side: String(side)
+    side: String(side),
   };
 
   // TODO: We need to figure out a way to handle async calls AND only expose
@@ -50,7 +50,7 @@ async function createOrder(call, cb) {
     const order = new Order(this.db);
     const res = await order.create(params);
 
-    this.logger.info('Order has been created', { ownerId, orderId: order.orderId });
+    this.logger.info('Order has been created', { payTo, orderId: order.orderId });
 
     // Create invoices w/ LND
     // TODO: need to figure out how we are going to calculate fees
@@ -63,14 +63,14 @@ async function createOrder(call, cb) {
     // up a node so that we can test it (preferably on testnet)
     //
     // const depositRequest = await this.engine.addInvoice({
+    //   memo:
     //   value: 10,
-    //   // preimage
-    //   // expiry
+    //   expiry
     // });
     // const feeRequest = await this.engine.addInvoice({
+    //   memo:
     //   value: 10,
-    //   // preimage
-    //   // expiry
+    //   expiry
     // });
     // const depositPaymentRequest = depositRequest.payment_request;
     // const feePaymentRequest = feeRequest.payment_request;
@@ -84,12 +84,12 @@ async function createOrder(call, cb) {
     // TODO: Not sure if we even care about this (need info from Trey)
     const invoice = new Invoice(this.db);
     const depositInvoice = await invoice.create({
-      ownerId: 'ln:1234',
+      payTo: 'ln:1234',
       paymentRequest: depositPaymentRequest,
       type: 'INCOMING',
     });
     const feeInvoice = await invoice.create({
-      ownerId: 'ln:1234',
+      payTo: 'ln:1234',
       paymentRequest: feePaymentRequest,
       type: 'INCOMING',
     });

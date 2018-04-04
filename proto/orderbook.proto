@@ -6,15 +6,19 @@ message Order {
   string order_id = 0;
 	string base_symbol = 1;
 	string counter_symbol = 2;
-  OrderStatus status = 3;
-  int64 fill_amount = 4;
+  int64 base_amount = 3;
+  int64 counter_amount = 4;
+  int64 fill_amount = 5;
+  Side side = 6;
+  OrderStatus status = 7;
 }
 
-message WatchMarket {
+message WatchMarketRequest {
 	string base_symbol = 0;
 	string counter_symbol = 1;
+  optional Timestamp last_updated = 2;
 }
 
 service OrderBook {
-  rpc WatchMarket (WatchMarket) returns (stream Order);
+  rpc WatchMarket (WatchMarketRequest) returns (stream Order);
 }

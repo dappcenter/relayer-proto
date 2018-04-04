@@ -4,7 +4,7 @@ import "google/protobuf/empty.proto";
 import "constants.proto";
 
 message FillOrderRequest {
-  string pay_to = 0;
+  string swap_hash = 0;
   int64 fill_amount = 1;
 }
 
