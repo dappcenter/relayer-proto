@@ -39,6 +39,8 @@ services:
     working_dir: '/home/db'
     expose:
       - '27017'
+    ports:
+      - '27018:27017'
 
   # LND multi-swap
   # @author kinesis
