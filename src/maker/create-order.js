@@ -25,6 +25,7 @@ const { Order, Invoice } = require('../models');
 async function createOrder(call, cb) {
   const {
     payTo,
+    ownerId,
     baseAmount,
     baseSymbol,
     counterAmount,
@@ -32,8 +33,11 @@ async function createOrder(call, cb) {
     side,
   } = call.request;
 
+  // TODO: wrap these params into a try catch incase the type casting fails
+  //   which would probably be an indication of tampering?
   const params = {
     payTo: String(payTo),
+    ownerId: String(ownerId),
     baseAmount: bigInt(baseAmount),
     baseSymbol: String(baseSymbol),
     counterAmount: bigInt(counterAmount),
@@ -88,7 +92,6 @@ async function createOrder(call, cb) {
     this.logger.info('Invoices have been created through LND');
 
     // Persist the invoices to DB
-    // TODO: Not sure if we even care about this (need info from Trey)
     const invoice = new Invoice(this.db);
     const depositInvoice = await invoice.create({
       payTo: 'ln:1234',

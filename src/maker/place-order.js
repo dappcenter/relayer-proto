@@ -10,7 +10,7 @@ const { Order } = require('../models');
  * @param {Function<err, message>} cb
  */
 async function placeOrder(call, cb) {
-  const { orderId, refundInvoice } = call.request;
+  const { orderId, feeRefundInvoice, depositRefundInvoice } = call.request;
 
   // TODO: Need to validate these steps
   //
@@ -19,11 +19,13 @@ async function placeOrder(call, cb) {
   //    - make sure it even exists
   //    - make sure that it is a valid order (not cancelled or whatever) preferably
   //      by querying mongo for created orders?
+  //    - checks if the maker is reachable on Lightning Network on channels
+  //    - sufficient to complete swap (depending on fill amount)
   // 2. Create a new order with the refundinvoice in the created status
   // 3. Broadcast to everyone
   //
 
-  const order = new Order({ orderId, refundInvoice });
+  const order = new Order({ orderId, feeRefundInvoice });
 
   if (order.valid() === false) {
     this.logger.error('Invalid Order: Could not process');

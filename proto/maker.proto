@@ -5,11 +5,12 @@ import "constants.proto";
 
 message CreateOrderRequest {
   string pay_to = 0;
-  string base_symbol = 1;
-  string counter_symbol = 2;
-  int64 base_amount = 5;
-  int64 counter_amount = 6;
-  Side side = 7;
+  string ownerId = 1;
+  string base_symbol = 2;
+  string counter_symbol = 3;
+  int64 base_amount = 4;
+  int64 counter_amount = 5;
+  Side side = 6;
 }
 
 message CreateOrderResponse {
