@@ -54,7 +54,13 @@ async function createOrder(call, cb) {
 
     // Create invoices w/ LND
     // TODO: need to figure out how we are going to calculate fees
+    const ORDER_FEE = 0.001;
+
     // TODO: figure out how to calculate the expiry
+    const INVOICE_EXPIRY = 60; // 60 seconds expiry for invoices
+
+    const fee_memo = JSON.stringify({ type: 'fee', orderId: order.orderId });
+    const deposit_memo = JSON.stringify({ type: 'deposit', orderId: order.orderId });
     // TODO: figure out what actions we want to take if fees/invoices cannot
     //   be produced for this order
     //
@@ -63,15 +69,16 @@ async function createOrder(call, cb) {
     // up a node so that we can test it (preferably on testnet)
     //
     // const depositRequest = await this.engine.addInvoice({
-    //   memo:
+    //   memo: deposit_memo,
     //   value: 10,
-    //   expiry
+    //   expiry: INVOICE_EXPIRY,
     // });
     // const feeRequest = await this.engine.addInvoice({
-    //   memo:
+    //   memo: fee_memo,
     //   value: 10,
-    //   expiry
+    //   expiry: INVOICE_EXPIRY,
     // });
+    //
     // const depositPaymentRequest = depositRequest.payment_request;
     // const feePaymentRequest = feeRequest.payment_request;
 
