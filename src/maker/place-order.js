@@ -79,7 +79,7 @@ async function placeOrder(call, cb) {
       fee: feeRefundInvoice._id,
     });
 
-    this.eventHandler.emit('order:placed', order.orderId, order);
+    this.eventHandler.emit('order:placed', order);
     this.logger.info('order:placed', { orderId: order.orderId });
 
     return cb(null, {});

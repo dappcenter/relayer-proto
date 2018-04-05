@@ -115,7 +115,7 @@ async function createOrder(call, cb) {
       fee: feeInvoice._id,
     });
 
-    this.eventHandler.emit('order:created', order.orderId, order);
+    this.eventHandler.emit('order:created', order);
     this.logger.info('order:created', { orderId: order.orderId });
 
     return cb(null, {
