@@ -33,7 +33,7 @@ class GrpcServer {
     this.orderBookService = this.proto.OrderBook.service;
     this.marketEventPublisher = new MarketEventPublisher(this.eventHandler);
 
-    this.action = new GrpcAction(this.eventHandler, this.logger, this.engine);
+    this.action = new GrpcAction(this.eventHandler, this.marketEventPublisher, this.logger, this.engine);
 
     this.server.addService(this.makerService, {
       createOrder: createOrder.bind(this.action),

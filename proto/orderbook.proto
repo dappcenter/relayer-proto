@@ -1,16 +1,23 @@
 syntax = "proto3";
 
 import "constants.proto";
+import "google/protobuf/timestamp.proto";
 
-message Order {
-  string order_id = 0;
-	string base_symbol = 1;
-	string counter_symbol = 2;
-  int64 base_amount = 3;
-  int64 counter_amount = 4;
-  int64 fill_amount = 5;
-  Side side = 6;
-  OrderStatus status = 7;
+message MarketEvent {
+  enum EventType {
+    PLACED = 0;
+    CANCELLED = 1;
+    FILLED = 2;
+  }
+
+  string event_id = 0;
+  string order_id = 1;
+  Timestamp date = 3;
+  EventType event_type = 4;
+  int64 base_amount = 5;
+  int64 counter_amount = 6;
+  int64 fill_amount = 7;
+  Side side = 8;
 }
 
 message WatchMarketRequest {
@@ -20,5 +27,5 @@ message WatchMarketRequest {
 }
 
 service OrderBook {
-  rpc WatchMarket (WatchMarketRequest) returns (stream Order);
+  rpc WatchMarket (WatchMarketRequest) returns (stream MarketEvent);
 }
