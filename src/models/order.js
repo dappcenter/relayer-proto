@@ -22,7 +22,7 @@ const orderSchema = new Schema({
     },
     message: '{VALUE} is not a valid payTo Address'
   } },
-  status: { type: String, required: true, enum: ORDER_STATUSES },
+  status: { type: String, required: true, enum: ORDER_STATUSES, default: 'CREATED' },
   side: { type: String, required: true, enum: MARKET_SIDES },
   baseAmount: { type: SchemaTypes.Long, required: true },
   baseSymbol: { type: String, required: true, maxlength: 3 },
@@ -57,7 +57,6 @@ orderSchema.pre('create', (next) => {
   if (this.orderId) {
     this.invalidate('orderId');
   }
-  this.status = 'CREATED';
   next();
 });
 
