@@ -124,6 +124,7 @@ async function createOrder(call, cb) {
       feePaymentRequest: feeInvoice.paymentRequest,
     });
   } catch (e) {
+    // TODO: filtering client friendly errors from internal errors
     this.logger.error('Invalid Order: Could not process', { error: e.toString() });
     return cb({ message: e.message, code: status.INTERNAL });
   }
