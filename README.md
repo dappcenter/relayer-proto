@@ -61,7 +61,8 @@ You will need to open up 2 terminal windows.
 
 ### TODOS
 
-- Fix sed command in relayer docker startup to work on unix (right now only works for mac LOL)
+- Contribute to LND for dockerfile updates (easy win)
+- Create Dockerfiles for Nodejs and Mongo (we shouldnt trust public images in the future)
 - Replace Glide w/ dep for docker lnd/btc/lnd-multichain (this should be done in the lnd repo too for the first contribution!!!!)
 - Add lnd-payment-driver to this repo
 - Add tests for all modules
