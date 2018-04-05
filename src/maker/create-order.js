@@ -13,7 +13,7 @@
 const { status } = require('grpc');
 const bigInt = require('big-integer');
 
-const { Order, Invoice } = require('../models');
+const { Order, Invoice, Market } = require('../models');
 
 
 /**
@@ -33,20 +33,8 @@ async function createOrder(call, cb) {
     side,
   } = call.request;
 
-  // TODO: wrap these params into a try catch incase the type casting fails
-  //   which would probably be an indication of tampering?
-  const params = {
-    payTo: String(payTo),
-    ownerId: String(ownerId),
-    baseAmount: bigInt(baseAmount),
-    baseSymbol: String(baseSymbol),
-    counterAmount: bigInt(counterAmount),
-    counterSymbol: String(counterSymbol),
-    side: String(side),
-  };
-
-  this.logger.info('Request to create order received', params);
-
+  // TODO: We need to figure out a way to handle async calls AND only expose
+  // errors that the client cares about
   //
   // TODO: figure out what actions we want to take if fees/invoices cannot
   //   be produced for this order
@@ -55,6 +43,17 @@ async function createOrder(call, cb) {
   //   to create them in the db?
   //
   try {
+    const params = {
+      payTo: String(payTo),
+      ownerId: String(ownerId),
+      marketName: Market.fromObject({ baseSymbol, counterSymbol }).name,
+      baseAmount: bigInt(baseAmount),
+      counterAmount: bigInt(counterAmount),
+      side: String(side),
+    };
+
+    this.logger.info('Request to create order received', params);
+
     const order = await Order.create(params);
 
     this.logger.info('Order has been created', { ownerId, orderId: order.orderId });

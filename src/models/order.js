@@ -5,6 +5,7 @@
  */
 
 const safeid = require('generate-safe-id');
+const { markets } = require('./market');
 const mongoose = require('mongoose');
 require('mongoose-long')(mongoose);
 
@@ -24,6 +25,11 @@ const STATUSES = Object.freeze({
   COMPLETED: 'COMPLETED',
 });
 
+const MARKETS = Object.freeze(markets.reduce((acc, market) => {
+  acc[market.name] = market.name;
+  return acc;
+}, {}));
+
 const orderSchema = new Schema({
   orderId: { type: String, unique: true, index: true, default: () => safeid() },
   ownerId: { type: String, required: true },
@@ -39,10 +45,9 @@ const orderSchema = new Schema({
   },
   status: { type: String, required: true, enum: STATUSES.values(), default: STATUSES.CREATED },
   side: { type: String, required: true, enum: MARKET_SIDES.values() },
+  marketName: { type: String, required: true, enum: MARKETS.values() },
   baseAmount: { type: SchemaTypes.Long, required: true },
-  baseSymbol: { type: String, required: true, maxlength: 3 },
   counterAmount: { type: SchemaTypes.Long, required: true },
-  counterSymbol: { type: String, required: true, maxlength: 3 },
 });
 
 orderSchema.method({

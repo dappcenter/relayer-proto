@@ -3,7 +3,7 @@ const path = require('path');
 
 const GrpcAction = require('./grpc-action');
 const { createOrder, placeOrder, cancelOrder } = require('./maker');
-const { watchMarket } = require('./orderbook');
+const { watchMarket, MarketEventPublisher } = require('./orderbook');
 
 const GRPC_HOST = process.env.GRPC_HOST || '0.0.0.0';
 const GRPC_PORT = process.env.GRPC_PORT || '50078';
@@ -31,6 +31,7 @@ class GrpcServer {
     this.makerService = this.proto.Maker.service;
     this.takerService = this.proto.Taker.service;
     this.orderBookService = this.proto.OrderBook.service;
+    this.marketEventPublisher = new MarketEventPublisher(this.eventHandler);
 
     this.action = new GrpcAction(this.eventHandler, this.logger, this.engine);
 
