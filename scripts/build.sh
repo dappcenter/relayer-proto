@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo ""
 echo "It's time to build! All resistance is futile."
 echo ""
