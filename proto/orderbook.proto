@@ -16,7 +16,7 @@ message Order {
 message WatchMarketRequest {
 	string base_symbol = 0;
 	string counter_symbol = 1;
-  optional Timestamp last_updated = 2;
+  optional int64 last_updated = 2;
 }
 
 service OrderBook {
