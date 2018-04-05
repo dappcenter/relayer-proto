@@ -7,4 +7,7 @@ const cancelOrder = require('./cancel-order');
 module.exports = {
   placeOrder,
   createOrder,
+  executeOrder,
+  completeOrder,
+  cancelOrder,
 };

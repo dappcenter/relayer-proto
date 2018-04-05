@@ -17,7 +17,7 @@ class Relayer {
     this.engine = new Engine(this.logger);
     this.logger = logger;
     this.eventHandler = new EventHandler();
-    this.server = new Server(this.logger, this.eventHandler, this.db, this.engine);
+    this.server = new Server(this.logger, this.eventHandler, this.engine);
 
     try {
       this.startServer();

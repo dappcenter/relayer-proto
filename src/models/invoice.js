@@ -4,41 +4,27 @@
  * @author kinesis
  */
 
-const safeid = require('generate-safe-id');
+const Enum = require('../utils/enum');
 const mongoose = require('mongoose');
 require('mongoose-long')(mongoose);
 
 const { Schema } = mongoose;
-const INVOICE_TYPES = ['INCOMING', 'OUTGOING'];
+const INVOICE_TYPES = new Enum(['INCOMING', 'OUTGOING']);
+const INVOICE_PURPOSES = new Enum(['FEE', 'DEPOSIT']);
+const FOREIGN_TYPES = new Enum(['ORDER', 'FILL']);
 
 const invoiceSchema = new Schema({
-  // ownerId, in the case of LND, would be the user's LND public key
-  invoiceId: { type: String, default: () => safeid() },
-  ownerId: { type: String, required: true },
+  foreignId: { type: String, required: true },
+  foreignType: { type: String, required: true, enum: FOREIGN_TYPES.values() },
   paymentRequest: { type: String, required: true },
-  type: { type: String, required: true, enum: INVOICE_TYPES },
+  type: { type: String, required: true, enum: INVOICE_TYPES.values() },
+  purpose: { type: String, required: true, enum: INVOICE_PURPOSES.values() },
 });
 
-/**
- * We only want the relayer to be able to set an invoiceId on the model. If there
- * is ever an invoiceId passed into the schema, we will prevent the saving of the record
- */
-invoiceSchema.pre('create', (next) => {
-  if (this.orderId) {
-    this.invalidate('orderId');
-  }
-  next();
-});
+const Invoice = mongoose.model('Invoice', invoiceSchema);
 
-class Invoice {
-  constructor(db) {
-    this.db = db;
-    this.invoice = this.db.model('Invoice', invoiceSchema);
-  }
-
-  async create(params) {
-    return this.invoice.create(params);
-  }
-}
+Invoice.TYPES = INVOICE_TYPES;
+Invoice.PURPOSES = INVOICE_PURPOSES;
+Invoice.FOREIGN_TYPES = FOREIGN_TYPES;
 
 module.exports = Invoice;
