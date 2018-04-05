@@ -29,10 +29,24 @@ const order = {
   side: 'BID',
 };
 
-maker.createOrder(order, (err, res) => {
+maker.createOrder(order, (err, createOrderRes) => {
   if (err) {
     return console.error(err);
   }
 
-  console.log(res);
+  console.log("created order", createOrderRes);
+
+  setTimeout(() => {
+    maker.placeOrder({
+      orderId: createOrderRes.orderId,
+      feeRefundPaymentRequest: '12345',
+      depositRefundPaymentRequest: '891011',
+    }, (err, placeOrderRes) => {
+      if (err) {
+        return console.error(err);
+      }
+
+      console.log("placed order", placeOrderRes);
+    });
+  }, 1000);
 });

@@ -25,9 +25,11 @@ async function placeOrder(call, cb) {
   // 3. Broadcast to everyone
   //
 
+  // TODO: validate ownership of the order
+
   try {
     const order = await Order.findOne({ orderId });
-    const inboundInvoices = await Invoice.find({ orderId, type: 'INCOMING' });
+    const inboundInvoices = await Invoice.find({ foreignId: orderId, foreignType: 'ORDER', type: 'INCOMING' });
 
     if (inboundInvoices.length > 2) {
       // This is basically a corrupt state. Should we cancel the order or something?
@@ -80,7 +82,7 @@ async function placeOrder(call, cb) {
     this.eventHandler.emit('order:placed', order.orderId, order);
     this.logger.info('order:placed', { orderId: order.orderId });
 
-    return cb(null, { orderId: order.orderId });
+    return cb(null, {});
   } catch (e) {
     this.logger.error('Invalid Order: Could not process', { error: e.toString() });
     return cb({ message: e.message, code: status.INTERNAL });
