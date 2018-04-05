@@ -15,14 +15,14 @@ message CreateOrderRequest {
 
 message CreateOrderResponse {
   string order_id = 0;
-  string fee_invoice = 1;
-  string deposit_invoice = 2;
+  string fee_payment_request = 1;
+  string deposit_payment_request = 2;
 }
 
 message PlaceOrderRequest {
   string order_id = 0;
-  string deposit_refund_invoice = 2;
-  optional string fee_refund_invoice = 1;
+  string deposit_refund_payment_request = 2;
+  optional string fee_refund_payment_request = 1;
 }
 
 message CancelOrderRequest {

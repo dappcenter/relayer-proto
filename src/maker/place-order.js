@@ -1,6 +1,6 @@
 const { status } = require('grpc');
 
-const { Order } = require('../models');
+const { Order, Invoice } = require('../models');
 
 /**
  * Given an orderId and refundInvoice, place an order in the relayer. This will
@@ -10,7 +10,7 @@ const { Order } = require('../models');
  * @param {Function<err, message>} cb
  */
 async function placeOrder(call, cb) {
-  const { orderId, feeRefundInvoice, depositRefundInvoice } = call.request;
+  const { orderId, feeRefundPaymentRequest, depositRefundPaymentRequest } = call.request;
 
   // TODO: Need to validate these steps
   //
@@ -25,17 +25,66 @@ async function placeOrder(call, cb) {
   // 3. Broadcast to everyone
   //
 
-  const order = new Order({ orderId, feeRefundInvoice });
+  try {
+    const order = await Order.findOne({ orderId });
+    const inboundInvoices = await Invoice.find({ orderId, type: 'INCOMING' });
 
-  if (order.valid() === false) {
-    this.logger.error('Invalid Order: Could not process');
-    return cb({ message: 'Invalid Order: Could not process', code: status.INVALID_ARGUMENT });
+    if (inboundInvoices.length > 2) {
+      // This is basically a corrupt state. Should we cancel the order or something?
+      throw new Error(`Too many invoices associated with Order ${orderId}.`);
+    }
+
+    const feeInvoice = inboundInvoices.find(invoice => invoice.purpose === 'FEE');
+    const depositInvoice = inboundInvoices.find(invoice => invoice.purpose === 'DEPOSIT');
+
+    if (!feeInvoice) {
+      throw new Error(`Could not find fee invoice associated with Order ${orderId}.`);
+    }
+    if (!depositInvoice) {
+      throw new Error(`Could not find deposit invoice associated with Order ${orderId}.`);
+    }
+
+    // Need to add this functionality to the LND engine
+    // const feeStatus = await this.engine.invoiceStatus(feeInvoice.paymentRequest);
+    // const depositStatus = await this.engine.invoiceStatus(depositInvoice.paymentRequest);
+
+    // if(feeStatus !== 'PAID') {
+    //   throw new Error(`Fee Invoice for Order ${orderId} has not been paid.`);
+    // }
+
+    // if(depositStatus !== 'PAID') {
+    //   throw new Error(`Deposit Invoice for Order ${orderId} has not been paid.`);
+    // }
+
+    // TODO: validate the payment requests on the user-supplied invoices
+    const feeRefundInvoice = await Invoice.create({
+      foreignId: orderId,
+      foreignType: 'ORDER',
+      paymentRequest: feeRefundPaymentRequest,
+      type: 'OUTGOING',
+      purpose: 'FEE',
+    });
+    const depositRefundInvoice = await Invoice.create({
+      foreignId: orderId,
+      foreignType: 'ORDER',
+      paymentRequest: depositRefundPaymentRequest,
+      type: 'OUTGOING',
+      purpose: 'DEPOSIT',
+    });
+
+    this.logger.info('Refund invoices have been stored on the Relayer', {
+      deposit: depositRefundInvoice._id,
+      fee: feeRefundInvoice._id,
+    });
+
+    this.eventHandler.emit('order:placed', order.orderId, order);
+    this.logger.info('order:placed', { orderId: order.orderId });
+
+    return cb(null, { orderId: order.orderId });
+  } catch (e) {
+    this.logger.error('Invalid Order: Could not process', { error: e.toString() });
+    return cb({ message: e.message, code: status.INTERNAL });
   }
-
-  this.eventHandler.emit('order:placed', order);
-  this.logger.info('order:placed', { orderId: order.id });
-
-  return cb(null, { ownerUuid: order.makerId, orderId: order.id });
 }
 
 module.exports = placeOrder;

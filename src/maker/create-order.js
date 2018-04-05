@@ -45,15 +45,15 @@ async function createOrder(call, cb) {
     side: String(side),
   };
 
+  this.logger.info('Request to create order received', params);
+
   // TODO: We need to figure out a way to handle async calls AND only expose
   // errors that the client cares about
   //
   // The current solution will display ALL application errors to the client which
   // is NOT ideal
   try {
-    const order = new Order(params);
-    await order.save();
-    this.eventHandler.emit('order:create', order.orderId, order);
+    const order = await Order.create(params);
 
     this.logger.info('Order has been created', { ownerId, orderId: order.orderId });
 
@@ -65,8 +65,9 @@ async function createOrder(call, cb) {
     // TODO: figure out how to calculate the expiry
     const INVOICE_EXPIRY = 60; // 60 seconds expiry for invoices
 
-    const fee_memo = JSON.stringify({ type: 'fee', orderId: order.orderId });
-    const deposit_memo = JSON.stringify({ type: 'deposit', orderId: order.orderId });
+    // TODO: figure out a better way to encode this
+    const feeMemo = JSON.stringify({ type: 'fee', orderId: order.orderId });
+    const depositMemo = JSON.stringify({ type: 'deposit', orderId: order.orderId });
     // TODO: figure out what actions we want to take if fees/invoices cannot
     //   be produced for this order
     //
@@ -75,12 +76,12 @@ async function createOrder(call, cb) {
     // up a node so that we can test it (preferably on testnet)
     //
     // const depositRequest = await this.engine.addInvoice({
-    //   memo: deposit_memo,
+    //   memo: depositMemo,
     //   value: 10,
     //   expiry: INVOICE_EXPIRY,
     // });
     // const feeRequest = await this.engine.addInvoice({
-    //   memo: fee_memo,
+    //   memo: feeMemo,
     //   value: 10,
     //   expiry: INVOICE_EXPIRY,
     // });
@@ -94,32 +95,33 @@ async function createOrder(call, cb) {
     this.logger.info('Invoices have been created through LND');
 
     // Persist the invoices to DB
-    const depositInvoice = new Invoice({
-      orderId: order.orderId,
-      payTo: 'ln:1234',
+    const depositInvoice = await Invoice.create({
+      foreignId: order.orderId,
+      foreignType: 'ORDER',
       paymentRequest: depositPaymentRequest,
       type: 'INCOMING',
+      purpose: 'DEPOSIT',
     });
-    const feeInvoice = new Invoice({
-      order.orderId,
-      payTo: 'ln:1234',
+    const feeInvoice = await Invoice.create({
+      foreignId: order.orderId,
+      foreignType: 'ORDER',
       paymentRequest: feePaymentRequest,
       type: 'INCOMING',
+      purpose: 'FEE',
     });
-
-    await Promise.all([depositInvoice.save(), feeInvoice.save()])
 
     this.logger.info('Invoices have been created through Relayer', {
-      deposit: depositInvoice.invoiceId,
-      fee: feeInvoice.invoiceId,
+      deposit: depositInvoice._id,
+      fee: feeInvoice._id,
     });
 
-    this.logger.info('order:created', { orderId: order.id });
+    this.eventHandler.emit('order:created', order.orderId, order);
+    this.logger.info('order:created', { orderId: order.orderId });
 
     return cb(null, {
       orderId: order.orderId,
-      depositInvoice: depositInvoice.paymentRequest,
-      feeInvoice: feeInvoice.paymentRequest,
+      depositPaymentRequest: depositInvoice.paymentRequest,
+      feePaymentRequest: feeInvoice.paymentRequest,
     });
   } catch (e) {
     this.logger.error('Invalid Order: Could not process', { error: e.toString() });

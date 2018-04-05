@@ -12,26 +12,24 @@ const { status } = require('grpc');
 const { Order } = require('../models');
 
 async function cancelOrder(call, cb) {
-  const { makerId, orderId } = call.request;
+  const { orderId } = call.request;
 
-  this.logger.info('cancelOrder: attempting to cancel order', { orderId, makerId });
+  this.logger.info('cancelOrder: attempting to cancel order', { orderId });
 
-  // Get an order w/ a placed status
-  // update the order as cancelled
-  // emil cancelled event to all subscribers
-  // return response
-  const order = new Order();
+  try {
+    const order = Order.findOne({ orderId });
 
-  this.eventHandler.emit('order:cancelled', order);
+    // TODO: ensure this user is authorized to cancel this order
 
-  const failedToCancel = false;
+    await order.cancel();
 
-  if (failedToCancel) {
-    this.logger.error('cancelOrder: failed to cancel order', { orderId, makerId });
-    return cb({ message: 'Invalid Order: Could not process', code: status.CANCELLED });
+    this.eventHandler.emit('order:cancelled', order);
+
+    return cb(null, { orderId: order.id });
+  } catch (e) {
+    this.logger.error('Invalid Order: Could not process', { error: e.toString() });
+    return cb({ message: e.message, code: status.INTERNAL });
   }
-
-  return cb(null, { ownerUuid: order.makerId, orderId: order.id });
 }
 
 module.exports = cancelOrder;

@@ -38,7 +38,7 @@ class GrpcServer {
     this.server.addService(this.makerService, {
       createOrder: createOrder.bind(this.action),
       placeOrder: placeOrder.bind(this.action),
-      cancelOrder: cancelOrder.bind(this.action)
+      cancelOrder: cancelOrder.bind(this.action),
     });
 
     this.server.addService(this.orderBookService, {

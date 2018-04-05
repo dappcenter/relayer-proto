@@ -20,13 +20,13 @@ const proto = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS);
 const maker = new proto.Maker(TEST_ADDRESS, grpc.credentials.createInsecure());
 
 const order = {
-  ownerId: 'ln:123455678',
+  ownerId: '123455678',
+  payTo: 'ln:12234987',
   baseSymbol: 'BTC',
   counterSymbol: 'LTC',
   baseAmount: '10000',
   counterAmount: '1000000',
-  swapHash: safeid(),
-  swapPreimage: safeid(),
+  side: 'BID',
 };
 
 maker.createOrder(order, (err, res) => {
