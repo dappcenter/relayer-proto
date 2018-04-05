@@ -29,7 +29,7 @@ async function placeOrder(call, cb) {
 
   try {
     const order = await Order.findOne({ orderId });
-    const inboundInvoices = await Invoice.find({ foreignId: orderId, foreignType: 'ORDER', type: 'INCOMING' });
+    const inboundInvoices = await Invoice.find({ foreignId: order._id, foreignType: 'ORDER', type: 'INCOMING' });
 
     if (inboundInvoices.length > 2) {
       // This is basically a corrupt state. Should we cancel the order or something?
@@ -60,14 +60,14 @@ async function placeOrder(call, cb) {
 
     // TODO: validate the payment requests on the user-supplied invoices
     const feeRefundInvoice = await Invoice.create({
-      foreignId: orderId,
+      foreignId: order._id,
       foreignType: 'ORDER',
       paymentRequest: feeRefundPaymentRequest,
       type: 'OUTGOING',
       purpose: 'FEE',
     });
     const depositRefundInvoice = await Invoice.create({
-      foreignId: orderId,
+      foreignId: order._id,
       foreignType: 'ORDER',
       paymentRequest: depositRefundPaymentRequest,
       type: 'OUTGOING',

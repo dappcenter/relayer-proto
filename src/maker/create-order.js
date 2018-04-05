@@ -96,14 +96,14 @@ async function createOrder(call, cb) {
 
     // Persist the invoices to DB
     const depositInvoice = await Invoice.create({
-      foreignId: order.orderId,
+      foreignId: order._id,
       foreignType: 'ORDER',
       paymentRequest: depositPaymentRequest,
       type: 'INCOMING',
       purpose: 'DEPOSIT',
     });
     const feeInvoice = await Invoice.create({
-      foreignId: order.orderId,
+      foreignId: order._id,
       foreignType: 'ORDER',
       paymentRequest: feePaymentRequest,
       type: 'INCOMING',
