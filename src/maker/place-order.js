@@ -29,15 +29,19 @@ async function placeOrder(call, cb) {
 
   try {
     const order = await Order.findOne({ orderId });
-    const inboundInvoices = await Invoice.find({ foreignId: order._id, foreignType: 'ORDER', type: 'INCOMING' });
+    const inboundInvoices = await Invoice.find({
+      foreignId: order._id,
+      foreignType: Invoice.FOREIGN_TYPES.ORDER,
+      type: Invoice.TYPES.INCOMING,
+    });
 
     if (inboundInvoices.length > 2) {
       // This is basically a corrupt state. Should we cancel the order or something?
       throw new Error(`Too many invoices associated with Order ${orderId}.`);
     }
 
-    const feeInvoice = inboundInvoices.find(invoice => invoice.purpose === 'FEE');
-    const depositInvoice = inboundInvoices.find(invoice => invoice.purpose === 'DEPOSIT');
+    const feeInvoice = inboundInvoices.find(invoice => invoice.purpose === Invoice.PURPOSES.FEE);
+    const depositInvoice = inboundInvoices.find(invoice => invoice.purpose === Invoice.PURPOSES.DEPOSIT);
 
     if (!feeInvoice) {
       throw new Error(`Could not find fee invoice associated with Order ${orderId}.`);
@@ -61,17 +65,17 @@ async function placeOrder(call, cb) {
     // TODO: validate the payment requests on the user-supplied invoices
     const feeRefundInvoice = await Invoice.create({
       foreignId: order._id,
-      foreignType: 'ORDER',
+      foreignType: Invoice.FOREIGN_TYPES.ORDER,
       paymentRequest: feeRefundPaymentRequest,
-      type: 'OUTGOING',
-      purpose: 'FEE',
+      type: Invoice.TYPES.OUTGOING,
+      purpose: Invoice.PURPOSES.FEE,
     });
     const depositRefundInvoice = await Invoice.create({
       foreignId: order._id,
-      foreignType: 'ORDER',
+      foreignType: Invoice.FOREIGN_TYPES.ORDER,
       paymentRequest: depositRefundPaymentRequest,
-      type: 'OUTGOING',
-      purpose: 'DEPOSIT',
+      type: Invoice.TYPES.OUTGOING,
+      purpose: Invoice.PURPOSES.DEPOSIT,
     });
 
     this.logger.info('Refund invoices have been stored on the Relayer', {

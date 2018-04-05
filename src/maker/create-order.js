@@ -97,17 +97,17 @@ async function createOrder(call, cb) {
     // Persist the invoices to DB
     const depositInvoice = await Invoice.create({
       foreignId: order._id,
-      foreignType: 'ORDER',
+      foreignType: Invoice.FOREIGN_TYPES.ORDER,
       paymentRequest: depositPaymentRequest,
-      type: 'INCOMING',
-      purpose: 'DEPOSIT',
+      type: Invoice.TYPES.INCOMING,
+      purpose: Invoice.PURPOSES.DEPOSIT,
     });
     const feeInvoice = await Invoice.create({
       foreignId: order._id,
-      foreignType: 'ORDER',
+      foreignType: Invoice.FOREIGN_TYPES.ORDER,
       paymentRequest: feePaymentRequest,
-      type: 'INCOMING',
-      purpose: 'FEE',
+      type: Invoice.TYPES.INCOMING,
+      purpose: Invoice.PURPOSES.FEE,
     });
 
     this.logger.info('Invoices have been created through Relayer', {
