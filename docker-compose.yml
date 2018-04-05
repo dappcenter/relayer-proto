@@ -30,7 +30,7 @@ services:
     # to read the file (preferably not through ssh w/ git)
     #
     # FOR NOW: We have the proto generated on the kinesis-relayer
-    command: bash -c 'npm i && npm rebuild && npm start'
+    command: bash -c 'npm run build'
 
   # Mongo DB
   mongo:
@@ -47,7 +47,7 @@ services:
   lnd_btc_ltc:
     image: lnd_btc_ltc
     build:
-      context: ../
+      context: ./
       dockerfile: docker-multichain/lnd-multichain/Dockerfile
     container_name: lnd_btc_ltc
     environment:
