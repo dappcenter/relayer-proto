@@ -21,8 +21,7 @@ const PROTO_GRPC_OPTIONS = {
  * @author kinesis
  */
 class GrpcServer {
-  constructor(logger, eventHandler, db, engine) {
-    this.db = db;
+  constructor(logger, eventHandler, engine) {
     this.engine = engine;
     this.logger = logger;
     this.eventHandler = eventHandler;
@@ -33,7 +32,7 @@ class GrpcServer {
     this.takerService = this.proto.Taker.service;
     this.orderBookService = this.proto.OrderBook.service;
 
-    this.action = new GrpcAction(this.eventHandler, this.logger, this.db, this.engine);
+    this.action = new GrpcAction(this.eventHandler, this.logger, this.engine);
 
     this.server.addService(this.makerService, {
       createOrder: createOrder.bind(this.action),
