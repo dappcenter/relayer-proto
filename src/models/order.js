@@ -37,15 +37,4 @@ orderSchema.pre('create', (next) => {
   next();
 });
 
-class Order {
-  constructor(db) {
-    this.db = db;
-    this.order = this.db.model('Order', orderSchema);
-  }
-
-  async create(params) {
-    return this.order.create(params);
-  }
-}
-
-module.exports = Order;
+module.exports = mongoose.model('Order', orderSchema);

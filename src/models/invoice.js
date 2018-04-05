@@ -30,15 +30,4 @@ invoiceSchema.pre('create', (next) => {
   next();
 });
 
-class Invoice {
-  constructor(db) {
-    this.db = db;
-    this.invoice = this.db.model('Invoice', invoiceSchema);
-  }
-
-  async create(params) {
-    return this.invoice.create(params);
-  }
-}
-
-module.exports = Invoice;
+module.exports = mongoose.model('Invoice', invoiceSchema);

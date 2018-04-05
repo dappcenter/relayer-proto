@@ -51,14 +51,16 @@ async function createOrder(call, cb) {
   // The current solution will display ALL application errors to the client which
   // is NOT ideal
   try {
-    const order = new Order(this.db);
-    const res = await order.create(params);
+    const order = new Order(params);
+    await order.save();
+    this.eventHandler.emit('order:create', order.orderId, order);
 
-    this.logger.info('Order has been created', { payTo, orderId: order.orderId });
+    this.logger.info('Order has been created', { ownerId, orderId: order.orderId });
 
     // Create invoices w/ LND
     // TODO: need to figure out how we are going to calculate fees
     const ORDER_FEE = 0.001;
+    const ORDER_DEPOSIT = 0.001;
 
     // TODO: figure out how to calculate the expiry
     const INVOICE_EXPIRY = 60; // 60 seconds expiry for invoices
@@ -92,17 +94,20 @@ async function createOrder(call, cb) {
     this.logger.info('Invoices have been created through LND');
 
     // Persist the invoices to DB
-    const invoice = new Invoice(this.db);
-    const depositInvoice = await invoice.create({
+    const depositInvoice = new Invoice({
+      orderId: order.orderId,
       payTo: 'ln:1234',
       paymentRequest: depositPaymentRequest,
       type: 'INCOMING',
     });
-    const feeInvoice = await invoice.create({
+    const feeInvoice = new Invoice({
+      order.orderId,
       payTo: 'ln:1234',
       paymentRequest: feePaymentRequest,
       type: 'INCOMING',
     });
+
+    await Promise.all([depositInvoice.save(), feeInvoice.save()])
 
     this.logger.info('Invoices have been created through Relayer', {
       deposit: depositInvoice.invoiceId,
@@ -112,7 +117,7 @@ async function createOrder(call, cb) {
     this.logger.info('order:created', { orderId: order.id });
 
     return cb(null, {
-      orderId: res.orderId,
+      orderId: order.orderId,
       depositInvoice: depositInvoice.paymentRequest,
       feeInvoice: feeInvoice.paymentRequest,
     });
