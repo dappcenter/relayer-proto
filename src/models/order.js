@@ -23,7 +23,7 @@ const orderSchema = new Schema({
     required: true,
     validate: {
       validator(v) {
-        return v.slice(0, 3) === 'ln:';
+        return v.startsWith('ln:');
       },
       message: '{VALUE} is not a valid payTo Address',
     },
