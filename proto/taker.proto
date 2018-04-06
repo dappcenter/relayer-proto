@@ -32,5 +32,5 @@ message SubscribeExecuteResponse {
 service Taker {
   rpc CreateFill (CreateFillRequest) returns (CreateFillResponse);
   rpc FillOrder (FillOrderRequest) returns (google.protobuf.Empty);
-  rpc SubscribeExecute (SubscribeExecuteRequest) returns (stream SubscribeExecuteResponse)
+  rpc SubscribeExecute (SubscribeExecuteRequest) returns (stream SubscribeExecuteResponse);
 }
