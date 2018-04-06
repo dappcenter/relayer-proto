@@ -5,15 +5,24 @@
  */
 
 const safeid = require('generate-safe-id');
-const Enum = require('../utils/enum');
 const mongoose = require('mongoose');
 require('mongoose-long')(mongoose);
 
 const { Schema } = mongoose;
-const { Types: SchemaTypes } = mongoose.Schema;
+const { Types: SchemaTypes } = Schema;
 
-const MARKET_SIDES = new Enum(['ASK', 'BID']);
-const STATUSES = new Enum(['CREATED', 'PLACED', 'CANCELLED', 'FILLED', 'COMPLETED']);
+const MARKET_SIDES = Object.freeze({
+  ASK: 'ASK',
+  BID: 'BID',
+});
+
+const STATUSES = Object.freeze({
+  CREATED: 'CREATED',
+  PLACED: 'PLACED',
+  CANCELLED: 'CANCELLED',
+  FILLED: 'FILLED',
+  COMPLETED: 'COMPLETED',
+});
 
 const orderSchema = new Schema({
   orderId: { type: String, unique: true, index: true, default: () => safeid() },
@@ -67,9 +76,9 @@ orderSchema.pre('create', (next) => {
   next();
 });
 
-const Order = mongoose.model('Order', orderSchema);
+orderSchema.statics.STATUSES = STATUSES;
+orderSchema.statics.MARKET_SIDES = MARKET_SIDES;
 
-Order.STATUSES = STATUSES;
-Order.MARKET_SIDES = MARKET_SIDES;
+const Order = mongoose.model('Order', orderSchema);
 
 module.exports = Order;
