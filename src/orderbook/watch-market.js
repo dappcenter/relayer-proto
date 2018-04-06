@@ -10,8 +10,7 @@
  */
 
 const safeid = require('generate-safe-id');
-const bigInt = require('big-integer');
-const { Market, MarketEvent } = require('../models');
+const { Market } = require('../models');
 
 async function watchMarket(call) {
   const { baseSymbol, counterSymbol, lastUpdated } = call.request;
@@ -21,50 +20,74 @@ async function watchMarket(call) {
     baseSymbol,
     counterSymbol,
     lastUpdated,
-    watcherId
+    watcherId,
   });
 
+  const params = {
+    baseSymbol: String(baseSymbol),
+    counterSymbol: String(counterSymbol),
+    lastUpdated: lastUpdated === '0' ? null : new Date(lastUpdated)
+  };
+
   try {
-    const market = Market.fromObject({ baseSymbol, counterSymbol });
-    if(!markets.find(m => m.name === market.name)) {
+    const market = Market.fromObject(params);
+    if (!Market.markets.find(m => m.name === market.name)) {
       throw new Error(`Market ${market.name} is not supported.`);
     }
 
-    if(lastUpdated) {
-      // send all events since they last checked
-      const events = await Market.find({
-        createdAt: {
-          $gt: new Date(lastUpdated)
-        },
-        marketName: market.name
-      });
+    let oldEvents;
 
-      events.forEach((event) => {
-        call.write(event.writable());
-      });
-    } else {
-      // send all current events
-    }
-
-    this.marketEventPublisher.on(`market:${market.name}`, (event) => {
-      this.logger.info('Detected market event', {
+    // TODO: handle if this is really old, where we'd prefer to just send the current state
+    if (params.lastUpdated) {
+      this.logger.info('watchMarket: Sending all events since last update', {
+        lastUpdated: params.lastUpdated,
         marketName: market.name,
         watcherId,
-        eventId,
-        eventType: event.type
       });
 
-      call.write(event.writable());
-
-      this.logger.info('Wrote market event to listener stream', {
+      oldEvents = await this.marketEventPublisher.eventsSince(market.name, params.lastUpdated);
+    } else {
+      this.logger.info('watchMarket: Sending entire current state of orderbook', {
+        marketName: market.name,
         watcherId,
-        event
       });
+
+      oldEvents = await this.marketEventPublisher.getState(market.name);
+    }
+
+    oldEvents.forEach((event) => {
+      call.write(event.serialize());
     });
 
+    this.logger.info(`watchMarket: Wrote ${oldEvents.length} events as update`, {
+      marketName: market.name,
+      watcherId,
+    });
+
+    this.eventHandler.on(`market:${market.name}`, (event) => {
+      this.logger.info('watchMarket: Detected market event', {
+        marketName: market.name,
+        watcherId,
+        eventId: event.eventId,
+        eventType: event.type,
+      });
+
+      call.write(event.serialize());
+
+      this.logger.info('watchMarket: Wrote market event to listener stream', {
+        watcherId,
+        event: event.serialize(),
+      });
+    });
   } catch (e) {
     // TODO: filter for user-friendly errors
     // send an error back. What is the gRPC way of doing that?
+    this.logger.error('watchMarket: Encountered error when streaming market events', {
+      message: e.message,
+      stack: e.stack,
+      watcherId
+    });
+    call.destroy(e);
   }
 }
 

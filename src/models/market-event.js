@@ -24,13 +24,18 @@ const marketEventSchema = new Schema({
 });
 
 marketEventSchema.method({
-	writable() {
-      let message = Object.assign({}, this.payload);
+	serialize() {
+      let message = {};
+
+      Object.keys(this.payload).forEach((key) => {
+        message[key] = this.payload[key].toString();
+      });
 
       Object.assign(message, {
         eventId: this.eventId,
         orderId: this.orderId,
         eventType: this.type,
+        timestamp: Math.round(this.createdAt.getTime() / 1000)
       });
 
       return message;

@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 import "constants.proto";
-import "google/protobuf/timestamp.proto";
 
 message MarketEvent {
   enum EventType {
@@ -12,7 +11,7 @@ message MarketEvent {
 
   string event_id = 0;
   string order_id = 1;
-  Timestamp date = 3;
+  int32 timestamp = 3;
   EventType event_type = 4;
   int64 base_amount = 5;
   int64 counter_amount = 6;
