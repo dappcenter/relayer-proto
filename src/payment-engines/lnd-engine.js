@@ -8,8 +8,8 @@ const { promisefy } = require('../utils');
 // TODO: We need to figure out the path to the lnd container for this cert
 // The cert is available on the lnd container at `~/.lnd/tls.cert`
 //
-const LND_HOME = 'lnd:~/.lnd/';
-const LIGHTNING_URL = process.env.LND_URL || 'lnd:10009';
+const LND_HOME = 'lnd_btc:~/.lnd/';
+const LIGHTNING_URL = process.env.LND_URL || 'lnd_btc:10009';
 // TODO: Need to make sure TLS and MACAROON works for lnd container
 const TLS_PATH = process.env.TLS_PATH || path.resolve(os.homedir(), LND_HOME, 'tls.cert');
 const MACAROON_PATH = process.env.MACAROON_PATH || path.resolve(os.homedir(), LND_HOME, 'admin.macaroon');
