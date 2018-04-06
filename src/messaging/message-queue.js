@@ -15,8 +15,12 @@ class MessageQueue extends EventEmitter {
 
     this.on('enqueue', () => {
       if(this._listeners.length) {
-        const listener = this._listeners.shift();
-        listener(this.dequeue());
+        const item = this.dequeue();
+        let listener
+        while(this._listeners.length) {
+          listener = this._listeners.shift();
+          listener(item);
+        }
       }
     });
   }
