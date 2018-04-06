@@ -49,7 +49,7 @@ async function createOrder(call, cb) {
   //   to create them in the db?
   //
   try {
-    const order = await Order.create(params);
+    var order = await Order.create(params);
   } catch (e) {
     this.logger.error('Invalid: Could not create order', { error: e.toString() });
     return cb({ message: 'Could not create order', code: status.INTERNAL });
@@ -60,7 +60,7 @@ async function createOrder(call, cb) {
   // Create invoices w/ LND
   //
   try {
-    const depositRequest = await this.engine.addInvoice({
+    var depositRequest = await this.engine.addInvoice({
       memo: JSON.stringify({ type: Invoice.PURPOSES.DEPOSIT, orderId: order.orderId }),
       value: 10,
       expiry: INVOICE_EXPIRY,
@@ -71,7 +71,7 @@ async function createOrder(call, cb) {
   }
 
   try {
-    const feeRequest = await this.engine.addInvoice({
+    var feeRequest = await this.engine.addInvoice({
       memo: JSON.stringify({ type: Invoice.PURPOSES.FEE, orderId: order.orderId }),
       value: 10,
       expiry: INVOICE_EXPIRY,
@@ -85,7 +85,7 @@ async function createOrder(call, cb) {
 
   // Persist the invoices to DB
   try {
-    const depositInvoice = await Invoice.create({
+    var depositInvoice = await Invoice.create({
       foreignId: order._id,
       foreignType: Invoice.FOREIGN_TYPES.ORDER,
       paymentRequest: depositRequest.payment_request,
@@ -98,7 +98,7 @@ async function createOrder(call, cb) {
   }
 
   try {
-    const feeInvoice = await Invoice.create({
+    var feeInvoice = await Invoice.create({
       foreignId: order._id,
       foreignType: Invoice.FOREIGN_TYPES.ORDER,
       paymentRequest: feeRequest.payment_request,

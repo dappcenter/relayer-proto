@@ -8,12 +8,27 @@ const { promisefy } = require('../utils');
 // TODO: We need to figure out the path to the lnd container for this cert
 // The cert is available on the lnd container at `~/.lnd/tls.cert`
 //
-const LND_HOME = 'lnd_btc:~/.lnd/';
-const LIGHTNING_URL = process.env.LND_URL || 'lnd_btc:10009';
-// TODO: Need to make sure TLS and MACAROON works for lnd container
-const TLS_PATH = process.env.TLS_PATH || path.resolve(os.homedir(), LND_HOME, 'tls.cert');
-const MACAROON_PATH = process.env.MACAROON_PATH || path.resolve(os.homedir(), LND_HOME, 'admin.macaroon');
+const LIGHTNING_URL = process.env.LND_URL; // ex: my.lightning.com:10009
+const TLS_PATH = process.env.TLS_PATH; // ex: ~/.lnd/tls.cert
+const MACAROON_PATH = process.env.MACAROON_PATH; // ex: ~/.lnd/admin.macaroon
 
+if (!LIGHTNING_URL || !TLS_PATH || !MACAROON_PATH) {
+  throw new Error('Environment variables not set for `lnd-engine.js');
+}
+
+// Create auth credentials w/ macaroon (decentralized token bearer specific to LND) and
+// w/ use of lnd ssl cert
+const macaroon = readFileSync(MACAROON_PATH);
+const metadata = new grpc.Metadata().add('macaroon', macaroon.toString('hex'));
+const macaroonCreds = grpc.credentials.createFromMetadataGenerator((_args, callback) => {
+  callback(null, metadata);
+});
+const lndCert = readFileSync(TLS_PATH);
+const sslCreds = grpc.credentials.createSsl(lndCert);
+const credentials = grpc.credentials.combineChannelCredentials(sslCreds, macaroonCreds);
+
+// Load lnd's rpc file and setup the Lightning service to be instantiated in
+// the lnd engine below
 const PROTO_PATH = path.resolve('lnd-rpc.proto');
 const PROTO_GRPC_TYPE = 'proto';
 const PROTO_GRPC_OPTIONS = {
@@ -21,20 +36,8 @@ const PROTO_GRPC_OPTIONS = {
   binaryAsBase64: true,
   longsAsStrings: true,
 };
-
-const lndCert = readFileSync(TLS_PATH);
-const sslCreds = grpc.credentials.createSsl(lndCert);
-
-const macaroonCreds = grpc.credentials.createFromMetadataGenerator((args, callback) => {
-  const macaroon = readFileSync(MACAROON_PATH);
-  const metadata = new grpc.Metadata();
-  metadata.add('macaroon', macaroon.toString('hex'));
-  callback(null, metadata);
-});
-
-const credentials = grpc.credentials.combineChannelCredentials(sslCreds, macaroonCreds);
 const lnrpcDescriptor = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS);
-const { lnrpc } = lnrpcDescriptor;
+const { lnrpc:LndRpc } = lnrpcDescriptor;
 
 
 class LndEngine {
@@ -42,7 +45,7 @@ class LndEngine {
     this.logger = logger;
 
     try {
-      this.client = new lnrpc.Lightning(LIGHTNING_URL, credentials);
+      this.client = new LndRpc.Lightning(LIGHTNING_URL, sslCreds);
     } catch (e) {
       this.logger.error('WARNING: LND Engine not implemented yet');
     }
@@ -63,9 +66,14 @@ class LndEngine {
    * an LND interface.
    */
   async getPayTo() {
-    const info = await promisefy({}, this.client.getInfo);
-    const pubKey = info.identityPubkey;
-    return `ln:${pubKey}`;
+    return await promisefy({}, this.client.getInfo);
+    // TODO: These need to be moved to where this function is being called (or abstracted).
+    // The reason for this is that error handling should occur in the action that is making a
+    // call to getPayTo, since there is no way to expose errors from inside this function,
+    // to the called.
+    //
+    // const pubKey = info.identityPubkey;
+    // return `ln:${pubKey}`;
   }
 }
 

@@ -18,9 +18,12 @@ services:
       - GRPC_HOST=0.0.0.0
       - GRPC_PORT=50078
       - MONGODB_CONNECTION_URL=mongodb://mongo:27017/relayer
-      - LND_URL=localhost:10009
+      - LND_URL=lnd_btc:10009
+      - TLS_PATH=/secure/tls.cert
+      - MACAROON_PATH=/secure/admin.macaroon
     volumes:
       - './:/home/app'
+      - 'secure:/secure/'
     expose:
       - '50078'
     ports:
@@ -30,7 +33,7 @@ services:
     # to read the file (preferably not through ssh w/ git)
     #
     # FOR NOW: We have the proto generated on the kinesis-relayer
-    command: bash -c 'npm run build'
+    command: bash -c 'npm run build && npm start'
 
   # Mongo DB
   mongo:
@@ -110,6 +113,9 @@ services:
     container_name: lnd_btc
     networks:
       - btcd
+    volumes:
+      - 'secure:/secure/'
+    command: cp ~/.lnd/tls.cert /secure/tls.cert && cp ~/.lnd/admin.macaroon /secure/admin.macaroon && chmod a+rx /secure/admin.macaroon
 
   # LTC
   #
@@ -158,6 +164,7 @@ services:
 # AND can be very very brittle.
 # We need these volumes because there is not
 volumes:
+  secure:
   bitcoin:
     driver: local
   shared:
