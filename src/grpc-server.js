@@ -4,6 +4,7 @@ const path = require('path');
 const GrpcAction = require('./grpc-action');
 const GrpcMarketAction = require('./grpc-market-action');
 const { createOrder, placeOrder, cancelOrder, subscribeFill, executeOrder, completeOrder } = require('./maker');
+const { createFill, fillOrder, subscribeExecute } = require('./taker');
 const { watchMarket, MarketEventPublisher } = require('./orderbook');
 
 const GRPC_HOST = process.env.GRPC_HOST || '0.0.0.0';
@@ -44,6 +45,12 @@ class GrpcServer {
       subscribeFill: subscribeFill.bind(this.action),
       executeOrder: executeOrder.bind(this.action),
       completeOrder: completeOrder.bind(this.action),
+    });
+
+    this.server.addService(this.takerService, {
+      createFill: createFill.bind(this.action),
+      fillOrder: fillOrder.bind(this.action),
+      subscribeExecute: subscribeExecute.bind(this.action),
     });
 
     this.server.addService(this.orderBookService, {

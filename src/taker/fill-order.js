@@ -1,31 +1,105 @@
-/**
- * Implements a client to client order fill
- *
- * TODO: this will have to change dramatically when payments get implemented
- * TODO: Need to figure out how to notify the orders recip
- */
+const { status } = require('grpc');
 
-const { Order } = require('../models');
+const { Order, Invoice, Fill } = require('../models');
 
 /**
- * Fill an order from the specified order id
+ * Given an fillId and refundInvoice, fill the order in the relayer. This will
+ * award the fill to the user and start the execution process
  *
- * The following steps occur to fill an order:
- * 1. Get an order with some orderId
- * 2. Validate that the order is in a valid state
- * 3. Update order to in-progress
- * 4. Notify the network that an order is pending
- * 5. Notify the receipient of the order that it is pending
- *
- * @param {String} orderId
- * @param {Object} request
+ * @param {grpc} call
+ * @param {Function<err, message>} cb
  */
-async function fillOrder(orderId) {
-  const order = new Order({ id: orderId });
+async function fillOrder(call, cb) {
+  const { fillId, feeRefundPaymentRequest, depositRefundPaymentRequest } = call.request;
 
-  this.eventHandler.emit('order:filled', order);
+  try {
+    const fill = await Fill.findOne({ fillId });
 
-  return [null, order];
+    if (!fill) {
+      throw new Error(`No fill with ID ${fillId}.`);
+    }
+
+    // TODO: validate ownership of the fill
+
+    const order = await Order.findOne({ order_id: fill.order_id });
+
+    if (!order) {
+      throw new Error(`No order associated with fill ${fill.fillId}.`);
+    }
+    const inboundInvoices = await Invoice.find({
+      foreignId: fill._id,
+      foreignType: Invoice.FOREIGN_TYPES.FILL,
+      type: Invoice.TYPES.INCOMING,
+    });
+
+    if (inboundInvoices.length > 2) {
+      // This is basically a corrupt state. Should we cancel the order or something?
+      throw new Error(`Too many invoices associated with Fill ${fill.fillId}.`);
+    }
+
+    const feeInvoice = inboundInvoices.find(invoice => invoice.purpose === Invoice.PURPOSES.FEE);
+    const depositInvoice = inboundInvoices.find(invoice => invoice.purpose === Invoice.PURPOSES.DEPOSIT);
+
+    if (!feeInvoice) {
+      throw new Error(`Could not find fee invoice associated with Fill ${fillId}.`);
+    }
+    if (!depositInvoice) {
+      throw new Error(`Could not find deposit invoice associated with Fill ${fillId}.`);
+    }
+
+    // TODO: refund their payments if the order is no longer in a good status?
+    if (order.status !== Order.STATUSES.PLACED) {
+      throw new Error(`Order ${order.orderId} is in ${order.status} status.
+        It must be in a ${Order.STATUSES.PLACED} status to be filled.`.replace(/\s+/g, ' '));
+    }
+
+    // Need to add this functionality to the LND engine
+    // const feeStatus = await this.engine.invoiceStatus(feeInvoice.paymentRequest);
+    // const depositStatus = await this.engine.invoiceStatus(depositInvoice.paymentRequest);
+
+    // if(feeStatus !== 'PAID') {
+    //   throw new Error(`Fee Invoice for Order ${orderId} has not been paid.`);
+    // }
+
+    // if(depositStatus !== 'PAID') {
+    //   throw new Error(`Deposit Invoice for Order ${orderId} has not been paid.`);
+    // }
+
+    // TODO: validate the payment requests on the user-supplied invoices
+    const feeRefundInvoice = await Invoice.create({
+      foreignId: fill._id,
+      foreignType: Invoice.FOREIGN_TYPES.FILL,
+      paymentRequest: feeRefundPaymentRequest,
+      type: Invoice.TYPES.OUTGOING,
+      purpose: Invoice.PURPOSES.FEE,
+    });
+    const depositRefundInvoice = await Invoice.create({
+      foreignId: fill._id,
+      foreignType: Invoice.FOREIGN_TYPES.FILL,
+      paymentRequest: depositRefundPaymentRequest,
+      type: Invoice.TYPES.OUTGOING,
+      purpose: Invoice.PURPOSES.DEPOSIT,
+    });
+
+    this.logger.info('Refund invoices have been stored on the Relayer', {
+      deposit: depositRefundInvoice._id,
+      fee: feeRefundInvoice._id,
+    });
+
+    // TODO: Check that the taker and maker are both reachable to complete
+
+    await fill.accept();
+
+    // note that the order does not get officially filled until `subscribeFill` takes it.
+    this.eventHandler.emit('order:filling', order, fill);
+    this.logger.info('order:filling', { orderId: order.orderId });
+
+    return cb(null, {});
+  } catch (e) {
+    // TODO: filtering client friendly errors from internal errors
+    this.logger.error('Invalid Fill: Could not process', { error: e.toString() });
+    return cb({ message: e.message, code: status.INTERNAL });
+  }
 }
 
 module.exports = fillOrder;

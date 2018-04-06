@@ -16,6 +16,10 @@ async function subscribeFill(call) {
   try {
     const order = await Order.findOne({ orderId });
 
+    if (!order) {
+      throw new Error(`No order with ID ${orderId}.`);
+    }
+
     // TODO: ensure this user is authorized to connect to this order's stream
     if (order.status !== Order.STATUSES.PLACED) {
       throw new Error(`Cannot setup a fill listener for order in ${order.status} status.`);
