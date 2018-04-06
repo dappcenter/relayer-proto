@@ -47,11 +47,13 @@ async function createOrder(call, cb) {
 
   this.logger.info('Request to create order received', params);
 
-  // TODO: We need to figure out a way to handle async calls AND only expose
-  // errors that the client cares about
   //
-  // The current solution will display ALL application errors to the client which
-  // is NOT ideal
+  // TODO: figure out what actions we want to take if fees/invoices cannot
+  //   be produced for this order
+  //
+  // TODO: figure out race condition where invoices are created, but we have failed
+  //   to create them in the db?
+  //
   try {
     const order = await Order.create(params);
 
@@ -62,16 +64,13 @@ async function createOrder(call, cb) {
     const ORDER_FEE = 0.001;
     const ORDER_DEPOSIT = 0.001;
 
-    // TODO: figure out how to calculate the expiry
-    const INVOICE_EXPIRY = 60; // 60 seconds expiry for invoices
+    // 2 minute expiry for invoices (in seconds)
+    const INVOICE_EXPIRY = 120;
 
     // TODO: figure out a better way to encode this
     const feeMemo = JSON.stringify({ type: 'fee', orderId: order.orderId });
     const depositMemo = JSON.stringify({ type: 'deposit', orderId: order.orderId });
-    // TODO: figure out what actions we want to take if fees/invoices cannot
-    //   be produced for this order
-    //
-    //
+
     // This code theoretically will work for LND payments, but I need to hook
     // up a node so that we can test it (preferably on testnet)
     //

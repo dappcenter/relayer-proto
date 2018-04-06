@@ -10,8 +10,10 @@ const { promisefy } = require('../utils');
 //
 const LND_HOME = 'lnd:~/.lnd/';
 const LIGHTNING_URL = process.env.LND_URL || 'lnd:10009';
+// TODO: Need to make sure TLS and MACAROON works for lnd container
 const TLS_PATH = process.env.TLS_PATH || path.resolve(os.homedir(), LND_HOME, 'tls.cert');
 const MACAROON_PATH = process.env.MACAROON_PATH || path.resolve(os.homedir(), LND_HOME, 'admin.macaroon');
+
 const PROTO_PATH = path.resolve('lnd-rpc.proto');
 const PROTO_GRPC_TYPE = 'proto';
 const PROTO_GRPC_OPTIONS = {
