@@ -5,6 +5,7 @@
  */
 
 const safeid = require('generate-safe-id');
+const { markets } = require('./market');
 const mongoose = require('mongoose');
 require('mongoose-long')(mongoose);
 
@@ -24,6 +25,11 @@ const STATUSES = Object.freeze({
   COMPLETED: 'COMPLETED',
 });
 
+const MARKETS = Object.freeze(markets.reduce((acc, market) => {
+  acc[market.name] = market.name;
+  return acc;
+}, {}));
+
 const orderSchema = new Schema({
   orderId: { type: String, unique: true, index: true, default: () => safeid() },
   ownerId: { type: String, required: true },
@@ -39,10 +45,9 @@ const orderSchema = new Schema({
   },
   status: { type: String, required: true, enum: STATUSES.values(), default: STATUSES.CREATED },
   side: { type: String, required: true, enum: MARKET_SIDES.values() },
+  marketName: { type: String, required: true, enum: MARKETS.values() },
   baseAmount: { type: SchemaTypes.Long, required: true },
-  baseSymbol: { type: String, required: true, maxlength: 3 },
   counterAmount: { type: SchemaTypes.Long, required: true },
-  counterSymbol: { type: String, required: true, maxlength: 3 },
 });
 
 orderSchema.method({
@@ -61,6 +66,22 @@ orderSchema.method({
         in order to be cancelled.`.replace(/\s+/g, ' '));
     }
     this.status = STATUSES.CANCELLED;
+    return this.save();
+  },
+  fill() {
+    if (this.status !== STATUSES.PLACED) {
+      throw new Error(`Invalid Order Status: ${this.status}.
+        Orders must be in a ${STATUSES.PLACED} status in order to be filled.`.replace(/\s+/g, ' '));
+    }
+    this.status = STATUSES.FILLED;
+    return this.save();
+  },
+  complete() {
+    if (this.status !== STATUSES.FILLED) {
+      throw new Error(`Invalid Order Status: ${this.status}.
+        Orders must be in a ${STATUSES.FILLED} status in order to be completed.`.replace(/\s+/g, ' '));
+    }
+    this.status = STATUSES.COMPLETED;
     return this.save();
   },
 });
