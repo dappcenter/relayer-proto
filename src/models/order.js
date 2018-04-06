@@ -68,6 +68,22 @@ orderSchema.method({
     this.status = STATUSES.CANCELLED;
     return this.save();
   },
+  fill() {
+    if (this.status !== STATUSES.PLACED) {
+      throw new Error(`Invalid Order Status: ${this.status}.
+        Orders must be in a ${STATUSES.PLACED} status in order to be filled.`.replace(/\s+/g, ' '));
+    }
+    this.status = STATUSES.FILLED;
+    return this.save();
+  },
+  complete() {
+    if (this.status !== STATUSES.FILLED) {
+      throw new Error(`Invalid Order Status: ${this.status}.
+        Orders must be in a ${STATUSES.FILLED} status in order to be completed.`.replace(/\s+/g, ' '));
+    }
+    this.status = STATUSES.COMPLETED;
+    return this.save();
+  },
 });
 
 /**
