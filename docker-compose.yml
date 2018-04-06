@@ -110,8 +110,6 @@ services:
     container_name: lnd_btc
     networks:
       - btcd
-    command: bash -c lncli newaddress np2wkh
-
 
   # LTC
   #
