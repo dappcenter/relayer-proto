@@ -91,7 +91,7 @@ async function fillOrder(call, cb) {
     await fill.accept();
 
     // note that the order does not get officially filled until `subscribeFill` takes it.
-    this.eventHandler.emit('order:filling', order, fill);
+    this.queueManager.get(`fill:${order._id}`).enqueue(fill.fillId);
     this.logger.info('order:filling', { orderId: order.orderId });
 
     return cb(null, {});
