@@ -1,6 +1,6 @@
 # Kinesis Relayer
 
-<img src="https://kines.is/logo.png" alt="Kinesis Exchange" width="350">
+<img src="https://kines.is/logo.png" alt="Kinesis Exchange" width="550">
 
 [![CircleCI](https://circleci.com/gh/kinesis-exchange/relayer/tree/master.svg?style=svg&circle-token=e939c1cbff879d7a083bea569a22d0ed8691e662)](https://circleci.com/gh/kinesis-exchange/relayer/tree/master)
 
@@ -10,13 +10,23 @@ Install NVM and run `nvm install 8` to pick up the latest LTS version of node (w
 
 After nvm is installed, use `nvm use` to switch to the current node version for this project.
 
-Additionally, we use MongoDB as our data store. You will need to run `brew install mongodb`.
-
-Additionally, Additionally, you will need to install `wget` to run the build command below. Install wget w/ brew `brew install wget`
-
 Install dependencies w/ `npm i` and then build the project with `npm run build`. The former command will initialize the protocol buffers for LND and Relayer as well as run tests against the project to make sure everything is setup properly
 
 After all of these steps! You can finally run `docker-compose up -d`
+
+### Development
+
+You will need to install [docker](https://www.docker.com/) for our setup.
+
+- To view logs you can use `docker-compose logs <container_name> --follow`
+- To run tests, use `npm test`
+
+##### Ports that are exposed to the host (through docker)
+
+```
+localhost:50078 # Relayer
+localhost:27017 # MongoDB
+```
 
 ### Terminology
 
@@ -25,6 +35,10 @@ After all of these steps! You can finally run `docker-compose up -d`
 - Service - gRPC service
 - Relayer Events - any action that is triggered by implementations
 - Relayer Subscriptions - client hooks for actions emitted by the relayer
+
+### Additional Notes
+
+- All amounts come into the application as a string that represented a 64 bit integer. In order to support this in JS (js support is weird for 64 bit numbers) we use BigInteger AND mongoose long (64 type)
 
 ### Documentation
 
@@ -42,29 +56,3 @@ The following documents are materials that we have followed for developing this 
 - [Mongo DB Compass](https://www.mongodb.com/download-center#compass)
 - [Creating a lightning network cluster w/ docker](https://github.com/lightningnetwork/lnd/tree/master/docker)
 - [Docker Compose v3 reference](https://docs.docker.com/compose/compose-file/)
-
-### Development
-
-You will need to install [docker](https://www.docker.com/) for our setup.
-
-##### Docker
-
-```
-docker-compose up -d
-docker-compose logs node --follow
-```
-
-##### Ports that are exposed to the host (through docker)
-
-```
-localhost:50078 # Relayer
-localhost:27017 # MongoDB
-```
-
-### Additional Notes
-
-- All amounts come into the application as a string that represented a 64 bit integer. In order to support this in JS (js support is weird for 64 bit numbers) we use BigInteger AND mongoose long (64 type)
-
-### Troubleshooting
-
-After installing mongodb, you need to start the service on mac by using the command `brew services start mongodb`
