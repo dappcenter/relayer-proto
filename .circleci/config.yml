@@ -7,7 +7,7 @@ jobs:
   build:
     docker:
       - image: node:8
-    working_directory: ~/
+    working_directory: ~/relayer
 
     steps:
       - checkout
