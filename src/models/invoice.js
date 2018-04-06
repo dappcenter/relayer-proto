@@ -32,9 +32,9 @@ const invoiceSchema = new Schema({
   purpose: { type: String, required: true, enum: INVOICE_PURPOSES.values() },
 });
 
-invoiceSchema.virtual('TYPES').get(() => INVOICE_TYPES);
-invoiceSchema.virtual('PURPOSES').get(() => INVOICE_PURPOSES);
-invoiceSchema.virtual('FOREIGN_TYPES').get(() => FOREIGN_TYPES);
+invoiceSchema.statics.TYPES = INVOICE_TYPES;
+invoiceSchema.statics.PURPOSES = INVOICE_PURPOSES;
+invoiceSchema.statics.FOREIGN_TYPES = FOREIGN_TYPES;
 
 const Invoice = mongoose.model('Invoice', invoiceSchema);
 

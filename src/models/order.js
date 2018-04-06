@@ -76,8 +76,8 @@ orderSchema.pre('create', (next) => {
   next();
 });
 
-orderSchema.virtual('STATUSES').get(() => STATUSES);
-orderSchema.virtual('MARKET_SIDES').get(() => MARKET_SIDES);
+orderSchema.statics.STATUSES = STATUSES;
+orderSchema.statics.MARKET_SIDES = MARKET_SIDES;
 
 const Order = mongoose.model('Order', orderSchema);
 
