@@ -1,6 +1,6 @@
 # Kinesis Relayer
 
-![Kinesis Exchange](https://raw.githubusercontent.com/kinesis-exchange/relayer/master/logo.png)
+![Kinesis Exchange](https://kines.is/logo.png)
 
 [![CircleCI](https://circleci.com/gh/kinesis-exchange/relayer/tree/master.svg?style=svg&circle-token=e939c1cbff879d7a083bea569a22d0ed8691e662)](https://circleci.com/gh/kinesis-exchange/relayer/tree/master)
 
