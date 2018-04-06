@@ -19,7 +19,7 @@ const fillSchema = new Schema({
   fillAmount: { type: SchemaTypes.Long, required: true },
   swapHash: { type: String, required: true },
   swapPreimage: { type: String, required: false },
-  status: { type: String, required: true, enum: STATUSES.values(), default: STATUSES.CREATED },
+  status: { type: String, required: true, enum: Object.values(STATUSES), default: STATUSES.CREATED },
 });
 
 /**

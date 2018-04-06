@@ -16,9 +16,9 @@ const MARKETS = new Enum(markets.map(market => market.name));
 
 const marketEventSchema = new Schema({
   eventId: { type: String, required: true, unique: true, default: () => safeid() },
-  marketName: { type: String, required: true, enum: MARKETS.values() },
+  marketName: { type: String, required: true, enum: Object.values(MARKETS) },
   orderId: { type: String, required: true },
-  type: { type: String, required: true, enum: EVENT_TYPES.values() },
+  type: { type: String, required: true, enum: Object.values(EVENT_TYPES) },
   payload: { type: Object, required: true },
   createdAt: { type: Date, required: true, default: Date.now },
 });

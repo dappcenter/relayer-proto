@@ -1,18 +1,29 @@
 const assert = require('assert');
 const sinon = require('sinon');
+const mock = require('mock-require');
 
-const Relayer = require('./index');
+
+const relayer = require('./index');
 
 describe('Relayer', () => {
-  const fakeServer = sinon.spy();
+  let Relayer;
 
-  describe('intialization', function() {
-    it('returns a db', () => {
-      asset(fakeServer.called());
-    })
-    it('should return -1 when the value is not present', function() {
-      assert.equal([1,2,3].indexOf(4), -1);
+  const fakeDb = sinon.spy();
+  const fakeLogger = sinon.spy();
+
+  beforeEach(() => {
+    mock('./utils', {
+      db: fakeDb,
+      logger: fakeLogger,
     });
+    Relayer = relayer;
   });
 
+
+  describe('intialization', function() {
+    it('returns an intance of a db', () => {
+      Relayer.db;
+      assert(fakeServer.called());
+    })
+  });
 });
