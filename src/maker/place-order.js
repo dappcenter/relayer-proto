@@ -83,6 +83,8 @@ async function placeOrder(call, cb) {
       fee: feeRefundInvoice._id,
     });
 
+    await order.place();
+
     this.eventHandler.emit('order:placed', order);
     this.logger.info('order:placed', { orderId: order.orderId });
 
