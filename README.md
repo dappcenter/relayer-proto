@@ -1,5 +1,7 @@
 # Kinesis Relayer
 
+[![CircleCI](https://circleci.com/gh/kinesis-exchange/relayer/tree/master.svg?style=svg&circle-token=e939c1cbff879d7a083bea569a22d0ed8691e662)](https://circleci.com/gh/kinesis-exchange/relayer/tree/master)
+
 #### Getting started
 
 Install NVM and run `nvm install 8` to pick up the latest LTS version of node (we will be upgrading to 10 in the future)
