@@ -13,12 +13,14 @@ services:
     working_dir: '/home/app'
     depends_on:
       - mongo
+      - redis
     environment:
       - NODE_ENV=development
       - GRPC_HOST=0.0.0.0
       - GRPC_PORT=50078
       - MONGODB_CONNECTION_URL=mongodb://mongo:27017/relayer
       - LND_URL=localhost:10009
+      - REDIS_HOST=redis
     volumes:
       - './:/home/app'
     expose:
@@ -41,6 +43,14 @@ services:
       - '27017'
     ports:
       - '27018:27017'
+
+  # Redis
+  redis:
+    container_name: redis
+    image: redis:4.0.9-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
 
   # LND multi-swap
   # @author kinesis
@@ -158,6 +168,7 @@ services:
 # AND can be very very brittle.
 # We need these volumes because there is not
 volumes:
+  redis-data:
   bitcoin:
     driver: local
   shared:
