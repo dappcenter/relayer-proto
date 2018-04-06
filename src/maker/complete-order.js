@@ -9,7 +9,7 @@
 
 const { status } = require('grpc');
 
-const { Order, Fill } = require('../models');
+const { Order, Fill, Invoice } = require('../models');
 
 async function completeOrder(call, cb) {
   const { orderId, swapPreimage } = call.request;
@@ -34,6 +34,35 @@ async function completeOrder(call, cb) {
 
     if (!fill.matchesHash(preimage)) {
       throw new Error(`Hash does not match preimage for Order ${order.orderId}.`);
+    }
+
+    // TODO: parallelize these two?
+
+    // TODO: refund deposits
+    const orderDepositRefundInvoice = await Invoice.findOne({
+      foreignId: order._id,
+      foreignType: Invoice.FOREIGN_TYPES.ORDER,
+      type: Invoice.TYPES.OUTGOING,
+      purpose: Invoice.PURPOSES.DEPOSIT,
+    });
+
+    if (!orderDepositRefundInvoice) {
+      this.logger.error('No refund invoice found for order', { orderId: order.orderId });
+    } else {
+      // await this.engine.sendPayment(orderDepositRefundInvoice.paymentRequest);
+    }
+
+    const fillDepositRefundInvoice = await Invoice.findOne({
+      foreignId: fill._id,
+      foreignType: Invoice.FOREIGN_TYPES.FILL,
+      type: Invoice.TYPES.OUTGOING,
+      purpose: Invoice.PURPOSES.DEPOSIT,
+    });
+
+    if (!fillDepositRefundInvoice) {
+      this.logger.error('No refund invoice found for fill on order', { orderId: order.orderId });
+    } else {
+      // await this.engine.sendPayment(fillDepositRefundInvoice.paymentRequest);
     }
 
     await order.complete();
