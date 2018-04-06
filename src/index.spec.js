@@ -1,6 +1,14 @@
 const assert = require('assert');
-const sinon = require('sinon');
 const mock = require('mock-require');
+const chai = require('chai');
+const sinon = require('sinon');
+const { expect } = chai;
+
+chai.use(require('sinon-chai'));
+
+class GrpcServer {
+  listen() {}
+}
 
 describe('Relayer', () => {
   let sandbox;
@@ -13,25 +21,21 @@ describe('Relayer', () => {
   const fakeLogger = sinon.spy();
   const fakeEngine = sinon.spy();
   const fakeListen = sinon.spy();
-  const fakeServer = sinon.spy();
+  const fakeServer = sinon.spy(() => {
+    return sinon.createStubInstance(GrpcServer);
+  });
 
   beforeEach(() => {
     // Setup utils
     mock('./utils', {
       db: fakeDb,
-      logger: fakeLogger,
+      logger: {
+        error: fakeLogger,
+      }
     });
-
-    // Setup grpc server
-    mock('./grpc-server', fakeServer);
-
-    // Setup events
     mock('./events', {});
-
-    // Setup fake payment engine
-    mock('./payment-engines', {
-      LndEngine: fakeEngine,
-    });
+    mock('./grpc-server', fakeServer);
+    mock('./payment-engines', { LndEngine: fakeEngine });
 
     Relayer = require('./index');
   });
@@ -40,7 +44,7 @@ describe('Relayer', () => {
   describe('intialization', function() {
     it('returns an intance of a db', () => {
       Relayer.db;
-      assert(fakeServer.called());
+      expect(fakeServer).to.have.been.calledOnce;
     })
   });
 });

@@ -6273,6 +6273,12 @@
         "type-detect": "4.0.8"
       }
     },
+    "sinon-chai": {
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/sinon-chai/-/sinon-chai-3.0.0.tgz",
+      "integrity": "sha512-+cqeKiuMZjZs800fRf4kjJR/Pp4p7bYY3ciZHClFNS8tSzJoAcWni/ZUZD8TrfZ+oFRyLiKWX3fTClDATGy5vQ==",
+      "dev": true
+    },
     "slice-ansi": {
       "version": "1.0.0",
       "resolved": "https://registry.npmjs.org/slice-ansi/-/slice-ansi-1.0.0.tgz",

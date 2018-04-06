@@ -11,35 +11,36 @@ const { promisefy } = require('../utils');
 const LND_HOME = 'lnd:~/.lnd/';
 const LIGHTNING_URL = process.env.LND_URL || 'lnd:10009';
 // TODO: Need to make sure TLS and MACAROON works for lnd container
-const TLS_PATH = process.env.TLS_PATH || path.resolve(os.homedir(), LND_HOME, 'tls.cert');
-const MACAROON_PATH = process.env.MACAROON_PATH || path.resolve(os.homedir(), LND_HOME, 'admin.macaroon');
-
-const PROTO_PATH = path.resolve('lnd-rpc.proto');
-const PROTO_GRPC_TYPE = 'proto';
-const PROTO_GRPC_OPTIONS = {
-  convertFieldsToCamelCase: true,
-  binaryAsBase64: true,
-  longsAsStrings: true,
-};
-
-const lndCert = readFileSync(TLS_PATH);
-const sslCreds = grpc.credentials.createSsl(lndCert);
-
-const macaroonCreds = grpc.credentials.createFromMetadataGenerator((args, callback) => {
-  const macaroon = readFileSync(MACAROON_PATH);
-  const metadata = new grpc.Metadata();
-  metadata.add('macaroon', macaroon.toString('hex'));
-  callback(null, metadata);
-});
-
-const credentials = grpc.credentials.combineChannelCredentials(sslCreds, macaroonCreds);
-const lnrpcDescriptor = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS);
-const { lnrpc } = lnrpcDescriptor;
 
 
 class LndEngine {
   constructor(logger) {
     this.logger = logger;
+
+    const TLS_PATH = process.env.TLS_PATH || path.resolve(os.homedir(), LND_HOME, 'tls.cert');
+    const MACAROON_PATH = process.env.MACAROON_PATH || path.resolve(os.homedir(), LND_HOME, 'admin.macaroon');
+
+    const PROTO_PATH = path.resolve('lnd-rpc.proto');
+    const PROTO_GRPC_TYPE = 'proto';
+    const PROTO_GRPC_OPTIONS = {
+      convertFieldsToCamelCase: true,
+      binaryAsBase64: true,
+      longsAsStrings: true,
+    };
+
+    const lndCert = readFileSync(TLS_PATH);
+    const sslCreds = grpc.credentials.createSsl(lndCert);
+
+    const macaroonCreds = grpc.credentials.createFromMetadataGenerator((args, callback) => {
+      const macaroon = readFileSync(MACAROON_PATH);
+      const metadata = new grpc.Metadata();
+      metadata.add('macaroon', macaroon.toString('hex'));
+      callback(null, metadata);
+    });
+
+    const credentials = grpc.credentials.combineChannelCredentials(sslCreds, macaroonCreds);
+    const lnrpcDescriptor = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS);
+    const { lnrpc } = lnrpcDescriptor;
 
     try {
       this.client = new lnrpc.Lightning(LIGHTNING_URL, credentials);
