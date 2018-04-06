@@ -4,14 +4,17 @@
  * @author kinesis
  */
 
-const Enum = require('../utils/enum');
 const safeid = require('generate-safe-id');
 const mongoose = require('mongoose');
 require('mongoose-long')(mongoose);
 
 const { Schema } = mongoose;
 const { Types: SchemaTypes } = mongoose.Schema;
-const STATUSES = new Enum(['CREATED', 'ACCEPTED']);
+
+const STATUSES = {
+  CREATED: 'CREATED',
+  ACCEPTED: 'ACCEPTED',
+};
 
 const fillSchema = new Schema({
   fillId: { type: String, unique: true, index: true, default: () => safeid() },
@@ -50,6 +53,8 @@ fillSchema.method({
     return true;
   },
 });
+
+fillSchema.statics.STATUSES = STATUSES;
 
 const Fill = mongoose.model('Fill', fillSchema);
 
