@@ -36,7 +36,7 @@ async function subscribeFill(call) {
         // TODO: filtering client friendly errors from internal errors
         this.logger.error('Invalid Order: Could not process', { error: e.toString() });
         call.emit({ message: e.message, code: status.INTERNAL });
-        return call.destroy();
+        call.destroy();
       }
 
       call.write({
@@ -48,13 +48,11 @@ async function subscribeFill(call) {
 
       this.eventHandler.emit('order:filled', order);
     });
-
-    return;
   } catch (e) {
     // TODO: filtering client friendly errors from internal errors
     this.logger.error('Invalid Order: Could not process', { error: e.toString() });
     call.emit({ message: e.message, code: status.INTERNAL });
-    return call.destroy();
+    call.destroy();
   }
 }
 

@@ -38,6 +38,10 @@ message SubscribeFillResponse {
   int64 fill_amount = 1;
 }
 
+message ExecuteOrderRequest {
+  string order_id = 0;
+}
+
 message CompleteOrderRequest {
   string order_id = 0;
   bytes swap_preimage = 1;
@@ -48,5 +52,6 @@ service Maker {
   rpc PlaceOrder (PlaceOrderRequest) returns (google.protobuf.Empty);
   rpc CancelOrder (CancelOrderRequest) returns (google.protobuf.Empty);
   rpc SubscribeFill(SubscribeFillRequest) returns (stream SubscribeFillResponse);
+  rpc ExecuteOrder(ExecuteOrderRequest) returns (google.protobuf.Empty);
   rpc CompleteOrder(CompleteOrderRequest) returns (google.protobuf.Empty);
 }
