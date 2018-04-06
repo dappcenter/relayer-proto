@@ -2,6 +2,7 @@ const grpc = require('grpc');
 const path = require('path');
 
 const GrpcAction = require('./grpc-action');
+const GrpcMarketAction = require('./grpc-market-action');
 const { createOrder, placeOrder, cancelOrder, subscribeFill, executeOrder, completeOrder } = require('./maker');
 const { watchMarket, MarketEventPublisher } = require('./orderbook');
 
@@ -25,15 +26,16 @@ class GrpcServer {
     this.engine = engine;
     this.logger = logger;
     this.eventHandler = eventHandler;
+    this.marketEventPublisher = new MarketEventPublisher(this.eventHandler);
     this.server = new grpc.Server();
     this.proto = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS);
 
     this.makerService = this.proto.Maker.service;
     this.takerService = this.proto.Taker.service;
     this.orderBookService = this.proto.OrderBook.service;
-    this.marketEventPublisher = new MarketEventPublisher(this.eventHandler);
 
-    this.action = new GrpcAction(this.eventHandler, this.marketEventPublisher, this.logger, this.engine);
+    this.action = new GrpcAction(this.eventHandler, this.logger, this.engine);
+    this.marketAction = new GrpcMarketAction(this.marketEventPublisher, this.eventHandler, this.logger, this.engine);
 
     this.server.addService(this.makerService, {
       createOrder: createOrder.bind(this.action),
@@ -45,7 +47,7 @@ class GrpcServer {
     });
 
     this.server.addService(this.orderBookService, {
-      watchMarket: watchMarket.bind(this.action),
+      watchMarket: watchMarket.bind(this.marketAction),
     });
   }
 

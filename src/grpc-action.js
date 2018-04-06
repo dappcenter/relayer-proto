@@ -1,8 +1,7 @@
 class GrpcAction {
-  constructor(eventHandler, marketEventPublisher, logger, engine) {
+  constructor(eventHandler, logger, engine) {
     this.engine = engine;
     this.eventHandler = eventHandler;
-    this.marketEventPublisher = marketEventPublisher;
     this.logger = logger;
   }
 }
