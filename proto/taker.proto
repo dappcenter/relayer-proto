@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "constants.proto";
+
+message FillOrderRequest {
+  string swap_hash = 0;
+  int64 fill_amount = 1;
+}
+
+service Taker {
+  rpc FillOrder (FillOrderRequest) returns (google.protobuf.Empty);
+}
