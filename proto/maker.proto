@@ -29,11 +29,11 @@ message CancelOrderRequest {
   string order_id = 0;
 }
 
-message ExecuteOrderRequest {
+message SubscribeFillRequest {
   string order_id = 0;
 }
 
-message ExecuteOrderResponse {
+message SubscribeFillResponse {
   bytes swap_hash = 0;
   int64 fill_amount = 1;
 }
@@ -47,6 +47,6 @@ service Maker {
   rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse);
   rpc PlaceOrder (PlaceOrderRequest) returns (google.protobuf.Empty);
   rpc CancelOrder (CancelOrderRequest) returns (google.protobuf.Empty);
-  rpc ExecuteOrder(ExecuteOrderRequest) returns (stream ExecuteOrderResponse);
+  rpc SubscribeFill(SubscribeFillRequest) returns (stream SubscribeFillResponse);
   rpc CompleteOrder(CompleteOrderRequest) returns (google.protobuf.Empty);
 }

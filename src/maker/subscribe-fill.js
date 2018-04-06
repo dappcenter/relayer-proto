@@ -8,10 +8,10 @@ const { status } = require('grpc');
 
 const { Order } = require('../models');
 
-async function executeOrder(call) {
+async function subscribeFill(call) {
   const { orderId } = call.request;
 
-  this.logger.info('executeOrder: opening stream to listen for order fills', { orderId });
+  this.logger.info('subscribeFill: opening stream to listen for order fills', { orderId });
 
   try {
     const order = await Order.findOne({ orderId });
@@ -58,4 +58,4 @@ async function executeOrder(call) {
   }
 }
 
-module.exports = executeOrder;
+module.exports = subscribeFill;
