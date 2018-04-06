@@ -43,9 +43,9 @@ const orderSchema = new Schema({
       message: '{VALUE} is not a valid payTo Address',
     },
   },
-  status: { type: String, required: true, enum: STATUSES.values(), default: STATUSES.CREATED },
-  side: { type: String, required: true, enum: MARKET_SIDES.values() },
-  marketName: { type: String, required: true, enum: MARKETS.values() },
+  status: { type: String, required: true, enum: Object.values(STATUSES), default: STATUSES.CREATED },
+  side: { type: String, required: true, enum: Object.values(MARKET_SIDES) },
+  marketName: { type: String, required: true, enum: Object.values(MARKETS) },
   baseAmount: { type: SchemaTypes.Long, required: true },
   counterAmount: { type: SchemaTypes.Long, required: true },
 });
