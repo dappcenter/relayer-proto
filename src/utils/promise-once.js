@@ -6,9 +6,9 @@
  * @param {String} event
  */
 function promiseOnce(emitter, event) {
-	return new Promise((resolve) => {
-		emitter.once(event, resolve);
-	});
+  return new Promise((resolve) => {
+    emitter.once(event, resolve);
+  });
 }
 
 module.exports = promiseOnce;
