@@ -75,18 +75,18 @@ async function createOrder(call, cb) {
       expiry: INVOICE_EXPIRY,
     });
   } catch (e) {
-    this.logger.error('Invalid: Could not create fee invoice', { error: e.toString() });
+    this.logger.error('Invalid: Could not create fee invoice', { error: e });
     return cb({ message: 'Could not create order', code: status.INTERNAL });
   }
 
-  this.logger.info('Invoices have been created through LND');
+  this.logger.info('Invoices have been created through LND', { feeRequest, depositRequest });
 
   // Persist the invoices to DB
   try {
     var depositInvoice = await Invoice.create({
       foreignId: order._id,
       foreignType: Invoice.FOREIGN_TYPES.ORDER,
-      paymentRequest: depositRequest.payment_request,
+      paymentRequest: depositRequest.paymentRequest,
       type: Invoice.TYPES.INCOMING,
       purpose: Invoice.PURPOSES.DEPOSIT,
     });
@@ -99,7 +99,7 @@ async function createOrder(call, cb) {
     var feeInvoice = await Invoice.create({
       foreignId: order._id,
       foreignType: Invoice.FOREIGN_TYPES.ORDER,
-      paymentRequest: feeRequest.payment_request,
+      paymentRequest: feeRequest.paymentRequest,
       type: Invoice.TYPES.INCOMING,
       purpose: Invoice.PURPOSES.FEE,
     });

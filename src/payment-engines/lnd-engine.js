@@ -38,10 +38,10 @@ class LndEngine {
       longsAsStrings: true,
     };
     const lnrpcDescriptor = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS);
-    const { lnrpc:LndRpc } = lnrpcDescriptor;
+    const { lnrpc: LndRpc } = lnrpcDescriptor;
 
     try {
-      this.client = new LndRpc.Lightning(LIGHTNING_URL, sslCreds);
+      this.client = new LndRpc.Lightning(LIGHTNING_URL, credentials);
     } catch (e) {
       this.logger.error('WARNING: LND Engine not implemented yet', { error: e.toString() });
     }
@@ -54,22 +54,22 @@ class LndEngine {
    * @returns {Promise} addInvoice
    */
   async addInvoice(params) {
-    return promisefy(params, this.client.addInvoice);
+    this.client.getInfo({}, (err, res) => {
+      if (err) {
+        this.logger.error(err);
+      }
+      return res;
+    })
   }
 
   /**
-   * TODO: We might want to take this logic out and abstract it into
-   * an LND interface.
+   * TODO: Might need to modify this call to except a parameter instead of grabbing
+   * the relayer's payto
    */
   async getPayTo() {
-    return await promisefy({}, this.client.getInfo);
-    // TODO: These need to be moved to where this function is being called (or abstracted).
-    // The reason for this is that error handling should occur in the action that is making a
-    // call to getPayTo, since there is no way to expose errors from inside this function,
-    // to the called.
-    //
-    // const pubKey = info.identityPubkey;
-    // return `ln:${pubKey}`;
+    const info =  await promisefy({}, this.client.getInfo);
+    const pubKey = info.identityPubkey;
+    return `ln:${pubKey}`;
   }
 }
 

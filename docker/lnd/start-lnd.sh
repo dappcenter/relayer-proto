@@ -52,6 +52,7 @@ fi
 exec lnd \
     --noencryptwallet \
     --logdir="/data" \
+    --rpclisten=0.0.0.0 \
     "--$CHAIN.active" \
     "--$CHAIN.$NETWORK" \
     "--$CHAIN.node"="btcd" \

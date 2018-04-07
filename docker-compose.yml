@@ -20,10 +20,11 @@ services:
       - GRPC_HOST=0.0.0.0
       - GRPC_PORT=50078
       - MONGODB_CONNECTION_URL=mongodb://mongo/relayer
-      - LND_URL=lnd_btc:8080
+      - LND_URL=http://lnd_btc:10009
       - TLS_PATH=/secure/tls.cert
       - MACAROON_PATH=/secure/admin.macaroon
       - REDIS_HOST=redis
+      - GRPC_SSL_CIPHER_SUITES=HIGH+ECDSA
     ports:
       - '50078:50078'
     networks:
@@ -87,7 +88,7 @@ services:
     networks:
       - btcd
     expose:
-      - '8080'
+      - '10009'
     volumes:
       - 'secure:/secure/'
     command: cp /.lnd/tls.cert /secure/tls.cert && cp /.lnd/admin.macaroon /secure/admin.macaroon && chmod a+rx /secure/admin.macaroon
