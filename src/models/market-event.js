@@ -18,9 +18,10 @@ const EVENT_TYPES = {
 };
 
 // TODO: Do we want to `toUpperCase` these names JIC?
-const MARKETS = markets.reduce((obj, market) => {
-  return { [market.name]: market.name }
-}, {});
+const MARKETS = Object.freeze(markets.reduce((acc, market) => {
+  acc[market.name] = market.name;
+  return acc;
+}, {}));
 
 const marketEventSchema = new Schema({
   eventId: { type: String, required: true, unique: true, default: () => safeid() },
