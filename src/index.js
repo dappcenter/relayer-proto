@@ -19,15 +19,6 @@ class Relayer {
     this.eventHandler = new EventHandler();
     this.server = new Server(this.logger, this.eventHandler, this.engine);
 
-    // This is specific to PM2. When the service is restarted, PM2 will kill
-    // the process. This callback will allow us to gracefully shutdown DB and other
-    // handlers before the process is restarted
-    process.on('SIGINT', function() {
-      this.db.stop(function(err) {
-        process.exit(err ? 1 : 0);
-      });
-    });
-
     try {
       this.startServer();
     } catch (e) {
