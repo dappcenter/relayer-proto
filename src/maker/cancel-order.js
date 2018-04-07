@@ -1,10 +1,8 @@
 /**
  * Given an order ID, cancel the specific order
  *
- * TODO: Actually implement cancelling of orders w/ data store
- * @param {String} orderId
- * @param {Object} request
- * @returns {Array<STATUS, Object>} response
+ * @param {Object} call, gRPC unary call
+ * @param {Function} cb, callback to respond to the gRPC call
  */
 
 const { status } = require('grpc');
@@ -17,7 +15,7 @@ async function cancelOrder(call, cb) {
   this.logger.info('cancelOrder: attempting to cancel order', { orderId });
 
   try {
-    const order = Order.findOne({ orderId });
+    const order = await Order.findOne({ orderId });
 
     // TODO: ensure this user is authorized to cancel this order
 
@@ -25,7 +23,7 @@ async function cancelOrder(call, cb) {
 
     this.eventHandler.emit('order:cancelled', order);
 
-    return cb(null, { orderId: order.id });
+    return cb(null, {});
   } catch (e) {
     // TODO: filtering client friendly errors from internal errors
     this.logger.error('Invalid Order: Could not process', { error: e.toString() });

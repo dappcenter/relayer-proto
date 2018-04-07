@@ -4,18 +4,58 @@
  * @author kinesis
  */
 
+const safeid = require('generate-safe-id');
 const mongoose = require('mongoose');
 require('mongoose-long')(mongoose);
 
 const { Schema } = mongoose;
 const { Types: SchemaTypes } = mongoose.Schema;
 
+const STATUSES = {
+  CREATED: 'CREATED',
+  ACCEPTED: 'ACCEPTED',
+};
+
 const fillSchema = new Schema({
-  orderId: { type: String, index: true },
-  ownerId: { type: String, required: true },
-  fillAmount: { type: SchemaTypes.Long, required: false },
-  swapHash: { type: String, required: false },
+  fillId: { type: String, unique: true, index: true, default: () => safeid() },
+  order_id: { type: String, index: true },
+  fillAmount: { type: SchemaTypes.Long, required: true },
+  swapHash: { type: String, required: true },
   swapPreimage: { type: String, required: false },
+  status: { type: String, required: true, enum: Object.values(STATUSES), default: STATUSES.CREATED },
 });
 
-module.exports = mongoose.model('Fill', fillSchema);
+/**
+ * We only want the relayer to be able to set an fillId on the model. If there
+ * is ever an orderId passed into the schema, we will prevent the saving of the record
+ */
+fillSchema.pre('create', (next) => {
+  if (this.fillId) {
+    this.invalidate('fillId');
+  }
+  next();
+});
+
+fillSchema.method({
+  accept() {
+    if (this.status !== STATUSES.CREATED) {
+      throw new Error(`Invalid Fill Status: ${this.status}.
+        Fills must be in a ${STATUSES.CREATED} status in order to be accepted.`.replace(/\s+/g, ' '));
+    }
+    this.status = STATUSES.ACCEPTED;
+    return this.save();
+  },
+  matchesHash(preimage) {
+    if (!this.swapHash) {
+      throw new Error('No swap hash exists for this fill.');
+    }
+    // TODO: make sure the preimage matches the hash
+    return true;
+  },
+});
+
+fillSchema.statics.STATUSES = STATUSES;
+
+const Fill = mongoose.model('Fill', fillSchema);
+
+module.exports = Fill;

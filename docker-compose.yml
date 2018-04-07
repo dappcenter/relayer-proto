@@ -1,87 +1,63 @@
-# we need to use DC v2 in order to support `extends`. Version 3 does not support
-# extends (https://github.com/moby/moby/issues/31101) yet.
-
+# we need to use DC v2 in order to support `extends` which is not supperted
+# by Version 3 yet (https://github.com/moby/moby/issues/31101)
 version: '2'
 
 services:
-
-  # Relayer BB
+  # Kinesis Relayer
   relayer:
-    container_name: relayer
+    container_name: 'relayer'
     image: 'node:8'
     user: 'node'
     working_dir: '/home/app'
-    depends_on:
-      - mongo
-    environment:
-      - NODE_ENV=development
-      - GRPC_HOST=0.0.0.0
-      - GRPC_PORT=50078
-      - MONGODB_CONNECTION_URL=mongodb://mongo:27017/relayer
-      - LND_URL=lnd_btc:10009
-      - TLS_PATH=/secure/tls.cert
-      - MACAROON_PATH=/secure/admin.macaroon
     volumes:
       - './:/home/app'
       - 'secure:/secure/'
-    expose:
-      - '50078'
+    depends_on:
+      - mongo
+      - redis
+      - lnd_btc
+    environment:
+      - GRPC_HOST=0.0.0.0
+      - GRPC_PORT=50078
+      - MONGODB_CONNECTION_URL=mongodb://mongo/relayer
+      - LND_URL=lnd_btc:8080
+      - TLS_PATH=/secure/tls.cert
+      - MACAROON_PATH=/secure/admin.macaroon
+      - REDIS_HOST=redis
     ports:
       - '50078:50078'
-    # In order for the npm i command to work, we need to make the proto
-    # file publically available or figure out another way to allow the container
-    # to read the file (preferably not through ssh w/ git)
-    #
-    # FOR NOW: We have the proto generated on the kinesis-relayer
-    command: bash -c 'npm run build && npm start'
+    networks:
+      - relayer
+      - btcd
+    command: bash -c 'npm i && npm start'
 
   # Mongo DB
   mongo:
-    container_name: mongo
     image: 'mongo:3.6.3'
     working_dir: '/home/db'
-    expose:
-      - '27017'
     ports:
-      - '27018:27017'
-
-  # LND multi-swap
-  # @author kinesis
-  lnd_btc_ltc:
-    image: lnd_btc_ltc
-    build:
-      context: ./
-      dockerfile: docker-multichain/lnd-multichain/Dockerfile
-    container_name: lnd_btc_ltc
-    environment:
-      - CHAINA
-      - CHAINB
-      - DEBUG
-      - NETWORK
-      - RPCUSERA
-      - RPCPASSA
-      - RPCUSERB
-      - RPCPASSB
-      - HOST
-    volumes:
-      - shared:/rpc
-      - lnd:/lnd
+      - '27017:27017'
     networks:
-      - multiswap
-    ports:
-      - "9735:9735"
-    entrypoint: ["./start-lnd-multichain.sh"]
+      - relayer
+
+  # Redis
+  redis:
+    image: redis:4.0.9-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    networks:
+      - relayer
+
 
   # Extensions of the official LND docker build found here:
-  # You can use `npm run build-lnd-docker` to update the LND docker files
-  #
-  # BTC
   #
   btc:
-    container_name: btc
     extends:
       file: ./docker/docker-compose.yml
       service: btc
+    networks:
+      - btcd
 
   btcd:
     extends:
@@ -92,91 +68,39 @@ services:
         aliases:
           - blockchain
           - rpcserver
-      multiswap:
-        aliases:
-          - blockchaina
 
-  # We are missing a few containers from the LND file because we cannot use extends w/ links,
-  # so we have decided to port the following containers over to this file:
-  # - btcctl
-  # - lnd_btc
+  # We were missing a few containers from the LND file because we could not use
+  # extends w/ links, so we decided to port btcctl/lnd_btc containers over.
   #
+  # This node is here so we can create blocks for our fake simnet
   btcctl:
     extends: btc
-    container_name: btcctl
     entrypoint: ["./start-btcctl.sh"]
     networks:
       - btcd
 
+  # This is the btc node that relayer will interact with for the LND Engine
   lnd_btc:
-    extends: lnd
-    container_name: lnd_btc
-    networks:
-      - btcd
-    volumes:
-      - 'secure:/secure/'
-    command: cp ~/.lnd/tls.cert /secure/tls.cert && cp ~/.lnd/admin.macaroon /secure/admin.macaroon && chmod a+rx /secure/admin.macaroon
-
-  # LTC
-  #
-  ltc:
-    container_name: ltc
-    extends:
-      file: ./docker/docker-compose.yml
-      service: ltc
-  ltcd:
-    extends:
-      file: ./docker/docker-compose.yml
-      service: ltcd
-    networks:
-      ltcd:
-        aliases:
-          - blockchain
-          - rpcserver
-      multiswap:
-        aliases:
-          - blockchainb
-  lnd:
-    container_name: lnd
     extends:
       file: ./docker/docker-compose.yml
       service: lnd
-
-  # We are missing a few containers from the LND file because we cannot use extends w/ links,
-  # so we have decided to port the following containers over to this file:
-  # - ltcctl
-  # - lnd_ltc
-  ltcctl:
-    extends: ltc
-    container_name: ltcctl
-    entrypoint: ["./start-ltcctl.sh"]
     networks:
-      - ltcd
-
-  lnd_ltc:
-    extends: lnd
-    container_name: lnd_ltc
-    networks:
-      - ltcd
+      - btcd
+    expose:
+      - '8080'
+    volumes:
+      - 'secure:/secure/'
+    command: cp /.lnd/tls.cert /secure/tls.cert && cp /.lnd/admin.macaroon /secure/admin.macaroon && chmod a+rx /secure/admin.macaroon
 
 
 # This information was taken from the LND docker setup (found in ./docker)
-# AND can be very very brittle.
-# We need these volumes because there is not
+#
 volumes:
+  redis-data:
   secure:
-  bitcoin:
-    driver: local
   shared:
-    driver: local
-  litecoin:
-    driver: local
-  kinesis:
-    driver: local
-  lnd:
-    driver: local
+  bitcoin:
 
 networks:
-  ltcd:
+  relayer:
   btcd:
-  multiswap:

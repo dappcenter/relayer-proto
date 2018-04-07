@@ -4,27 +4,38 @@
  * @author kinesis
  */
 
-const Enum = require('../utils/enum');
 const mongoose = require('mongoose');
 require('mongoose-long')(mongoose);
 
 const { Schema } = mongoose;
-const INVOICE_TYPES = new Enum(['INCOMING', 'OUTGOING']);
-const INVOICE_PURPOSES = new Enum(['FEE', 'DEPOSIT']);
-const FOREIGN_TYPES = new Enum(['ORDER', 'FILL']);
+
+const INVOICE_TYPES = Object.freeze({
+  INCOMING: 'INCOMING',
+  OUTGOING: 'OUTGOING',
+});
+
+const INVOICE_PURPOSES = Object.freeze({
+  FEE: 'FEE',
+  DEPOSIT: 'DEPOSIT',
+});
+
+const FOREIGN_TYPES = Object.freeze({
+  ORDER: 'ORDER',
+  FILL: 'FILL',
+});
 
 const invoiceSchema = new Schema({
   foreignId: { type: String, required: true },
-  foreignType: { type: String, required: true, enum: FOREIGN_TYPES.values() },
+  foreignType: { type: String, required: true, enum: Object.values(FOREIGN_TYPES) },
   paymentRequest: { type: String, required: true },
-  type: { type: String, required: true, enum: INVOICE_TYPES.values() },
-  purpose: { type: String, required: true, enum: INVOICE_PURPOSES.values() },
+  type: { type: String, required: true, enum: Object.values(INVOICE_TYPES) },
+  purpose: { type: String, required: true, enum: Object.values(INVOICE_PURPOSES) },
 });
 
-const Invoice = mongoose.model('Invoice', invoiceSchema);
+invoiceSchema.statics.TYPES = INVOICE_TYPES;
+invoiceSchema.statics.PURPOSES = INVOICE_PURPOSES;
+invoiceSchema.statics.FOREIGN_TYPES = FOREIGN_TYPES;
 
-Invoice.TYPES = INVOICE_TYPES;
-Invoice.PURPOSES = INVOICE_PURPOSES;
-Invoice.FOREIGN_TYPES = FOREIGN_TYPES;
+const Invoice = mongoose.model('Invoice', invoiceSchema);
 
 module.exports = Invoice;

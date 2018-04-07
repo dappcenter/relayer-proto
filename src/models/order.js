@@ -5,15 +5,30 @@
  */
 
 const safeid = require('generate-safe-id');
-const Enum = require('../utils/enum');
+const { markets } = require('./market');
 const mongoose = require('mongoose');
 require('mongoose-long')(mongoose);
 
 const { Schema } = mongoose;
-const { Types: SchemaTypes } = mongoose.Schema;
+const { Types: SchemaTypes } = Schema;
 
-const MARKET_SIDES = new Enum(['ASK', 'BID']);
-const STATUSES = new Enum(['CREATED', 'PLACED', 'CANCELLED', 'FILLED', 'COMPLETED']);
+const MARKET_SIDES = Object.freeze({
+  ASK: 'ASK',
+  BID: 'BID',
+});
+
+const STATUSES = Object.freeze({
+  CREATED: 'CREATED',
+  PLACED: 'PLACED',
+  CANCELLED: 'CANCELLED',
+  FILLED: 'FILLED',
+  COMPLETED: 'COMPLETED',
+});
+
+const MARKETS = Object.freeze(markets.reduce((acc, market) => {
+  acc[market.name] = market.name;
+  return acc;
+}, {}));
 
 const orderSchema = new Schema({
   orderId: { type: String, unique: true, index: true, default: () => safeid() },
@@ -28,12 +43,11 @@ const orderSchema = new Schema({
       message: '{VALUE} is not a valid payTo Address',
     },
   },
-  status: { type: String, required: true, enum: STATUSES.values(), default: STATUSES.CREATED },
-  side: { type: String, required: true, enum: MARKET_SIDES.values() },
+  status: { type: String, required: true, enum: Object.values(STATUSES), default: STATUSES.CREATED },
+  side: { type: String, required: true, enum: Object.values(MARKET_SIDES) },
+  marketName: { type: String, required: true, enum: Object.values(MARKETS) },
   baseAmount: { type: SchemaTypes.Long, required: true },
-  baseSymbol: { type: String, required: true, maxlength: 3 },
   counterAmount: { type: SchemaTypes.Long, required: true },
-  counterSymbol: { type: String, required: true, maxlength: 3 },
 });
 
 orderSchema.method({
@@ -54,6 +68,22 @@ orderSchema.method({
     this.status = STATUSES.CANCELLED;
     return this.save();
   },
+  fill() {
+    if (this.status !== STATUSES.PLACED) {
+      throw new Error(`Invalid Order Status: ${this.status}.
+        Orders must be in a ${STATUSES.PLACED} status in order to be filled.`.replace(/\s+/g, ' '));
+    }
+    this.status = STATUSES.FILLED;
+    return this.save();
+  },
+  complete() {
+    if (this.status !== STATUSES.FILLED) {
+      throw new Error(`Invalid Order Status: ${this.status}.
+        Orders must be in a ${STATUSES.FILLED} status in order to be completed.`.replace(/\s+/g, ' '));
+    }
+    this.status = STATUSES.COMPLETED;
+    return this.save();
+  },
 });
 
 /**
@@ -67,9 +97,9 @@ orderSchema.pre('create', (next) => {
   next();
 });
 
-const Order = mongoose.model('Order', orderSchema);
+orderSchema.statics.STATUSES = STATUSES;
+orderSchema.statics.MARKET_SIDES = MARKET_SIDES;
 
-Order.STATUSES = STATUSES;
-Order.MARKET_SIDES = MARKET_SIDES;
+const Order = mongoose.model('Order', orderSchema);
 
 module.exports = Order;

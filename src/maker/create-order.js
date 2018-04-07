@@ -1,7 +1,7 @@
 const { status } = require('grpc');
 const bigInt = require('big-integer');
 
-const { Order, Invoice } = require('../models');
+const { Order, Invoice, Market } = require('../models');
 
 // TODO: Figure out if we want to have a rolling fee
 const ORDER_FEE = 0.001;
@@ -32,14 +32,12 @@ async function createOrder(call, cb) {
   const params = {
     payTo: String(payTo),
     ownerId: String(ownerId),
+    // TODO:
+    marketName: Market.fromObject({ baseSymbol, counterSymbol }).name,
     baseAmount: bigInt(baseAmount),
-    baseSymbol: String(baseSymbol),
     counterAmount: bigInt(counterAmount),
-    counterSymbol: String(counterSymbol),
     side: String(side),
   };
-
-  this.logger.info('Request to create order received', params);
 
   //
   // TODO: figure out what actions we want to take if fees/invoices cannot
