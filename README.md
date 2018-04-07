@@ -44,6 +44,8 @@ localhost:27017 # MongoDB
 
 The following documents are materials that we have followed for developing this application
 
+##### Application
+
 - [gRPC NodeJS](https://grpc.io/grpc/node/grpc.Server.html#addService)
 - [NodeJS Directory Structure Best Practices](https://blog.risingstack.com/node-hero-node-js-project-structure-tutorial/)
 - [gRPC basic - Bidirectional Streaming](https://grpc.io/docs/guides/concepts.html#bidirectional-streaming-rpc)
@@ -54,5 +56,9 @@ The following documents are materials that we have followed for developing this 
 - [BigInteger so we can support int64](https://github.com/peterolson/BigInteger.js)
 - [Adding methods to mongoose schemas](http://mongoosejs.com/docs/2.7.x/docs/methods-statics.html)
 - [Mongo DB Compass](https://www.mongodb.com/download-center#compass)
+
+##### Infrastructure
+
+- [PM2 application declaration](http://pm2.keymetrics.io/docs/usage/application-declaration/)
+- [Docker Compose reference](https://docs.docker.com/compose/compose-file/)
 - [Creating a lightning network cluster w/ docker](https://github.com/lightningnetwork/lnd/tree/master/docker)
-- [Docker Compose v3 reference](https://docs.docker.com/compose/compose-file/)

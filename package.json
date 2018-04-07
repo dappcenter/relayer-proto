@@ -3,17 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/kinesis-exchange/relayer"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kinesis-exchange/relayer"
   },
   "scripts": {
     "preinstall": "npm rebuild",
-    "start": "node ./src",
+    "start": "pm2-docker pm2.json",
+    "start-production": "pm2-docker pm2.json --env production",
     "pretest": "eslint --quiet --ignore-path .gitignore .; exit 0",
     "test": "mocha",
-    "dev": "nodemon ./src",
-    "client": "node ./test-client.js",
     "protobuf": "pbjs -t proto3 constants.proto maker.proto taker.proto orderbook.proto -p ./proto -o ./relayer.proto",
     "build": "bash ./scripts/ascii.sh && bash ./scripts/clean.sh && bash ./scripts/build.sh"
   },
@@ -36,7 +35,6 @@
     "eslint-plugin-jsx-a11y": "6.0.3",
     "eslint-plugin-react": "7.7.0",
     "mocha": "5.0.5",
-    "nodemon": "1.17.3",
     "pkg": "4.3.1",
     "protobufjs": "6.8.6"
   }

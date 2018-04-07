@@ -7,32 +7,26 @@ services:
 
   # Relayer BB
   relayer:
-    container_name: relayer
+    container_name: 'relayer'
     image: 'node:8'
     user: 'node'
     working_dir: '/home/app'
+    volumes:
+      - './:/home/app'
     depends_on:
       - mongo
       - redis
     environment:
-      - NODE_ENV=development
       - GRPC_HOST=0.0.0.0
       - GRPC_PORT=50078
       - MONGODB_CONNECTION_URL=mongodb://mongo:27017/relayer
       - LND_URL=localhost:10009
       - REDIS_HOST=redis
-    volumes:
-      - './:/home/app'
     expose:
       - '50078'
     ports:
       - '50078:50078'
-    # In order for the npm i command to work, we need to make the proto
-    # file publically available or figure out another way to allow the container
-    # to read the file (preferably not through ssh w/ git)
-    #
-    # FOR NOW: We have the proto generated on the kinesis-relayer
-    command: bash -c 'npm run build'
+    command: bash -c 'npm i && npm start'
 
   # Mongo DB
   mongo:
