@@ -14,8 +14,8 @@ const { LndEngine } = require('./payment-engines');
 class Relayer {
   constructor(Server, EventHandler, Engine) {
     this.db = db;
-    this.engine = new Engine(this.logger);
     this.logger = logger;
+    this.engine = new Engine(this.logger);
     this.eventHandler = new EventHandler();
     this.server = new Server(this.logger, this.eventHandler, this.engine);
 
@@ -31,5 +31,6 @@ class Relayer {
     this.server.listen();
   }
 }
+
 
 module.exports = new Relayer(GrpcServer, EventEmitter, LndEngine);
