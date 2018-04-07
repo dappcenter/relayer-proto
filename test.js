@@ -38,6 +38,8 @@ const lnrpcDescriptor = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTION
 const { lnrpc: LndRpc } = lnrpcDescriptor;
 const dan = new LndRpc.Lightning(LIGHTNING_URL, credentials);
 
+console.log(dan);
+
 dan.getInfo({}, {}, function(err, obj) {
   if (err) {
     console.log(err);

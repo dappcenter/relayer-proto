@@ -91,8 +91,6 @@ services:
       - '10009'
     volumes:
       - 'secure:/secure/'
-    command: cp /.lnd/tls.cert /secure/tls.cert && cp /.lnd/admin.macaroon /secure/admin.macaroon && chmod a+rx /secure/admin.macaroon
-
 
 # This information was taken from the LND docker setup (found in ./docker)
 #

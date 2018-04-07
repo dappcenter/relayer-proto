@@ -47,81 +47,60 @@ async function createOrder(call, cb) {
   //   to create them in the db?
   //
   try {
-    var order = await Order.create(params);
-  } catch (e) {
-    this.logger.error('Invalid: Could not create order', { error: e.toString() });
-    return cb({ message: 'Could not create order', code: status.INTERNAL });
-  }
+    const order = await Order.create(params);
 
-  this.logger.info('Order has been created', { ownerId, orderId: order.orderId });
+    this.logger.info('Order has been created', { ownerId, orderId: order.orderId });
 
-  // Create invoices w/ LND
-  //
-  try {
-    var depositRequest = await this.engine.addInvoice({
+    // Create invoices w/ LND
+    //
+    const depositRequest = await this.engine.addInvoice({
       memo: JSON.stringify({ type: Invoice.PURPOSES.DEPOSIT, orderId: order.orderId }),
       value: 10,
       expiry: INVOICE_EXPIRY,
     });
-  } catch (e) {
-    this.logger.error('Invalid: Could not create deposit invoice', { error: e.toString() });
-    return cb({ message: 'Could not create order', code: status.INTERNAL });
-  }
 
-  try {
-    var feeRequest = await this.engine.addInvoice({
+    const feeRequest = await this.engine.addInvoice({
       memo: JSON.stringify({ type: Invoice.PURPOSES.FEE, orderId: order.orderId }),
       value: 10,
       expiry: INVOICE_EXPIRY,
     });
-  } catch (e) {
-    this.logger.error('Invalid: Could not create fee invoice', { error: e });
-    return cb({ message: 'Could not create order', code: status.INTERNAL });
-  }
 
-  this.logger.info('Invoices have been created through LND', { feeRequest, depositRequest });
+    this.logger.info('Invoices have been created through LND', { feeRequest, depositRequest });
 
-  // Persist the invoices to DB
-  try {
-    var depositInvoice = await Invoice.create({
+    // Persist the invoices to DB
+    const depositInvoice = await Invoice.create({
       foreignId: order._id,
       foreignType: Invoice.FOREIGN_TYPES.ORDER,
       paymentRequest: depositRequest.paymentRequest,
       type: Invoice.TYPES.INCOMING,
       purpose: Invoice.PURPOSES.DEPOSIT,
     });
-  } catch (e) {
-    this.logger.error('Invalid: Could not persist deposit invoice', { error: e.toString() });
-    return cb({ message: 'Could not create order', code: status.INTERNAL });
-  }
 
-  try {
-    var feeInvoice = await Invoice.create({
+    const feeInvoice = await Invoice.create({
       foreignId: order._id,
       foreignType: Invoice.FOREIGN_TYPES.ORDER,
       paymentRequest: feeRequest.paymentRequest,
       type: Invoice.TYPES.INCOMING,
       purpose: Invoice.PURPOSES.FEE,
     });
+
+    this.logger.info('Invoices have been created through Relayer', {
+      deposit: depositInvoice._id,
+      fee: feeInvoice._id,
+    });
+
+    this.eventHandler.emit('order:created', order);
+    this.logger.info('order:created', { orderId: order.orderId });
+
+    return cb(null, {
+      orderId: order.orderId,
+      depositPaymentRequest: depositInvoice.paymentRequest,
+      feePaymentRequest: feeInvoice.paymentRequest,
+    });
   } catch (e) {
-    this.logger.error('Invalid: Could not persist fee invoice', { error: e.toString() });
+    this.logger.error('Invalid: Could not create order', { error: e.toString() });
     return cb({ message: 'Could not create order', code: status.INTERNAL });
   }
-
-  this.logger.info('Invoices have been created through Relayer', {
-    deposit: depositInvoice._id,
-    fee: feeInvoice._id,
-  });
-
-  this.eventHandler.emit('order:created', order);
-
-  this.logger.info('order:created', { orderId: order.orderId });
-
-  return cb(null, {
-    orderId: order.orderId,
-    depositPaymentRequest: depositInvoice.paymentRequest,
-    feePaymentRequest: feeInvoice.paymentRequest,
-  });
 }
 
 module.exports = createOrder;

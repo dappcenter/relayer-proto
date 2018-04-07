@@ -54,10 +54,16 @@ class LndEngine {
    * @returns {Promise} addInvoice
    */
   async addInvoice(params) {
-    this.client.getInfo({}, (err, res) => {
+    return this.client.getInfo({}, function(err, res) {
       if (err) {
-        this.logger.error(err);
+        this.logger.error('addInvoice request failed', { err });
+        throw new Error('addInvoice request failed');
       }
+
+      if (!res) {
+        throw new Error('Connection error: No Response');
+      }
+
       return res;
     })
   }
