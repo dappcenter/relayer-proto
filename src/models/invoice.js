@@ -26,10 +26,10 @@ const FOREIGN_TYPES = Object.freeze({
 
 const invoiceSchema = new Schema({
   foreignId: { type: String, required: true },
-  foreignType: { type: String, required: true, enum: FOREIGN_TYPES.values() },
+  foreignType: { type: String, required: true, enum: Object.values(FOREIGN_TYPES) },
   paymentRequest: { type: String, required: true },
-  type: { type: String, required: true, enum: INVOICE_TYPES.values() },
-  purpose: { type: String, required: true, enum: INVOICE_PURPOSES.values() },
+  type: { type: String, required: true, enum: Object.values(INVOICE_TYPES) },
+  purpose: { type: String, required: true, enum: Object.values(INVOICE_PURPOSES) },
 });
 
 invoiceSchema.statics.TYPES = INVOICE_TYPES;

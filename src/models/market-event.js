@@ -5,20 +5,28 @@
  */
 
 const safeid = require('generate-safe-id');
-const Enum = require('../utils/enum');
 const { markets } = require('./market');
 const mongoose = require('mongoose');
 require('mongoose-long')(mongoose);
 
 const { Schema } = mongoose;
-const EVENT_TYPES = new Enum(['PLACED', 'CANCELLED', 'FILLED']);
-const MARKETS = new Enum(markets.map(market => market.name));
+
+const EVENT_TYPES = {
+  PLACED: 'PLACED',
+  CANCELLED: 'CANCELLED',
+  FILLED: 'FILLED',
+};
+
+// TODO: Do we want to `toUpperCase` these names JIC?
+const MARKETS = markets.reduce((obj, market) => {
+  return { [market.name]: market.name }
+}, {});
 
 const marketEventSchema = new Schema({
   eventId: { type: String, required: true, unique: true, default: () => safeid() },
-  marketName: { type: String, required: true, enum: MARKETS.values() },
+  marketName: { type: String, required: true, enum: Object.values(MARKETS) },
   orderId: { type: String, required: true },
-  type: { type: String, required: true, enum: EVENT_TYPES.values() },
+  type: { type: String, required: true, enum: Object.values(EVENT_TYPES) },
   payload: { type: Object, required: true },
   createdAt: { type: Date, required: true, default: Date.now },
 });
@@ -42,8 +50,10 @@ marketEventSchema.method({
 	}
 })
 
+marketEventSchema.statics.TYPES = EVENT_TYPES;
+marketEventSchema.statics.MARKETS = MARKETS;
+
 const MarketEvent = mongoose.model('MarketEvent', marketEventSchema);
 
-MarketEvent.TYPES = EVENT_TYPES;
 
 module.exports = MarketEvent;
