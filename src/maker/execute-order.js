@@ -34,7 +34,7 @@ async function executeOrder(call, cb) {
       throw new Error('No valid fill to trigger execution of.');
     }
 
-    this.queueManager.get(`execute:${order._id}`).enqueue(order.payTo);
+    await this.messenger.set(`execute:${order._id}`, order.payTo);
 
     return cb(null, {});
   } catch (e) {

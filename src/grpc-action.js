@@ -1,8 +1,8 @@
 class GrpcAction {
-  constructor(eventHandler, queueManager, logger, engine) {
+  constructor(eventHandler, messenger, logger, engine) {
     this.engine = engine;
     this.eventHandler = eventHandler;
-    this.queueManager = queueManager;
+    this.messenger = messenger;
     this.logger = logger;
   }
 }

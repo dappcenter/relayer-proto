@@ -26,7 +26,7 @@ async function subscribeFill(call) {
     }
 
     // TODO: if they drop connection how do we make sure this listener doesn't get called
-    const fillId = await this.queueManager.get(`fill:${order._id}`).next();
+    const fillId = await this.messenger.get(`fill:${order._id}`);
     const fill = await Fill.findOne({ fillId });
 
     // TODO: how to handle this? Should we hide these from the client?

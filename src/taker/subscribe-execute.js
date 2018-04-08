@@ -35,7 +35,7 @@ async function subscribeExecute(call) {
       throw new Error(`Cannot setup execution listener for order in ${order.status} status`);
     }
 
-    const payTo = await this.queueManager.get(`execute:${order._id}`).next();
+    const payTo = await this.messenger.get(`execute:${order._id}`);
 
     call.write({ payTo });
 
