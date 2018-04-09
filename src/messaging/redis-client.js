@@ -4,6 +4,7 @@
  * @author kinesis
  */
 
+const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
 
 const redis = require('redis');
 const { promisify } = require('util');
@@ -15,8 +16,9 @@ const COMMANDS = [
 ];
 
 class RedisClient {
-  constructor(options) {
-    this.client = redis.createClient(options);
+  constructor(options = {}) {
+    const redisOptions = Object.assign({ host: REDIS_HOST }, options);
+    this.client = redis.createClient(redisOptions);
 
     COMMANDS.forEach((command) => {
       this[command] = promisify(this.client[command].bind(this.client));
