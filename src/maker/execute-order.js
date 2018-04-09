@@ -34,8 +34,7 @@ async function executeOrder(call, cb) {
       throw new Error('No valid fill to trigger execution of.');
     }
 
-    // TODO: is this how we want to do this? seems like a fragile pattern
-    this.eventHandler.emit('fill:execute', fill);
+    await this.messenger.set(`execute:${order._id}`, order.payTo);
 
     return cb(null, {});
   } catch (e) {

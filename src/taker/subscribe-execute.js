@@ -35,19 +35,11 @@ async function subscribeExecute(call) {
       throw new Error(`Cannot setup execution listener for order in ${order.status} status`);
     }
 
-    // TODO: buffering in case of:
-    //  1. not connecting fast enough
-    //  2. drop and re-connect (will also need to make sure to get rid of old listner)
-    // TODO: should we filter this listener down?
-    this.eventHandler.on('fill:execute', async (emittedFill) => {
-      if (emittedFill.fillId !== fill.fillId) {
-        return;
-      }
+    const payTo = await this.messenger.get(`execute:${order._id}`);
 
-      call.write({ payTo: order.payTo });
+    call.write({ payTo });
 
-      call.end();
-    });
+    call.end();
   } catch (e) {
     // TODO: filtering client friendly errors from internal errors
     this.logger.error('Invalid Order: Could not process', { error: e.toString() });

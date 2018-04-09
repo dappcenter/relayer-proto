@@ -6,7 +6,7 @@
 
 const { status } = require('grpc');
 
-const { Order } = require('../models');
+const { Order, Fill } = require('../models');
 
 async function subscribeFill(call) {
   const { orderId } = call.request;
@@ -25,33 +25,28 @@ async function subscribeFill(call) {
       throw new Error(`Cannot setup a fill listener for order in ${order.status} status.`);
     }
 
-    // TODO: buffering in case of:
-    //  1. not connecting fast enough
-    //  2. drop and re-connect (will also need to make sure to get rid of old listner)
-    // TODO: should we filter this listener down?
-    this.eventHandler.on('order:filling', async (emittedOrder, fill) => {
-      if (emittedOrder.orderId !== order.orderId) {
-        return;
-      }
+    // TODO: if they drop connection how do we make sure this listener doesn't get called
+    const fillId = await this.messenger.get(`fill:${order._id}`);
+    const fill = await Fill.findOne({ fillId });
 
-      try {
-        await order.fill();
-      } catch (e) {
-        // TODO: filtering client friendly errors from internal errors
-        this.logger.error('Invalid Order: Could not process', { error: e.toString() });
-        call.emit({ message: e.message, code: status.INTERNAL });
-        call.destroy();
-      }
+    // TODO: how to handle this? Should we hide these from the client?
+    if (!fill) {
+      throw new Error('No fill found.');
+    }
 
-      call.write({
-        swapHash: fill.swapHash,
-        fillAmount: fill.fillAmount,
-      });
+    if (fill.status !== Fill.STATUSES.ACCEPTED) {
+      throw new Error('Only accepted status are valid fills.');
+    }
+    await order.fill();
 
-      call.end();
-
-      this.eventHandler.emit('order:filled', order);
+    call.write({
+      swapHash: fill.swapHash,
+      fillAmount: fill.fillAmount,
     });
+
+    call.end();
+
+    this.eventHandler.emit('order:filled', order);
   } catch (e) {
     // TODO: filtering client friendly errors from internal errors
     this.logger.error('Invalid Order: Could not process', { error: e.toString() });
