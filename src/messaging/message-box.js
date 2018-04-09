@@ -6,10 +6,19 @@
  */
 
 const RedisClient = require('./redis-client');
+const EventEmitter = require('events');
 
-class MessageBox {
+class MessageBox extends EventEmitter {
   constructor() {
+    super();
     this._client = new RedisClient();
+    this._subscriber = new RedisClient();
+    this._subscriber.on('pmessage', async (pattern, channel, message) => {
+      if (message === 'set') {
+        const key = channel.split(':').slice(1).join(':');
+        this.emit(`set:${key}`);
+      }
+    });
   }
 
   async set(key, item) {
@@ -35,21 +44,15 @@ class MessageBox {
   }
 
   nextAtKey(key) {
-    const subscriber = new RedisClient();
     const pattern = `__keyspace@*__:${key}`;
 
     return new Promise((resolve) => {
-      subscriber.on('pmessage', async (_p, _c, message) => {
-        if (message === 'set') {
-          subscriber.punsubscribe(pattern);
-          subscriber.quit();
-          // won't this be a race condition if there are multiple subscribers?
-          // one of them will get the item, others will get nada?
-          resolve(await this.retrieve(key));
-        }
+      this.once(`set:${key}`, async () => {
+        this._subscriber.punsubscribe(pattern);
+        resolve(await this.retrieve(key));
       });
 
-      subscriber.psubscribe(pattern);
+      this._subscriber.psubscribe(pattern);
     });
   }
 }
