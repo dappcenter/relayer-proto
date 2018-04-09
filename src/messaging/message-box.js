@@ -22,7 +22,7 @@ class MessageBox extends EventEmitter {
   }
 
   async set(key, item) {
-    return this._client.rpush(this.key, item);
+    return this._client.set(key, item);
   }
 
   async get(key) {

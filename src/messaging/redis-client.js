@@ -19,11 +19,12 @@ class RedisClient {
     this.client = redis.createClient();
 
     COMMANDS.forEach((command) => {
-      this[command] = promisify(this.client[command]);
+      this[command] = promisify(this.client[command].bind(this.client));
     });
 
     this.on = this.client.on.bind(this.client);
-    this.psubscribe = this.client.psubscribe.bind(this);
+    this.psubscribe = this.client.psubscribe.bind(this.client);
+    this.punsubscribe = this.client.punsubscribe.bind(this.client);
   }
 }
 

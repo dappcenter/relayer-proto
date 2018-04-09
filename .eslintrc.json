@@ -10,5 +10,9 @@
     }],
     "no-underscore-dangle": "off",
     "object-property-newline": "off"
+  },
+  "env": {
+    "node": true,
+    "mocha": true
   }
 }
