@@ -12,7 +12,7 @@
     "start": "pm2-docker pm2.json",
     "start-production": "pm2-docker pm2.json --env production",
     "pretest": "eslint --quiet --ignore-path .gitignore .; exit 0",
-    "test": "mocha src/**/**.spec.js test/**/**.spec.js",
+    "test": "mocha 'src/**/*.spec.js' 'test/**/*.spec.js'",
     "protobuf": "pbjs -t proto3 constants.proto maker.proto taker.proto orderbook.proto -p ./proto -o ./relayer.proto",
     "build": "bash ./scripts/ascii.sh && bash ./scripts/clean.sh && bash ./scripts/build.sh",
     "metrics": "pm2 monit"

@@ -31,8 +31,12 @@ async function watchMarket(call) {
 
   try {
     const market = Market.getByObject(params);
-    if (!Market.markets.find(m => m.name === market.name)) {
-      throw new Error(`Market ${market.name} is not supported.`);
+
+    if (!market) {
+      throw new Error('Market is not supported', {
+        baseSymbol: params.baseSymbol,
+        counterSymbol: params.counterSymbol,
+      });
     }
 
     let oldEvents;
