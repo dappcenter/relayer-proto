@@ -46,7 +46,7 @@ async function createOrder(call, cb) {
     const params = {
       payTo: String(payTo),
       ownerId: String(ownerId),
-      marketName: Market.fromObject({ baseSymbol, counterSymbol }).name,
+      marketName: Market.getByObject({ baseSymbol, counterSymbol }).name,
       baseAmount: bigInt(baseAmount),
       counterAmount: bigInt(counterAmount),
       side: String(side),

@@ -2,14 +2,10 @@ const markets = require('../../config/markets');
 
 class Market {
   constructor(marketName) {
-    const [baseSymbol, counterSymbol] = marketName.split('/');
-
-    // TODO: We should just fail if the market is incorrect since we have a mapping
-    // of the correct markets that we want to support.
-    if (counterSymbol < baseSymbol) {
-      throw new Error(`Market names must be in alphabetical order.
-        ${counterSymbol} comes before ${baseSymbol} alphabetically.`.replace(/\s+/g, ' '));
+    if (!markets.includes(marketName)) {
+      throw new Error(`${marketName} is not supported.`);
     }
+    const [baseSymbol, counterSymbol] = marketName.split('/');
 
     this.baseSymbol = baseSymbol;
     this.counterSymbol = counterSymbol;
@@ -19,9 +15,24 @@ class Market {
     return `${this.baseSymbol}/${this.counterSymbol}`;
   }
 
-  // TODO: We should never create a new market (because we potentially dont support it)
-  static fromObject({ baseSymbol, counterSymbol }) {
-    return new Market(`${baseSymbol}/${counterSymbol}`);
+  static getByObject({ baseSymbol, counterSymbol }) {
+    const market = this.markets[`${this.baseSymbol}/${this.counterSymbol}`];
+
+    if (!market) {
+      throw new Error(`Market for ${baseSymbol}/${counterSymbol} is not supported.`);
+    }
+
+    return market;
+  }
+
+  static getByName(marketName) {
+    const market = this.markets[marketName];
+
+    if (!market) {
+      throw new Error(`Market for ${marketName} is not supported.`);
+    }
+
+    return market;
   }
 }
 
