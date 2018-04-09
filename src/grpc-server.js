@@ -8,6 +8,7 @@ const { createFill, fillOrder, subscribeExecute } = require('./taker');
 const { watchMarket, MarketEventPublisher } = require('./orderbook');
 const { MessageBox } = require('./messaging');
 
+const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
 const GRPC_HOST = process.env.GRPC_HOST || '0.0.0.0';
 const GRPC_PORT = process.env.GRPC_PORT || '50078';
 const PROTO_PATH = path.resolve('relayer.proto');
@@ -29,7 +30,7 @@ class GrpcServer {
     this.logger = logger;
     this.eventHandler = eventHandler;
     this.marketEventPublisher = new MarketEventPublisher(this.eventHandler);
-    this.messenger = new MessageBox();
+    this.messenger = new MessageBox({ host: REDIS_HOST });
     this.server = new grpc.Server();
     this.proto = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS);
 

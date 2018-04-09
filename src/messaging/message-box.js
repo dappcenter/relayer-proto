@@ -9,10 +9,10 @@ const RedisClient = require('./redis-client');
 const EventEmitter = require('events');
 
 class MessageBox extends EventEmitter {
-  constructor() {
+  constructor(redisOptions) {
     super();
-    this._client = new RedisClient();
-    this._subscriber = new RedisClient();
+    this._client = new RedisClient(redisOptions);
+    this._subscriber = new RedisClient(redisOptions);
     this._subscriber.on('pmessage', async (pattern, channel, message) => {
       if (message === 'set') {
         const key = channel.split(':').slice(1).join(':');

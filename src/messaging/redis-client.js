@@ -15,8 +15,8 @@ const COMMANDS = [
 ];
 
 class RedisClient {
-  constructor() {
-    this.client = redis.createClient();
+  constructor(options) {
+    this.client = redis.createClient(options);
 
     COMMANDS.forEach((command) => {
       this[command] = promisify(this.client[command].bind(this.client));
