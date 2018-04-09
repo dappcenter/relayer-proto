@@ -65,12 +65,11 @@ fi
 
 exec lnd \
     --noencryptwallet \
-    --adminmacaroonpath=/secure/ \
-    --readonlymacaroonpath=/secure/ \
     --tlscertpath=/secure/tls.cert \
     --tlskeypath=/secure/tls.key \
     --logdir="/data" \
     --rpclisten=0.0.0.0 \
+    --restlisten=0.0.0.0 \
     "--$CHAIN.active" \
     "--$CHAIN.$NETWORK" \
     "--$CHAIN.node"="btcd" \

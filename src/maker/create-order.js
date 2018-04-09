@@ -3,11 +3,11 @@ const bigInt = require('big-integer');
 
 const { Order, Invoice, Market } = require('../models');
 
-// TODO: Figure out if we want to have a rolling fee
-const ORDER_FEE = 0.001;
+// ORDER_DEPOSIT is bigInt equivelent of 0.001
+const ORDER_DEPOSIT = bigInt(1000);
 
-// TODO: Figure out how we want to calculate the deposit
-const ORDER_DEPOSIT = 0.001;
+// ORDER_FEE is bigInt equivelent of 0.001
+const ORDER_FEE = bigInt(1000);
 
 // 2 minute expiry for invoices (in seconds)
 const INVOICE_EXPIRY = 120;
@@ -54,13 +54,13 @@ async function createOrder(call, cb) {
     //
     const depositRequest = await this.engine.addInvoice({
       memo: JSON.stringify({ type: Invoice.PURPOSES.DEPOSIT, orderId: order.orderId }),
-      value: 10,
+      value: order.baseAmount.times(ORDER_DEPOSIT),
       expiry: INVOICE_EXPIRY,
     });
 
     const feeRequest = await this.engine.addInvoice({
       memo: JSON.stringify({ type: Invoice.PURPOSES.FEE, orderId: order.orderId }),
-      value: 10,
+      value: order.baseAmount.time(ORDER_FEE),
       expiry: INVOICE_EXPIRY,
     });
 

@@ -20,7 +20,7 @@ services:
       - GRPC_HOST=0.0.0.0
       - GRPC_PORT=50078
       - MONGODB_CONNECTION_URL=mongodb://mongo/relayer
-      - LND_URL=http://lnd_btc:10009
+      - LND_URL=lnd_btc:10009
       - TLS_PATH=/secure/tls.cert
       - MACAROON_PATH=/secure/admin.macaroon
       - REDIS_HOST=redis
@@ -87,10 +87,17 @@ services:
       service: lnd
     networks:
       - btcd
+    environment:
+      - GRPC_VERBOSITY=DEBUG
+      - GRPC_TRACE=tcp,channel,api,http,http1
     expose:
       - '10009'
+    ports:
+      - '10009:10009'
+      - '8080:8080'
     volumes:
       - 'secure:/secure/'
+    command: cp ~/.lnd/admin.macaroon /secure/admin.macaroon && chmod a+rx /secure/admin.macaroon
 
 # This information was taken from the LND docker setup (found in ./docker)
 #
