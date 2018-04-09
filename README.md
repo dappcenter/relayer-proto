@@ -62,3 +62,5 @@ The following documents are materials that we have followed for developing this 
 - [PM2 application declaration](http://pm2.keymetrics.io/docs/usage/application-declaration/)
 - [Docker Compose reference](https://docs.docker.com/compose/compose-file/)
 - [Creating a lightning network cluster w/ docker](https://github.com/lightningnetwork/lnd/tree/master/docker)
+- [Redis Command reference](https://redis.io/commands)
+- [Mongoose Documentation](http://mongoosejs.com/docs/)
