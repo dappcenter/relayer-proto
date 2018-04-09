@@ -26,11 +26,11 @@ async function watchMarket(call) {
   const params = {
     baseSymbol: String(baseSymbol),
     counterSymbol: String(counterSymbol),
-    lastUpdated: lastUpdated === '0' ? null : new Date(lastUpdated)
+    lastUpdated: lastUpdated === '0' ? null : new Date(lastUpdated),
   };
 
   try {
-    const market = Market.fromObject(params);
+    const market = Market.getByObject(params);
     if (!Market.markets.find(m => m.name === market.name)) {
       throw new Error(`Market ${market.name} is not supported.`);
     }
@@ -85,7 +85,7 @@ async function watchMarket(call) {
     this.logger.error('watchMarket: Encountered error when streaming market events', {
       message: e.message,
       stack: e.stack,
-      watcherId
+      watcherId,
     });
     call.destroy(e);
   }
