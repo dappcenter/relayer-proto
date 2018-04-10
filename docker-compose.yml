@@ -1,6 +1,4 @@
-# we need to use DC v2 in order to support `extends` which is not supperted
-# by Version 3 yet (https://github.com/moby/moby/issues/31101)
-version: '2'
+version: '3'
 
 services:
   # Kinesis Relayer
@@ -54,28 +52,42 @@ services:
 
   # Extensions of the official LND docker build found here:
   #
-  btc:
-    extends:
-      file: ./docker/docker-compose.yml
-      service: btc
-    networks:
-      - btcd
-
   btcd:
-    extends:
-      file: ./docker/docker-compose.yml
-      service: btcd
+    image: btcd
+    build:
+      context: ./
+      dockerfile: docker-multichain/btcd/Dockerfile
+    volumes:
+      - shared:/rpc
+      - bitcoin:/data
+    environment:
+      - RPCUSER
+      - RPCPASS
+      - NETWORK
+      - DEBUG
+      - MINING_ADDRESS
     networks:
       btcd:
         aliases:
           - blockchain
           - rpcserver
+    entrypoint: ["./start-btcd.sh"]
 
   btcctl:
-    extends: btc
-    entrypoint: ["./start-btcctl.sh"]
+    image: btcctl
+    build:
+      context: ./
+      dockerfile: docker-multichain/btcd/Dockerfile
+    volumes:
+      - shared:/rpc
+      - bitcoin:/data
+    environment:
+      - RPCUSER
+      - RPCPASS
+      - NETWORK
     networks:
       - btcd
+    entrypoint: ["./start-btcctl.sh"]
 
   # This is the btc node that relayer will interact with for the LND Engine
   lnd_btc:

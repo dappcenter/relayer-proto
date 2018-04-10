@@ -7,11 +7,6 @@ echo "It's time to build! All resistance is futile."
 echo ""
 
 LND_PROTO_URL=${LND_PROTO_URL:-https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/rpc.proto}
-LND_DOCKER_URL=${LND_DOCKER_URL:-https://github.com/lightningnetwork/lnd/trunk/docker}
-
-# Download the lnd docker files to the projcets `./docker` directory so we can
-# overwrite their configs in `docker-compose.yml`
-svn export $LND_DOCKER_URL ./docker --force
 
 # Downloads the LND proto file
 curl -o lnd-rpc.proto $LND_PROTO_URL

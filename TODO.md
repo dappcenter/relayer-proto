@@ -21,3 +21,12 @@ Our NODEJS client will then use the tls.key + a macaroon to make requests
 The macaroon auth will fail if the db/macaroons are not created at the same time, so we need to wipe out the /secure/ folder before each new run (this is OK for internal)
 
 Using `GRPC_VERBOSITY=DEBUG` and `GRPC_TRACE=all` on the relayer was my best friend
+
+```
+openssl s_client -connect lnd_btc:10009 -prexit
+
+apt-get update && apt-get install tcpdump
+tcpdump port 10009 and '(tcp-syn|tcp-ack)!=0'
+
+curl --cacert /secure/tls.cert https://lnd_btc:10009 -v
+```

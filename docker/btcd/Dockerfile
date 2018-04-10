@@ -1,6 +1,6 @@
-FROM golang:1.8
+FROM golang:1.9
 
-MAINTAINER Olaoluwa Osuntokun <laolu@lightning.network>
+LABEL maintainer="Danny Paz <danny@kines.is>"
 
 # Expose mainnet ports (server, rpc)
 EXPOSE 8333 8334
@@ -18,8 +18,10 @@ EXPOSE 28901 28902
 # related dependencies.
 RUN go get -u github.com/Masterminds/glide
 
+RUN go get -d github.com/roasbeef/btcd
+
 WORKDIR $GOPATH/src/github.com/roasbeef/btcd
-RUN git clone https://github.com/roasbeef/btcd .
+
 RUN glide install
 RUN go install . ./cmd/...
 
@@ -38,8 +40,8 @@ RUN "/go/bin/gencerts" --host="*" --directory="/rpc" --force
 # mounted volume! For more info read dockerfile "VOLUME" documentation.
 VOLUME ["/rpc"]
 
-COPY "start-btcctl.sh" .
-COPY "start-btcd.sh" .
+COPY "./docker-multichain/btcd/start-btcctl.sh" .
+COPY "./docker-multichain/btcd/start-btcd.sh" .
 
 RUN chmod +x start-btcctl.sh
 RUN chmod +x start-btcd.sh
