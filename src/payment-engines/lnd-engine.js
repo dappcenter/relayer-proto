@@ -2,8 +2,6 @@ const grpc = require('grpc');
 const path = require('path');
 const { readFileSync } = require('fs');
 
-const { promisefy } = require('../utils');
-
 // ex: /secure/tls.cert
 // ex: /secure/admin.macaroon
 // ex: https://my.lightning.com:10009
@@ -62,28 +60,30 @@ class LndEngine {
   async addInvoice(params) {
     return new Promise((resolve, reject) => {
       this.client.addInvoice(params, (err, res) => {
-        if (err) {
-          reject(err);
-        }
+        if (err) return reject(err);
+        if (!res) return reject(new Error('Payload is blank'));
 
-        if (!res) {
-          reject(new Error('Payload is blank'));
-        }
-        resolve(res);
+        return resolve(res);
       });
     });
   }
 
   /**
+   * Gets the Relayer's identity_pubkey from the LND api
+   *
    * TODO: Might need to modify this call to except a parameter instead of grabbing
    * the relayer's payto
+   * @returns {String} identityPubkey
    */
-  async getPayTo() {
-    // TODO: Promisefy doesnt actually work for RPC calls because the method is triggered with
-    // no params instead of being wrapped :(
-    const info = await promisefy({}, this.client.getInfo);
-    const pubKey = info.identityPubkey;
-    return `ln:${pubKey}`;
+  async getInfo() {
+    return new Promise((resolve, reject) => {
+      this.client.getInfo({}, (err, res) => {
+        if (err) return reject(err);
+        if (!res) return reject(new Error('Payload is blank'));
+
+        return resolve(res);
+      });
+    });
   }
 }
 
