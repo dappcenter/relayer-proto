@@ -11,3 +11,11 @@
   - This will need to happen to be able to run more than 1 relayer node
 - Add dev util to track dependencies (and when we should update them)
 - Add dev util to post test rpc commands
+
+### SSL/TLS
+
+Authentication for LND happens on the server side. We will generate a client cert (tls.cert) and a private server key (tls.key). Only the LND_BTC instance needs to know about both keys.
+
+Our NODEJS client will then use the tls.key + a macaroon to make requests
+
+The macaroon auth will fail if the db/macaroons are not created at the same time, so we need to wipe out the /secure/ folder before each new run (this is OK for internal)
