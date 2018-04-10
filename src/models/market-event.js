@@ -5,7 +5,7 @@
  */
 
 const safeid = require('generate-safe-id');
-const { markets } = require('./market');
+const { SUPPORTED_MARKETS } = require('./market');
 const mongoose = require('mongoose');
 require('mongoose-long')(mongoose);
 
@@ -17,15 +17,10 @@ const EVENT_TYPES = {
   FILLED: 'FILLED',
 };
 
-// TODO: Do we want to `toUpperCase` these names JIC?
-const MARKETS = Object.freeze(markets.reduce((acc, market) => {
-  acc[market.name] = market.name;
-  return acc;
-}, {}));
 
 const marketEventSchema = new Schema({
   eventId: { type: String, required: true, unique: true, default: () => safeid() },
-  marketName: { type: String, required: true, enum: Object.values(MARKETS) },
+  marketName: { type: String, required: true, enum: Object.values(SUPPORTED_MARKETS) },
   orderId: { type: String, required: true },
   type: { type: String, required: true, enum: Object.values(EVENT_TYPES) },
   payload: { type: Object, required: true },
@@ -51,7 +46,7 @@ marketEventSchema.method({
 });
 
 marketEventSchema.statics.TYPES = EVENT_TYPES;
-marketEventSchema.statics.MARKETS = MARKETS;
+marketEventSchema.statics.MARKETS = SUPPORTED_MARKETS;
 
 const MarketEvent = mongoose.model('MarketEvent', marketEventSchema);
 

@@ -1,7 +1,7 @@
-const assert = require('assert');
 const mock = require('mock-require');
 const chai = require('chai');
 const sinon = require('sinon');
+
 const { expect } = chai;
 
 chai.use(require('sinon-chai'));
@@ -14,24 +14,19 @@ describe('Relayer', () => {
   let sandbox;
   let Relayer;
 
-  before(() => { sandbox = sinon.sandbox.create(); })
-  afterEach(() => { sandbox.restore(); })
+  before(() => { sandbox = sinon.sandbox.create(); });
+  afterEach(() => { sandbox.restore(); });
 
   const fakeDb = sinon.spy();
   const fakeLogger = sinon.spy();
   const fakeEngine = sinon.spy();
-  const fakeListen = sinon.spy();
-  const fakeServer = sinon.spy(() => {
-    return sinon.createStubInstance(GrpcServer);
-  });
+  const fakeServer = sinon.spy(() => sinon.createStubInstance(GrpcServer));
 
   beforeEach(() => {
     // Setup utils
     mock('./utils', {
       db: fakeDb,
-      logger: {
-        error: fakeLogger,
-      }
+      logger: { error: fakeLogger },
     });
     mock('./events', {});
     mock('./grpc-server', fakeServer);
@@ -41,10 +36,10 @@ describe('Relayer', () => {
   });
 
 
-  describe('intialization', function() {
+  describe('intialization', () => {
     it('returns an intance of a db', () => {
       Relayer.db;
       expect(fakeServer).to.have.been.calledOnce;
-    })
+    });
   });
 });

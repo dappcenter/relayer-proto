@@ -10,5 +10,22 @@
     }],
     "no-underscore-dangle": "off",
     "object-property-newline": "off"
-  }
+  },
+  "env": {
+    "node": true,
+    "mocha": true
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/*.spec.js",
+        "src/models/*.spec.js"
+      ],
+      "rules": {
+        "no-unused-expressions": "off",
+        "global-require": "off",
+        "class-methods-use-this": "off"
+      }
+    }
+  ]
 }
