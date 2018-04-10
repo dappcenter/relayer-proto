@@ -62,14 +62,24 @@ class LndEngine {
   async addInvoice(params) {
     return new Promise((resolve, reject) => {
       this.client.addInvoice(params, (err, res) => {
-        if (err) {
-          reject(err);
-        }
+        if (err) return reject(err);
+        if (!res) return reject(new Error('addInvoice: Payload is blank'));
 
-        if (!res) {
-          reject(new Error('Payload is blank'));
-        }
-        resolve(res);
+        return resolve(res);
+      });
+    });
+  }
+
+  /**
+   * Check's an invoice status
+   */
+  async invoiceStatus(paymentRequest) {
+    return new Promise((resolve, reject) => {
+      this.client.lookupInvoice({ rHash: paymentRequest }, (err, res) => {
+        if (err) return reject(err);
+        if (!res) return reject(new Error('invoiceStatus: Payload is blank'));
+
+        return resolve(res);
       });
     });
   }
