@@ -54,33 +54,44 @@ describe('Market', () => {
   });
 
   describe('getByObject', () => {
-    it('returns false if the marketName is not found', () => {
+    it('throws an exception if the marketName is not found', () => {
       const badMarket = {
         baseSymbol: 'DAN',
         counterSymbol: 'TEST',
+        name: 'DAN/TEST',
       };
-      expect(Market.getByObject(badMarket)).to.eql(false);
+      expect(() => Market.getByObject(badMarket)).to.throw(`${badMarket.name} is not supported.`);
     });
 
-    it('returns the marketName if the marketName is found', () => {
+    it('returns a market object if the marketName is found', () => {
       const goodMarket = {
         baseSymbol: 'BTC',
         counterSymbol: 'LTC',
+        name: 'BTC/LTC',
       };
-      const expectedResponse = 'BTC/LTC';
-      expect(Market.getByObject(goodMarket)).to.eql(expectedResponse);
+      const market = Market.getByObject(goodMarket);
+      expect(market.baseSymbol).to.eql(goodMarket.baseSymbol);
+      expect(market.counterSymbol).to.eql(goodMarket.counterSymbol);
+      expect(market.name).to.eql(goodMarket.name);
     });
   });
 
   describe('getByName', () => {
-    it('returns false if the marketName is not found', () => {
+    it('throws an exception if the marketName is not found', () => {
       const badMarketName = 'BTC/TEST';
-      expect(Market.getByName(badMarketName)).to.eql(false);
+      expect(() => Market.getByName(badMarketName)).to.throw(`${badMarketName} is not supported.`);
     });
 
-    it('returns the marketName if the marketName is found', () => {
-      const goodMarketName = 'BTC/LTC';
-      expect(Market.getByName(goodMarketName)).to.eql(goodMarketName);
+    it('returns a market object if the marketName is found', () => {
+      const goodMarket = {
+        baseSymbol: 'BTC',
+        counterSymbol: 'LTC',
+        name: 'BTC/LTC',
+      };
+      const market = Market.getByName(goodMarket.name);
+      expect(market.baseSymbol).to.eql(goodMarket.baseSymbol);
+      expect(market.counterSymbol).to.eql(goodMarket.counterSymbol);
+      expect(market.name).to.eql(goodMarket.name);
     });
   });
 });

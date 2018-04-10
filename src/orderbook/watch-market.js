@@ -32,13 +32,6 @@ async function watchMarket(call) {
   try {
     const market = Market.getByObject(params);
 
-    if (!market) {
-      throw new Error('Market is not supported', {
-        baseSymbol: params.baseSymbol,
-        counterSymbol: params.counterSymbol,
-      });
-    }
-
     let oldEvents;
 
     // TODO: handle if this is really old, where we'd prefer to just send the current state

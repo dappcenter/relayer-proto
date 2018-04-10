@@ -26,7 +26,7 @@ class Market {
    */
   static getByObject({ baseSymbol, counterSymbol }) {
     const marketName = [baseSymbol, counterSymbol].join('/');
-    return (this._supportedMarket(marketName) && marketName);
+    return new Market(marketName);
   }
 
   /**
@@ -36,7 +36,7 @@ class Market {
    * @returns {False} - if the passed in symbols are not a valid market
    */
   static getByName(marketName) {
-    return (this._supportedMarket(marketName) && marketName);
+    return new Market(marketName);
   }
 
   /**
