@@ -29,15 +29,6 @@ async function createOrder(call, cb) {
     side,
   } = call.request;
 
-  const params = {
-    payTo: String(payTo),
-    ownerId: String(ownerId),
-    marketName: 'BTC/LTC',
-    baseAmount: bigInt(baseAmount),
-    counterAmount: bigInt(counterAmount),
-    side: String(side),
-  };
-
   //
   // TODO: figure out what actions we want to take if fees/invoices cannot
   //   be produced for this order
@@ -46,6 +37,19 @@ async function createOrder(call, cb) {
   //   to create them in the db?
   //
   try {
+    const market = Market.getByObject({
+      baseSymbol: String(baseSymbol),
+      counterSymbol: String(counterSymbol),
+    });
+
+    const params = {
+      payTo: String(payTo),
+      ownerId: String(ownerId),
+      marketName: market.name,
+      baseAmount: bigInt(baseAmount),
+      counterAmount: bigInt(counterAmount),
+      side: String(side),
+    };
     const order = await Order.create(params);
 
     this.logger.info('Order has been created', { ownerId, orderId: order.orderId });
@@ -54,13 +58,13 @@ async function createOrder(call, cb) {
     //
     const depositRequest = await this.engine.addInvoice({
       memo: JSON.stringify({ type: Invoice.PURPOSES.DEPOSIT, orderId: order.orderId }),
-      value: 20,
+      value: ORDER_DEPOSIT.times(order.base).value,
       expiry: INVOICE_EXPIRY,
     });
 
     const feeRequest = await this.engine.addInvoice({
       memo: JSON.stringify({ type: Invoice.PURPOSES.FEE, orderId: order.orderId }),
-      value: 20,
+      value: ORDER_FEE.times(order.base).value,
       expiry: INVOICE_EXPIRY,
     });
 

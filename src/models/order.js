@@ -4,10 +4,11 @@
  * @author kinesis
  */
 
+const bigInt = require('big-integer');
 const safeid = require('generate-safe-id');
-const { SUPPORTED_MARKETS } = require('./market');
 const mongoose = require('mongoose');
 require('mongoose-long')(mongoose);
+const { SUPPORTED_MARKETS } = require('./market');
 
 const { Schema } = mongoose;
 const { Types: SchemaTypes } = Schema;
@@ -91,6 +92,9 @@ orderSchema.pre('create', (next) => {
   }
   next();
 });
+
+orderSchema.virtual('base').get(() => bigInt(this.baseAmount));
+orderSchema.virtual('counter').get(() => bigInt(this.counterAmount));
 
 orderSchema.statics.STATUSES = STATUSES;
 orderSchema.statics.MARKET_SIDES = MARKET_SIDES;
