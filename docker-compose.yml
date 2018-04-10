@@ -7,7 +7,6 @@ services:
   relayer:
     container_name: 'relayer'
     image: 'node:8'
-    user: 'node'
     working_dir: '/home/app'
     volumes:
       - './:/home/app'
@@ -19,6 +18,8 @@ services:
     environment:
       - GRPC_HOST=0.0.0.0
       - GRPC_PORT=50078
+      # - GRPC_VERBOSITY=INFO
+      # - GRPC_TRACE=all
       - MONGODB_CONNECTION_URL=mongodb://mongo/relayer
       - LND_URL=lnd_btc:10009
       - TLS_PATH=/secure/tls.cert
@@ -89,15 +90,13 @@ services:
       - btcd
     environment:
       - GRPC_VERBOSITY=DEBUG
-      - GRPC_TRACE=tcp,channel,api,http,http1
+      - GRPC_TRACE=all
     expose:
+      - '8080'
       - '10009'
-    ports:
-      - '10009:10009'
-      - '8080:8080'
     volumes:
       - 'secure:/secure/'
-    command: cp ~/.lnd/admin.macaroon /secure/admin.macaroon && chmod a+rx /secure/admin.macaroon
+    command: chmod a+rx /secure/admin.macaroon
 
 # This information was taken from the LND docker setup (found in ./docker)
 #

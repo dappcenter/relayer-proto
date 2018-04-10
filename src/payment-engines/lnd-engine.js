@@ -1,13 +1,13 @@
 const grpc = require('grpc');
 const path = require('path');
-const os = require('os');
 const { readFileSync } = require('fs');
 
 const { promisefy } = require('../utils');
 
-const LIGHTNING_URL = process.env.LND_URL; // ex: my.lightning.com:10009
-const TLS_PATH = process.env.TLS_PATH; // ex: ~/.lnd/tls.cert
-const MACAROON_PATH = process.env.MACAROON_PATH; // ex: ~/.lnd/admin.macaroon
+// ex: /secure/tls.cert
+// ex: /secure/admin.macaroon
+// ex: https://my.lightning.com:10009
+const { TLS_PATH, MACAROON_PATH, LND_URL: LIGHTNING_URL } = process.env;
 
 if (!LIGHTNING_URL || !TLS_PATH || !MACAROON_PATH) {
   throw new Error('Environment variables not set for `lnd-engine.js');
@@ -19,11 +19,13 @@ class LndEngine {
 
     // Create auth credentials w/ macaroon (decentralized token bearer specific to LND) and
     // w/ use of lnd ssl cert
-    const macaroon = readFileSync(MACAROON_PATH);
-    const metadata = new grpc.Metadata().add('macaroon', macaroon.toString('hex'));
     const macaroonCreds = grpc.credentials.createFromMetadataGenerator((_args, callback) => {
+      const macaroon = readFileSync(MACAROON_PATH);
+      const metadata = new grpc.Metadata();
+      metadata.add('macaroon', macaroon.toString('hex'));
       callback(null, metadata);
     });
+
     const lndCert = readFileSync(TLS_PATH);
     const sslCreds = grpc.credentials.createSsl(lndCert);
     const credentials = grpc.credentials.combineChannelCredentials(sslCreds, macaroonCreds);
@@ -37,11 +39,15 @@ class LndEngine {
       binaryAsBase64: true,
       longsAsStrings: true,
     };
+    const SERVICE_OPTIONS = {
+      'grpc.ssl_target_name_override': 'lnd_btc',
+      'grpc.default_authority': 'lnd_btc',
+    };
     const lnrpcDescriptor = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS);
     const { lnrpc: LndRpc } = lnrpcDescriptor;
 
     try {
-      this.client = new LndRpc.Lightning(LIGHTNING_URL, credentials);
+      this.client = new LndRpc.Lightning(LIGHTNING_URL, credentials, SERVICE_OPTIONS);
     } catch (e) {
       this.logger.error('WARNING: LND Engine not implemented yet', { error: e.toString() });
     }
@@ -54,18 +60,18 @@ class LndEngine {
    * @returns {Promise} addInvoice
    */
   async addInvoice(params) {
-    return this.client.getInfo({}, function(err, res) {
-      if (err) {
-        this.logger.error('addInvoice request failed', { err });
-        throw new Error('addInvoice request failed');
-      }
+    return new Promise((resolve, reject) => {
+      this.client.addInvoice(params, (err, res) => {
+        if (err) {
+          reject(err);
+        }
 
-      if (!res) {
-        throw new Error('Connection error: No Response');
-      }
-
-      return res;
-    })
+        if (!res) {
+          reject(new Error('Payload is blank'));
+        }
+        resolve(res);
+      });
+    });
   }
 
   /**
@@ -73,7 +79,9 @@ class LndEngine {
    * the relayer's payto
    */
   async getPayTo() {
-    const info =  await promisefy({}, this.client.getInfo);
+    // TODO: Promisefy doesnt actually work for RPC calls because the method is triggered with
+    // no params instead of being wrapped :(
+    const info = await promisefy({}, this.client.getInfo);
     const pubKey = info.identityPubkey;
     return `ln:${pubKey}`;
   }

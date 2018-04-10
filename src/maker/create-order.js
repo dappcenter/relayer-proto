@@ -32,7 +32,7 @@ async function createOrder(call, cb) {
   const params = {
     payTo: String(payTo),
     ownerId: String(ownerId),
-    marketName: Market.getByObject({ baseSymbol, counterSymbol }).name,
+    marketName: 'BTC/LTC',
     baseAmount: bigInt(baseAmount),
     counterAmount: bigInt(counterAmount),
     side: String(side),
@@ -54,17 +54,17 @@ async function createOrder(call, cb) {
     //
     const depositRequest = await this.engine.addInvoice({
       memo: JSON.stringify({ type: Invoice.PURPOSES.DEPOSIT, orderId: order.orderId }),
-      value: order.baseAmount.times(ORDER_DEPOSIT),
+      value: 20,
       expiry: INVOICE_EXPIRY,
     });
 
     const feeRequest = await this.engine.addInvoice({
       memo: JSON.stringify({ type: Invoice.PURPOSES.FEE, orderId: order.orderId }),
-      value: order.baseAmount.time(ORDER_FEE),
+      value: 20,
       expiry: INVOICE_EXPIRY,
     });
 
-    this.logger.info('Invoices have been created through LND', { feeRequest, depositRequest });
+    this.logger.info('Invoices have been created through LND');
 
     // Persist the invoices to DB
     const depositInvoice = await Invoice.create({

@@ -8,9 +8,11 @@ set -e
 # Enter the Lnd home directory, located by default at ~/.lnd on Linux or
 # /Users/[username]/Library/Application Support/Lnd/ on Mac OSX
 # $APPDATA/Local/Lnd on Windows. Also change '/CN=localhost/O=lnd' to '//CN=localhost\O=lnd' if you are using Git Bash.
+
 cd /secure/
+rm ./*.macaroon
 openssl ecparam -genkey -name prime256v1 -out tls.key
-openssl req -new -sha256 -key tls.key -out csr.csr -subj '/CN=relayer/O=lnd'
+openssl req -new -sha256 -key tls.key -out csr.csr -subj '/CN=lnd_btc/O=lnd'
 openssl req -x509 -sha256 -days 36500 -key tls.key -in csr.csr -out tls.cert
 rm csr.csr
 
@@ -69,7 +71,8 @@ exec lnd \
     --tlskeypath=/secure/tls.key \
     --logdir="/data" \
     --rpclisten=0.0.0.0 \
-    --restlisten=0.0.0.0 \
+    --adminmacaroonpath=/secure/admin.macaroon \
+    --readonlymacaroonpath=/secure/readonly.macaroon \
     "--$CHAIN.active" \
     "--$CHAIN.$NETWORK" \
     "--$CHAIN.node"="btcd" \

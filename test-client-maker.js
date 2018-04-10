@@ -36,17 +36,17 @@ maker.createOrder(order, (err, createOrderRes) => {
 
   console.log("created order", createOrderRes);
 
-  setTimeout(() => {
-    maker.placeOrder({
-      orderId: createOrderRes.orderId,
-      feeRefundPaymentRequest: '12345',
-      depositRefundPaymentRequest: '891011',
-    }, (err, placeOrderRes) => {
-      if (err) {
-        return console.error(err);
-      }
+  // setTimeout(() => {
+  //   maker.placeOrder({
+  //     orderId: createOrderRes.orderId,
+  //     feeRefundPaymentRequest: '12345',
+  //     depositRefundPaymentRequest: '891011',
+  //   }, (err, placeOrderRes) => {
+  //     if (err) {
+  //       return console.error(err);
+  //     }
 
-      console.log("placed order", placeOrderRes);
-    });
-  }, 1000);
+  //     console.log("placed order", placeOrderRes);
+  //   });
+  // }, 1000);
 });
