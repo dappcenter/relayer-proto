@@ -6,7 +6,7 @@ echo ""
 echo "It's time to (clean) kill!"
 echo ""
 
-if [ $(basename $PWD) == 'kinesis-relayer' ];
+if [ $(basename $PWD) == 'relayer' ];
 then
   rm -f *.log
   echo "Removed all existing .log files from parent directory"

@@ -9,7 +9,7 @@
   },
   "scripts": {
     "preinstall": "npm rebuild",
-    "start": "pm2-docker pm2.json",
+    "start": "pm2-docker pm2.json --watch",
     "start-production": "pm2-docker pm2.json --env production",
     "pretest": "eslint --quiet --ignore-path .gitignore .; exit 0",
     "test": "mocha 'src/**/*.spec.js' 'test/**/*.spec.js'",

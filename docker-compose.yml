@@ -7,7 +7,6 @@ services:
   relayer:
     container_name: 'relayer'
     image: 'node:8'
-    user: 'node'
     working_dir: '/home/app'
     volumes:
       - './:/home/app'
@@ -19,11 +18,14 @@ services:
     environment:
       - GRPC_HOST=0.0.0.0
       - GRPC_PORT=50078
+      # - GRPC_VERBOSITY=INFO
+      # - GRPC_TRACE=all
       - MONGODB_CONNECTION_URL=mongodb://mongo/relayer
-      - LND_URL=lnd_btc:8080
+      - LND_URL=lnd_btc:10009
       - TLS_PATH=/secure/tls.cert
       - MACAROON_PATH=/secure/admin.macaroon
       - REDIS_HOST=redis
+      - GRPC_SSL_CIPHER_SUITES=HIGH+ECDSA
     ports:
       - '50078:50078'
     networks:
@@ -69,10 +71,6 @@ services:
           - blockchain
           - rpcserver
 
-  # We were missing a few containers from the LND file because we could not use
-  # extends w/ links, so we decided to port btcctl/lnd_btc containers over.
-  #
-  # This node is here so we can create blocks for our fake simnet
   btcctl:
     extends: btc
     entrypoint: ["./start-btcctl.sh"]
@@ -81,17 +79,24 @@ services:
 
   # This is the btc node that relayer will interact with for the LND Engine
   lnd_btc:
-    extends:
-      file: ./docker/docker-compose.yml
-      service: lnd
+    image: lnd
+    build:
+      context: ./
+      dockerfile: docker-multichain/lnd/Dockerfile
+    environment:
+      - RPCUSER
+      - RPCPASS
+      - NETWORK
+      - CHAIN
+      - DEBUG
     networks:
       - btcd
-    expose:
-      - '8080'
     volumes:
+      - 'shared:/rpc'
       - 'secure:/secure/'
-    command: cp /.lnd/tls.cert /secure/tls.cert && cp /.lnd/admin.macaroon /secure/admin.macaroon && chmod a+rx /secure/admin.macaroon
-
+    expose:
+      - '10009'
+    entrypoint: ["./start-lnd.sh"]
 
 # This information was taken from the LND docker setup (found in ./docker)
 #

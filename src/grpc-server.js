@@ -1,5 +1,6 @@
 const grpc = require('grpc');
 const path = require('path');
+const fs = require('fs');
 
 const GrpcAction = require('./grpc-action');
 const GrpcMarketAction = require('./grpc-market-action');
@@ -17,6 +18,10 @@ const PROTO_GRPC_OPTIONS = {
   binaryAsBase64: true,
   longsAsStrings: true,
 };
+
+if (!fs.existsSync(PROTO_PATH)) {
+  throw new Error('relayer.proto does not exist. please run `npm run build`');
+}
 
 /**
  * Abstract class for a grpc server
