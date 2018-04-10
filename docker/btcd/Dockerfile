@@ -40,8 +40,8 @@ RUN "/go/bin/gencerts" --host="*" --directory="/rpc" --force
 # mounted volume! For more info read dockerfile "VOLUME" documentation.
 VOLUME ["/rpc"]
 
-COPY "./docker-multichain/btcd/start-btcctl.sh" .
-COPY "./docker-multichain/btcd/start-btcd.sh" .
+COPY "docker/btcd/start-btcctl.sh" .
+COPY "docker/btcd/start-btcd.sh" .
 
 RUN chmod +x start-btcctl.sh
 RUN chmod +x start-btcd.sh
