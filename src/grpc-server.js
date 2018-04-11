@@ -11,7 +11,7 @@ const { MessageBox } = require('./messaging');
 
 const GRPC_HOST = process.env.GRPC_HOST || '0.0.0.0';
 const GRPC_PORT = process.env.GRPC_PORT || '50078';
-const PROTO_PATH = path.resolve('relayer.proto');
+const PROTO_PATH = path.resolve('./proto/relayer.proto');
 const PROTO_GRPC_TYPE = 'proto';
 const PROTO_GRPC_OPTIONS = {
   convertFieldsToCamelCase: true,
@@ -20,7 +20,7 @@ const PROTO_GRPC_OPTIONS = {
 };
 
 if (!fs.existsSync(PROTO_PATH)) {
-  throw new Error('relayer.proto does not exist. please run `npm run build`');
+  throw new Error(`relayer.proto does not exist at ${PROTO_PATH}. please run 'npm run build'`);
 }
 
 /**
