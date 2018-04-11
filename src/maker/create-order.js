@@ -1,7 +1,7 @@
 const { status } = require('grpc');
 const bigInt = require('big-integer');
 
-const { Order, Invoice, Market } = require('../models');
+const { Order, Market, FeeInvoice, DepositInvoice } = require('../models');
 
 // ORDER_DEPOSIT is bigInt equivelent of 0.001
 const ORDER_DEPOSIT = bigInt(1000);
@@ -57,13 +57,13 @@ async function createOrder(call, cb) {
     // Create invoices w/ LND
     //
     const depositRequest = await this.engine.addInvoice({
-      memo: JSON.stringify({ type: Invoice.PURPOSES.DEPOSIT, orderId: order.orderId }),
+      memo: order.orderId,
       value: ORDER_DEPOSIT.times(order.base).value,
       expiry: INVOICE_EXPIRY,
     });
 
     const feeRequest = await this.engine.addInvoice({
-      memo: JSON.stringify({ type: Invoice.PURPOSES.FEE, orderId: order.orderId }),
+      memo: order.orderId,
       value: ORDER_FEE.times(order.base).value,
       expiry: INVOICE_EXPIRY,
     });
@@ -71,20 +71,16 @@ async function createOrder(call, cb) {
     this.logger.info('Invoices have been created through LND');
 
     // Persist the invoices to DB
-    const depositInvoice = await Invoice.create({
+    const depositInvoice = await DepositInvoice.create({
       foreignId: order._id,
-      foreignType: Invoice.FOREIGN_TYPES.ORDER,
       paymentRequest: depositRequest.paymentRequest,
-      type: Invoice.TYPES.INCOMING,
-      purpose: Invoice.PURPOSES.DEPOSIT,
+      rHash: depositRequest.rHash,
     });
 
-    const feeInvoice = await Invoice.create({
+    const feeInvoice = await FeeInvoice.create({
       foreignId: order._id,
-      foreignType: Invoice.FOREIGN_TYPES.ORDER,
       paymentRequest: feeRequest.paymentRequest,
-      type: Invoice.TYPES.INCOMING,
-      purpose: Invoice.PURPOSES.FEE,
+      rHash: feeRequest.rHash,
     });
 
     this.logger.info('Invoices have been created through Relayer', {
