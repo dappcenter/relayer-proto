@@ -2,7 +2,7 @@ const path = require('path');
 const grpc = require('grpc');
 const { readFileSync } = require('fs');
 const debug = debugSetup('kinesis:ln-driver')
-const RPCPATH = path.resolve('lnd-rpc.proto');
+const RPCPATH = path.resolve('./proto/lnd-rpc.proto');
 
 class LNPaymentDriver {
   // TODO: figure out why we need baseSymbol or counterSymbol (which would be application)

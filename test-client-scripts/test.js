@@ -27,7 +27,7 @@ const credentials = grpc.credentials.combineChannelCredentials(sslCreds, macaroo
 
 // Load lnd's rpc file and setup the Lightning service to be instantiated in
 // the lnd engine below
-const PROTO_PATH = path.resolve('lnd-rpc.proto');
+const PROTO_PATH = path.resolve('./proto/lnd-rpc.proto');
 const PROTO_GRPC_TYPE = 'proto';
 const PROTO_GRPC_OPTIONS = {
   convertFieldsToCamelCase: true,

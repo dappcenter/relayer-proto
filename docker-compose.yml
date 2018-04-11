@@ -14,6 +14,7 @@ services:
       - redis
       - lnd_btc
     environment:
+      - NODE_PATH=.
       - GRPC_HOST=0.0.0.0
       - GRPC_PORT=50078
       # - GRPC_VERBOSITY=INFO
