@@ -17,5 +17,4 @@ sed 's|^import \"google/api/annotations.proto\";||' lnd-rpc.proto > /tmp/file.$$
 
 # Rest of the installation process
 npm i
-npm run protobuf
 npm test

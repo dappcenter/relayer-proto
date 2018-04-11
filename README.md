@@ -74,8 +74,6 @@ The following documents are materials that we have followed for developing this 
 - [gRPC NodeJS](https://grpc.io/grpc/node/grpc.Server.html#addService)
 - [NodeJS Directory Structure Best Practices](https://blog.risingstack.com/node-hero-node-js-project-structure-tutorial/)
 - [gRPC basic - Bidirectional Streaming](https://grpc.io/docs/guides/concepts.html#bidirectional-streaming-rpc)
-- [Protocol Buffer 3 basics](https://developers.google.com/protocol-buffers/docs/proto3)
-- [Protocol Buffer dev guide](https://developers.google.com/protocol-buffers/docs/overview)
 - [LND w/ NodeJS](https://github.com/lightningnetwork/lnd/blob/master/docs/grpc/javascript.md)
 - [LND API Reference](http://api.lightning.community/)
 - [BigInteger so we can support int64](https://github.com/peterolson/BigInteger.js)
