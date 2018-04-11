@@ -72,13 +72,13 @@ async function createOrder(call, cb) {
 
     // Persist the invoices to DB
     const depositInvoice = await DepositInvoice.create({
-      foreignId: order.id,
+      foreignId: order._id,
       paymentRequest: depositRequest.paymentRequest,
       rHash: depositRequest.rHash,
     });
 
     const feeInvoice = await FeeInvoice.create({
-      foreignId: order.id,
+      foreignId: order._id,
       paymentRequest: feeRequest.paymentRequest,
       rHash: feeRequest.rHash,
     });

@@ -25,8 +25,8 @@ async function placeOrder(call, cb) {
   // TODO: validate ownership of the order
   try {
     const order = await Order.findOne({ orderId });
-    const feeInvoice = await FeeInvoice.findOne({ foreignId: order.id });
-    const depositInvoice = await DepositInvoice.findOne({ foreignId: order.id });
+    const feeInvoice = await FeeInvoice.findOne({ foreignId: order._id });
+    const depositInvoice = await DepositInvoice.findOne({ foreignId: order._id });
 
     if (!feeInvoice) return cb({ message: `No fee invoice associated with Order ${orderId}`, code: status.INVALID_ARGUMENT });
     if (!depositInvoice) return cb({ message: `No deposit invoice associated with Order ${orderId}`, code: status.INVALID_ARGUMENT });

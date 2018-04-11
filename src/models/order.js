@@ -95,7 +95,6 @@ orderSchema.pre('create', (next) => {
 
 orderSchema.virtual('base').get(() => bigInt(this.baseAmount));
 orderSchema.virtual('counter').get(() => bigInt(this.counterAmount));
-orderSchema.virtual('id').get(() => bigInt(this._id));
 
 orderSchema.statics.STATUSES = STATUSES;
 orderSchema.statics.MARKET_SIDES = MARKET_SIDES;
