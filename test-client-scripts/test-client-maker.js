@@ -5,9 +5,8 @@
  */
 const grpc = require('grpc');
 const path = require('path');
-const safeid = require('generate-safe-id');
 
-const PROTO_PATH = path.resolve('proto', 'relayer.proto');
+const PROTO_PATH = path.resolve('./proto/relayer.proto');
 const PROTO_GRPC_TYPE = 'proto';
 const PROTO_GRPC_OPTIONS = {
   convertFieldsToCamelCase: true,
