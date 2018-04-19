@@ -54,7 +54,7 @@ services:
   # Extensions of the official LND docker build found here:
   #
   btcd:
-    image: btcd
+    image: relayer_btcd
     build:
       context: ./
       dockerfile: docker/btcd/Dockerfile
@@ -75,7 +75,7 @@ services:
     entrypoint: ["./start-btcd.sh"]
 
   btcctl:
-    image: btcctl
+    image: relayer_btcctl
     build:
       context: ./
       dockerfile: docker/btcd/Dockerfile
@@ -92,7 +92,7 @@ services:
 
   # This is the btc node that relayer will interact with for the LND Engine
   lnd_btc:
-    image: lnd
+    image: relayer_lnd_btc
     build:
       context: ./
       dockerfile: docker/lnd/Dockerfile

@@ -89,8 +89,6 @@ class LndEngine {
     return new Promise((resolve, reject) => {
       this.client.getInfo({}, (err, res) => {
         if (err) return reject(err);
-        if (!res) return reject(new Error('Payload is blank'));
-
         return resolve(res);
       });
     });

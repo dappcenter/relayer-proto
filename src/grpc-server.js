@@ -7,6 +7,7 @@ const GrpcMarketAction = require('./grpc-market-action');
 const { createOrder, placeOrder, cancelOrder, subscribeFill, executeOrder, completeOrder } = require('./maker');
 const { createFill, fillOrder, subscribeExecute } = require('./taker');
 const { watchMarket, MarketEventPublisher } = require('./orderbook');
+const { getPublicKey } = require('./payment-network');
 const { MessageBox } = require('./messaging');
 
 const GRPC_HOST = process.env.GRPC_HOST || '0.0.0.0';
@@ -41,6 +42,7 @@ class GrpcServer {
     this.makerService = this.proto.Maker.service;
     this.takerService = this.proto.Taker.service;
     this.orderBookService = this.proto.OrderBook.service;
+    this.paymentNetworkService = this.proto.PaymentNetwork.service;
 
     this.action = new GrpcAction(this.eventHandler, this.messenger, this.logger, this.engine);
     this.marketAction = new GrpcMarketAction(this.marketEventPublisher, this.eventHandler, this.logger, this.engine);
@@ -58,6 +60,10 @@ class GrpcServer {
       createFill: createFill.bind(this.action),
       fillOrder: fillOrder.bind(this.action),
       subscribeExecute: subscribeExecute.bind(this.action),
+    });
+
+    this.server.addService(this.paymentNetworkService, {
+      getPublicKey: getPublicKey.bind(this.action),
     });
 
     this.server.addService(this.orderBookService, {
