@@ -4,22 +4,32 @@
 
 [![CircleCI](https://circleci.com/gh/kinesis-exchange/relayer/tree/master.svg?style=svg&circle-token=e939c1cbff879d7a083bea569a22d0ed8691e662)](https://circleci.com/gh/kinesis-exchange/relayer/tree/master)
 
+### Before you begin
+
+You will need to install [docker](https://www.docker.com/) for our setup.
+
 #### Getting started
 
 Install NVM and run `nvm install 8` to pick up the latest LTS version of node (we will be upgrading to 10 in the future)
 
 After nvm is installed, use `nvm use` to switch to the current node version for this project.
 
-Install dependencies w/ `npm i` and then build the project with `npm run build`. The former command will initialize the protocol buffers for LND and Relayer as well as run tests against the project to make sure everything is setup properly
+Install dependencies w/ `npm i` (this will automatically rebuild binaries w/ `npm rebuild`).
 
-After all of these steps! You can finally run `docker-compose up -d`
+Next, 'build' the project with `npm run build`. This command will initialize the protocol buffers for LND and Relayer as well as run tests against the project to make sure everything is setup properly
 
-### Development
+After all of these steps, you can finally run `docker-compose up -d`
 
-You will need to install [docker](https://www.docker.com/) for our setup.
+NOTE: Docker will try to bind to ports 27017/28492 on your host/local machine. These are ports for mongo/relayer respectively.
+
+NOTE: We only expose the mongo port so you can attach a GUI to it like [Mongo Compass Community](https://www.mongodb.com/download-center#compass)
+
+### Commands
 
 - To view logs you can use `docker-compose logs <container_name> --follow`
 - To run tests, use `npm test`
+- To start containers `docker-compose up -d`
+- To stop containers `docker-compose down`
 
 ##### Ports that are exposed to the host (through docker)
 
@@ -64,6 +74,21 @@ rm csr.csr
 ```
 
 More Info: [lncli issue](https://github.com/mably/lncli-web/issues/121) && [cipher](https://github.com/lightningnetwork/lnd/issues/861#issuecomment-373811976)
+
+### Troubleshooting
+
+Using `GRPC_VERBOSITY=DEBUG` and `GRPC_TRACE=all` on the relayer was my best friend
+
+You can also dive into connection inside of a container w/ the following commands:
+
+```
+openssl s_client -connect lnd_btc:10009 -prexit
+
+apt-get update && apt-get install tcpdump
+tcpdump port 10009 and '(tcp-syn|tcp-ack)!=0'
+
+curl --cacert /secure/tls.cert https://lnd_btc:10009 -v
+```
 
 ### Documentation
 

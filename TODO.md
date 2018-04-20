@@ -11,21 +11,7 @@
 - Add dev util to track dependencies (and when we should update them)
 - Add dev util to post test rpc commands
 
-### SSL/TLS
 
-Authentication for LND happens on the server side. We will generate a client cert (tls.cert) and a private server key (tls.key). Only the LND_BTC instance needs to know about both keys.
+### Starting your engine!!
 
-Our NODEJS client will then use the tls.key + a macaroon to make requests
-
-The macaroon auth will fail if the db/macaroons are not created at the same time, so we need to wipe out the /secure/ folder before each new run (this is OK for internal)
-
-Using `GRPC_VERBOSITY=DEBUG` and `GRPC_TRACE=all` on the relayer was my best friend
-
-```
-openssl s_client -connect lnd_btc:10009 -prexit
-
-apt-get update && apt-get install tcpdump
-tcpdump port 10009 and '(tcp-syn|tcp-ack)!=0'
-
-curl --cacert /secure/tls.cert https://lnd_btc:10009 -v
-```
+COMPOSE_PROJECT_NAME or docker-compose -p 'YOUR_PROJECT_NAME'

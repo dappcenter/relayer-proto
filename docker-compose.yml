@@ -3,7 +3,6 @@ version: '3'
 services:
   # Kinesis Relayer
   relayer:
-    container_name: 'relayer'
     image: 'node:8'
     working_dir: '/home/app'
     volumes:
@@ -14,28 +13,30 @@ services:
       - redis
       - lnd_btc
     environment:
-      - NODE_PATH=.
-      - GRPC_HOST=0.0.0.0
-      - GRPC_PORT=50078
       # - GRPC_VERBOSITY=INFO
       # - GRPC_TRACE=all
+      - NODE_PATH=.
+      - RELAYER_GRPC_HOST=0.0.0.0:28492
       - MONGODB_CONNECTION_URL=mongodb://mongo/relayer
-      - LND_URL=lnd_btc:10009
-      - TLS_PATH=/secure/tls.cert
-      - MACAROON_PATH=/secure/admin.macaroon
+      - LND_HOST=lnd_btc:10009
+      - TLS_CERT_PATH=/secure/tls.cert
+      - LND_MACAROON_PATH=/secure/admin.macaroon
       - REDIS_HOST=redis
       - GRPC_SSL_CIPHER_SUITES=HIGH+ECDSA
     ports:
-      - '50078:50078'
+      - '28492:28492'
+    expose:
+      - '28492'
     networks:
       - relayer
-      - btcd
     command: bash -c 'npm i && npm start'
 
   # Mongo DB
   mongo:
     image: 'mongo:3.6.3'
     working_dir: '/home/db'
+    # TODO: this is only a development setting so you can view the DB from a UI
+    #   like mongo compass
     ports:
       - '27017:27017'
     networks:
@@ -54,7 +55,6 @@ services:
   # Extensions of the official LND docker build found here:
   #
   btcd:
-    image: relayer_btcd
     build:
       context: ./
       dockerfile: docker/btcd/Dockerfile
@@ -68,31 +68,15 @@ services:
       - DEBUG
       - MINING_ADDRESS
     networks:
-      btcd:
+      relayer:
         aliases:
           - blockchain
           - rpcserver
     entrypoint: ["./start-btcd.sh"]
 
-  btcctl:
-    image: relayer_btcctl
-    build:
-      context: ./
-      dockerfile: docker/btcd/Dockerfile
-    volumes:
-      - shared:/rpc
-      - bitcoin:/data
-    environment:
-      - RPCUSER
-      - RPCPASS
-      - NETWORK
-    networks:
-      - btcd
-    entrypoint: ["./start-btcctl.sh"]
-
-  # This is the btc node that relayer will interact with for the LND Engine
+  # This is the lnd/btc node specifically for relayer
+  #
   lnd_btc:
-    image: relayer_lnd_btc
     build:
       context: ./
       dockerfile: docker/lnd/Dockerfile
@@ -103,7 +87,7 @@ services:
       - CHAIN
       - DEBUG
     networks:
-      - btcd
+      - relayer
     volumes:
       - 'shared:/rpc'
       - 'secure:/secure/'
@@ -121,4 +105,3 @@ volumes:
 
 networks:
   relayer:
-  btcd:

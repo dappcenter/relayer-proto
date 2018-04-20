@@ -10,8 +10,7 @@ const { watchMarket, MarketEventPublisher } = require('./orderbook');
 const { getPublicKey } = require('./payment-network');
 const { MessageBox } = require('./messaging');
 
-const GRPC_HOST = process.env.GRPC_HOST || '0.0.0.0';
-const GRPC_PORT = process.env.GRPC_PORT || '50078';
+const RELAYER_GRPC_HOST = process.env.RELAYER_GRPC_HOST || '0.0.0.0:28492';
 const PROTO_PATH = path.resolve('./proto/relayer.proto');
 const PROTO_GRPC_TYPE = 'proto';
 const PROTO_GRPC_OPTIONS = {
@@ -78,10 +77,10 @@ class GrpcServer {
    * @param {String} port
    * @returns {void}
    */
-  listen(host = GRPC_HOST, port = GRPC_PORT) {
-    this.server.bind(`${host}:${port}`, grpc.ServerCredentials.createInsecure());
+  listen(host = RELAYER_GRPC_HOST) {
+    this.server.bind(host, grpc.ServerCredentials.createInsecure());
     this.server.start();
-    this.logger.info('gRPC server started', { host, port });
+    this.logger.info('gRPC server started', { host });
   }
 }
 

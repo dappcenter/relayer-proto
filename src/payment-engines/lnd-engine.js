@@ -5,9 +5,9 @@ const { readFileSync } = require('fs');
 // ex: /secure/tls.cert
 // ex: /secure/admin.macaroon
 // ex: https://my.lightning.com:10009
-const { TLS_PATH, MACAROON_PATH, LND_URL: LIGHTNING_URL } = process.env;
+const { TLS_CERT_PATH, LND_MACAROON_PATH, LND_HOST } = process.env;
 
-if (!LIGHTNING_URL || !TLS_PATH || !MACAROON_PATH) {
+if (!LND_HOST || !TLS_CERT_PATH || !LND_MACAROON_PATH) {
   throw new Error('Environment variables not set for `lnd-engine.js');
 }
 
@@ -18,13 +18,13 @@ class LndEngine {
     // Create auth credentials w/ macaroon (decentralized token bearer specific to LND) and
     // w/ use of lnd ssl cert
     const macaroonCreds = grpc.credentials.createFromMetadataGenerator((_args, callback) => {
-      const macaroon = readFileSync(MACAROON_PATH);
+      const macaroon = readFileSync(LND_MACAROON_PATH);
       const metadata = new grpc.Metadata();
       metadata.add('macaroon', macaroon.toString('hex'));
       callback(null, metadata);
     });
 
-    const lndCert = readFileSync(TLS_PATH);
+    const lndCert = readFileSync(TLS_CERT_PATH);
     const sslCreds = grpc.credentials.createSsl(lndCert);
     const credentials = grpc.credentials.combineChannelCredentials(sslCreds, macaroonCreds);
 
@@ -45,7 +45,7 @@ class LndEngine {
     const { lnrpc: LndRpc } = lnrpcDescriptor;
 
     try {
-      this.client = new LndRpc.Lightning(LIGHTNING_URL, credentials, SERVICE_OPTIONS);
+      this.client = new LndRpc.Lightning(LND_HOST, credentials, SERVICE_OPTIONS);
     } catch (e) {
       this.logger.error('WARNING: LND Engine not implemented yet', { error: e.toString() });
     }
