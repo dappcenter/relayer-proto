@@ -44,7 +44,7 @@ class GrpcServer {
     this.paymentNetworkService = this.proto.PaymentNetwork.service;
 
     this.action = new GrpcAction(this.eventHandler, this.messenger, this.logger, this.engine);
-    this.marketAction = new GrpcMarketAction(this.marketEventPublisher, this.eventHandler, this.logger, this.engine);
+    this.marketAction = new GrpcMarketAction(this.marketEventPublisher, this.eventHandler, this.messenger, this.logger, this.engine);
 
     this.server.addService(this.makerService, {
       createOrder: createOrder.bind(this.action),
