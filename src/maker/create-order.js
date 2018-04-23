@@ -58,13 +58,15 @@ async function createOrder (call, cb) {
     //
     const depositRequest = await this.engine.addInvoice({
       memo: order.orderId,
-      value: ORDER_DEPOSIT.times(order.base).value,
+      // TODO: Create a virtual attribute to make sure this value is BigInt and not LONG
+      value: ORDER_DEPOSIT.divide(order.baseAmount).value,
       expiry: INVOICE_EXPIRY
     })
 
     const feeRequest = await this.engine.addInvoice({
       memo: order.orderId,
-      value: ORDER_FEE.times(order.base).value,
+      // TODO: Create a virtual attribute to make sure this value is BigInt and not LONG
+      value: ORDER_FEE.divide(order.baseAmount).value,
       expiry: INVOICE_EXPIRY
     })
 

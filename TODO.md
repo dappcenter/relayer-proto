@@ -1,5 +1,6 @@
 ### TODOS
 
+- Wherever we accept strings we should make sure we either lowcase/upcase them for normalization
 - Contribute to LND for dockerfile updates (easy win)
 - Create Dockerfiles for Nodejs and Mongo (we shouldnt trust public images in the future)
 - Replace Glide w/ dep for docker lnd/btc/lnd-multichain (this should be done in the lnd repo too for the first contribution!!!!)

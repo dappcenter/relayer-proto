@@ -2,6 +2,12 @@ const { status } = require('grpc')
 
 const { Order, FeeInvoice, DepositInvoice, FeeRefundInvoice, DepositRefundInvoice } = require('../models')
 
+const FRIENDLY_ERRORS = {
+  NOT_PLACED: id => `Could not place order. Please create another order and try again. Order id: ${id}`,
+  FEE_NOT_PAID: id => `Fee Invoice has not been paid. Order id: ${id}`,
+  DEPOSIT_NOT_PAID: id => `Deposit Invoice has not been paid. Order id: ${id}`
+}
+
 /**
  * Given an orderId and refundInvoice, place an order in the relayer. This will
  * make the order actionable to all other users.
@@ -29,14 +35,26 @@ async function placeOrder (call, cb) {
     const feeInvoice = await FeeInvoice.findOne({ foreignId: order._id })
     const depositInvoice = await DepositInvoice.findOne({ foreignId: order._id })
 
-    if (!feeInvoice) return cb({ message: `No fee invoice associated with Order ${orderId}`, code: status.INVALID_ARGUMENT })
-    if (!depositInvoice) return cb({ message: `No deposit invoice associated with Order ${orderId}`, code: status.INVALID_ARGUMENT })
+    // This circumstance means that either 1. the relayer messed up or 2. the CLI is broken.
+    // In either scenario, there is nothing actionable that the user can do. We need to
+    // cancel the order and prompt the user to retry the order again.
+    if (!feeInvoice || !depositInvoice) {
+      this.logger.error('Fee invoice could not be found for order', { orderId, feeInvoice, depositInvoice })
+      return cb({ message: FRIENDLY_ERRORS.NOT_PLACED(order.orderId), code: status.INTERNAL })
+    }
 
     const feeStatus = await this.engine.invoiceStatus(feeInvoice.rHash)
     const depositStatus = await this.engine.invoiceStatus(depositInvoice.rHash)
 
-    if (!feeStatus.settled) return cb({ message: `Fee Invoice for Order ${orderId} has not been paid`, code: status.INVALID_ARGUMENT })
-    if (!depositStatus.settled) return cb({ message: `Deposit Invoice for Order ${orderId} has not been paid`, code: status.INVALID_ARGUMENT })
+    if (!feeStatus.settled) {
+      this.logger.error('Fee not paid for order', { orderId: order.orderId })
+      return cb({ message: FRIENDLY_ERRORS.FEE_NOT_PAID(order.orderId), code: status.INVALID_ARGUMENT })
+    }
+
+    if (!depositStatus.settled) {
+      this.logger.error('Deposit not paid for order', { orderId: order.orderId })
+      return cb({ message: FRIENDLY_ERRORS.DEPOSIT_NOT_PAID(order.orderId), code: status.INVALID_ARGUMENT })
+    }
 
     // TODO: validate the payment requests on the user-supplied invoices
     await FeeRefundInvoice.create({

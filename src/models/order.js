@@ -36,7 +36,7 @@ const orderSchema = new Schema({
       validator (v) {
         return v.startsWith('ln:')
       },
-      message: '{VALUE} is not a valid payTo Address'
+      message: '{VALUE} is not a valid payTo Address. Must start with a LN: prefix'
     }
   },
   status: { type: String, required: true, enum: Object.values(STATUSES), default: STATUSES.CREATED },
