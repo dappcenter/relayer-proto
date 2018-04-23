@@ -11,17 +11,6 @@ const { getPublicKey } = require('./payment-network');
 const { MessageBox } = require('./messaging');
 
 const RELAYER_GRPC_HOST = process.env.RELAYER_GRPC_HOST || '0.0.0.0:28492';
-const PROTO_PATH = path.resolve('./proto/relayer.proto');
-const PROTO_GRPC_TYPE = 'proto';
-const PROTO_GRPC_OPTIONS = {
-  convertFieldsToCamelCase: true,
-  binaryAsBase64: true,
-  longsAsStrings: true,
-};
-
-if (!fs.existsSync(PROTO_PATH)) {
-  throw new Error(`relayer.proto does not exist at ${PROTO_PATH}. please run 'npm run build'`);
-}
 
 /**
  * Abstract class for a grpc server
@@ -30,13 +19,25 @@ if (!fs.existsSync(PROTO_PATH)) {
  */
 class GrpcServer {
   constructor(logger, eventHandler, engine) {
+    this.protoPath = path.resolve('./proto/relayer.proto');
+    this.protoFileType = 'proto';
+    this.protoOptions = {
+      convertFieldsToCamelCase: true,
+      binaryAsBase64: true,
+      longsAsStrings: true,
+    };
+
+    if (!fs.existsSync(this.protoPath)) {
+      throw new Error(`relayer.proto does not exist at ${this.protoPath}. please run 'npm run build'`);
+    }
+
     this.engine = engine;
     this.logger = logger;
     this.eventHandler = eventHandler;
     this.marketEventPublisher = new MarketEventPublisher(this.eventHandler);
     this.messenger = new MessageBox();
     this.server = new grpc.Server();
-    this.proto = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS);
+    this.proto = grpc.load(this.protoPath, this.protoFileType, this.protoOptions);
 
     this.makerService = this.proto.Maker.service;
     this.takerService = this.proto.Taker.service;
