@@ -62,3 +62,6 @@ typings/
 
 # Mac
 .DS_Store
+
+# Private repo ignore
+/proto/relayer/
