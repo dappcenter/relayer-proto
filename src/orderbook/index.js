@@ -1,4 +1,4 @@
-const watchMarket = require('./watch-market');
-const MarketEventPublisher = require('./market-event-publisher');
+const watchMarket = require('./watch-market')
+const MarketEventPublisher = require('./market-event-publisher')
 
-module.exports = { watchMarket, MarketEventPublisher };
+module.exports = { watchMarket, MarketEventPublisher }

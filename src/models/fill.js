@@ -4,17 +4,17 @@
  * @author kinesis
  */
 
-const safeid = require('generate-safe-id');
-const mongoose = require('mongoose');
-require('mongoose-long')(mongoose);
+const safeid = require('generate-safe-id')
+const mongoose = require('mongoose')
+require('mongoose-long')(mongoose)
 
-const { Schema } = mongoose;
-const { Types: SchemaTypes } = mongoose.Schema;
+const { Schema } = mongoose
+const { Types: SchemaTypes } = mongoose.Schema
 
 const STATUSES = {
   CREATED: 'CREATED',
-  ACCEPTED: 'ACCEPTED',
-};
+  ACCEPTED: 'ACCEPTED'
+}
 
 const fillSchema = new Schema({
   fillId: { type: String, unique: true, index: true, default: () => safeid() },
@@ -22,8 +22,8 @@ const fillSchema = new Schema({
   fillAmount: { type: SchemaTypes.Long, required: true },
   swapHash: { type: String, required: true },
   swapPreimage: { type: String, required: false },
-  status: { type: String, required: true, enum: Object.values(STATUSES), default: STATUSES.CREATED },
-});
+  status: { type: String, required: true, enum: Object.values(STATUSES), default: STATUSES.CREATED }
+})
 
 /**
  * We only want the relayer to be able to set an fillId on the model. If there
@@ -31,31 +31,31 @@ const fillSchema = new Schema({
  */
 fillSchema.pre('create', (next) => {
   if (this.fillId) {
-    this.invalidate('fillId');
+    this.invalidate('fillId')
   }
-  next();
-});
+  next()
+})
 
 fillSchema.method({
-  accept() {
+  accept () {
     if (this.status !== STATUSES.CREATED) {
       throw new Error(`Invalid Fill Status: ${this.status}.
-        Fills must be in a ${STATUSES.CREATED} status in order to be accepted.`.replace(/\s+/g, ' '));
+        Fills must be in a ${STATUSES.CREATED} status in order to be accepted.`.replace(/\s+/g, ' '))
     }
-    this.status = STATUSES.ACCEPTED;
-    return this.save();
+    this.status = STATUSES.ACCEPTED
+    return this.save()
   },
-  matchesHash(preimage) {
+  matchesHash (preimage) {
     if (!this.swapHash) {
-      throw new Error('No swap hash exists for this fill.');
+      throw new Error('No swap hash exists for this fill.')
     }
     // TODO: make sure the preimage matches the hash
-    return true;
-  },
-});
+    return true
+  }
+})
 
-fillSchema.statics.STATUSES = STATUSES;
+fillSchema.statics.STATUSES = STATUSES
 
-const Fill = mongoose.model('Fill', fillSchema);
+const Fill = mongoose.model('Fill', fillSchema)
 
-module.exports = Fill;
+module.exports = Fill

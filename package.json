@@ -7,14 +7,20 @@
     "type": "git",
     "url": "https://github.com/kinesis-exchange/relayer"
   },
+  "standard": {
+    "env": [
+      "mocha"
+    ]
+  },
   "scripts": {
     "preinstall": "npm rebuild",
     "start": "pm2-docker pm2.json --watch",
     "start-production": "pm2-docker pm2.json --env production",
-    "pretest": "eslint --quiet --ignore-path .gitignore .; exit 0",
+    "pretest": "standard",
     "test": "mocha 'src/**/*.spec.js' 'test/**/*.spec.js'",
     "build": "bash ./scripts/ascii.sh && bash ./scripts/clean.sh && bash ./scripts/build.sh",
-    "metrics": "pm2 monit"
+    "metrics": "pm2 monit",
+    "format": "standard --fix"
   },
   "author": "kinesis",
   "license": "UNLICENSED",
@@ -31,16 +37,12 @@
   },
   "devDependencies": {
     "chai": "4.1.2",
-    "eslint": "4.19.1",
-    "eslint-config-airbnb": "16.1.0",
-    "eslint-plugin-import": "2.10.0",
-    "eslint-plugin-jsx-a11y": "6.0.3",
-    "eslint-plugin-react": "7.7.0",
     "mocha": "5.0.5",
     "mock-require": "3.0.2",
     "pkg": "4.3.1",
     "protobufjs": "6.8.6",
     "sinon": "4.5.0",
-    "sinon-chai": "3.0.0"
+    "sinon-chai": "3.0.0",
+    "standard": "11.0.1"
   }
 }

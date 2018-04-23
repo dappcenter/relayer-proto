@@ -1,5 +1,5 @@
-const getPublicKey = require('./get-public-key');
+const getPublicKey = require('./get-public-key')
 
 module.exports = {
-  getPublicKey,
-};
+  getPublicKey
+}

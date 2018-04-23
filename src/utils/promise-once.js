@@ -5,10 +5,10 @@
  * @param {Object} emitter
  * @param {String} event
  */
-function promiseOnce(emitter, event) {
+function promiseOnce (emitter, event) {
   return new Promise((resolve) => {
-    emitter.once(event, resolve);
-  });
+    emitter.once(event, resolve)
+  })
 }
 
-module.exports = promiseOnce;
+module.exports = promiseOnce

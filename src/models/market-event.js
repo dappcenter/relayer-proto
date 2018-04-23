@@ -4,19 +4,18 @@
  * @author kinesis
  */
 
-const safeid = require('generate-safe-id');
-const { SUPPORTED_MARKETS } = require('./market');
-const mongoose = require('mongoose');
-require('mongoose-long')(mongoose);
+const safeid = require('generate-safe-id')
+const { SUPPORTED_MARKETS } = require('./market')
+const mongoose = require('mongoose')
+require('mongoose-long')(mongoose)
 
-const { Schema } = mongoose;
+const { Schema } = mongoose
 
 const EVENT_TYPES = {
   PLACED: 'PLACED',
   CANCELLED: 'CANCELLED',
-  FILLED: 'FILLED',
-};
-
+  FILLED: 'FILLED'
+}
 
 const marketEventSchema = new Schema({
   eventId: { type: String, required: true, unique: true, default: () => safeid() },
@@ -24,30 +23,30 @@ const marketEventSchema = new Schema({
   orderId: { type: String, required: true },
   type: { type: String, required: true, enum: Object.values(EVENT_TYPES) },
   payload: { type: Object, required: true },
-  createdAt: { type: Date, required: true, default: Date.now },
-});
+  createdAt: { type: Date, required: true, default: Date.now }
+})
 
 marketEventSchema.method({
-  serialize() {
+  serialize () {
     const message = Object.keys(this.payload).reduce((acc, key) => {
-      acc[key] = this.payload[key].toString();
-      return acc;
-    }, {});
+      acc[key] = this.payload[key].toString()
+      return acc
+    }, {})
 
     Object.assign(message, {
       eventId: this.eventId,
       orderId: this.orderId,
       eventType: this.type,
-      timestamp: Math.round(this.createdAt.getTime() / 1000),
-    });
+      timestamp: Math.round(this.createdAt.getTime() / 1000)
+    })
 
-    return message;
-  },
-});
+    return message
+  }
+})
 
-marketEventSchema.statics.TYPES = EVENT_TYPES;
-marketEventSchema.statics.MARKETS = SUPPORTED_MARKETS;
+marketEventSchema.statics.TYPES = EVENT_TYPES
+marketEventSchema.statics.MARKETS = SUPPORTED_MARKETS
 
-const MarketEvent = mongoose.model('MarketEvent', marketEventSchema);
+const MarketEvent = mongoose.model('MarketEvent', marketEventSchema)
 
-module.exports = MarketEvent;
+module.exports = MarketEvent

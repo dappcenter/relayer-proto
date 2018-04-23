@@ -24,6 +24,8 @@ NOTE: Docker will try to bind to ports 27017/28492 on your host/local machine. T
 
 NOTE: We only expose the mongo port so you can attach a GUI to it like [Mongo Compass Community](https://www.mongodb.com/download-center#compass)
 
+Additionally, we use the [JavaScript Standard Style](https://standardjs.com/) for our project. Make sure to download a plugin for your prefered editor.
+
 ### Commands
 
 - To view logs you can use `docker-compose logs <container_name> --follow`

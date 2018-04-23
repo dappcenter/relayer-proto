@@ -1,6 +1,6 @@
-const { status } = require('grpc');
+const { status } = require('grpc')
 
-const { Order, Invoice, Fill } = require('../models');
+const { Order, Invoice, Fill } = require('../models')
 
 /**
  * Given an fillId and refundInvoice, fill the order in the relayer. This will
@@ -9,48 +9,48 @@ const { Order, Invoice, Fill } = require('../models');
  * @param {grpc} call
  * @param {Function<err, message>} cb
  */
-async function fillOrder(call, cb) {
-  const { fillId, feeRefundPaymentRequest, depositRefundPaymentRequest } = call.request;
+async function fillOrder (call, cb) {
+  const { fillId, feeRefundPaymentRequest, depositRefundPaymentRequest } = call.request
 
   try {
-    const fill = await Fill.findOne({ fillId });
+    const fill = await Fill.findOne({ fillId })
 
     if (!fill) {
-      throw new Error(`No fill with ID ${fillId}.`);
+      throw new Error(`No fill with ID ${fillId}.`)
     }
 
     // TODO: validate ownership of the fill
 
-    const order = await Order.findOne({ order_id: fill.order_id });
+    const order = await Order.findOne({ order_id: fill.order_id })
 
     if (!order) {
-      throw new Error(`No order associated with fill ${fill.fillId}.`);
+      throw new Error(`No order associated with fill ${fill.fillId}.`)
     }
     const inboundInvoices = await Invoice.find({
       foreignId: fill._id,
       foreignType: Invoice.FOREIGN_TYPES.FILL,
-      type: Invoice.TYPES.INCOMING,
-    });
+      type: Invoice.TYPES.INCOMING
+    })
 
     if (inboundInvoices.length > 2) {
       // This is basically a corrupt state. Should we cancel the order or something?
-      throw new Error(`Too many invoices associated with Fill ${fill.fillId}.`);
+      throw new Error(`Too many invoices associated with Fill ${fill.fillId}.`)
     }
 
-    const feeInvoice = inboundInvoices.find(invoice => invoice.purpose === Invoice.PURPOSES.FEE);
-    const depositInvoice = inboundInvoices.find(invoice => invoice.purpose === Invoice.PURPOSES.DEPOSIT);
+    const feeInvoice = inboundInvoices.find(invoice => invoice.purpose === Invoice.PURPOSES.FEE)
+    const depositInvoice = inboundInvoices.find(invoice => invoice.purpose === Invoice.PURPOSES.DEPOSIT)
 
     if (!feeInvoice) {
-      throw new Error(`Could not find fee invoice associated with Fill ${fillId}.`);
+      throw new Error(`Could not find fee invoice associated with Fill ${fillId}.`)
     }
     if (!depositInvoice) {
-      throw new Error(`Could not find deposit invoice associated with Fill ${fillId}.`);
+      throw new Error(`Could not find deposit invoice associated with Fill ${fillId}.`)
     }
 
     // TODO: refund their payments if the order is no longer in a good status?
     if (order.status !== Order.STATUSES.PLACED) {
       throw new Error(`Order ${order.orderId} is in ${order.status} status.
-        It must be in a ${Order.STATUSES.PLACED} status to be filled.`.replace(/\s+/g, ' '));
+        It must be in a ${Order.STATUSES.PLACED} status to be filled.`.replace(/\s+/g, ' '))
     }
 
     // Need to add this functionality to the LND engine
@@ -71,35 +71,36 @@ async function fillOrder(call, cb) {
       foreignType: Invoice.FOREIGN_TYPES.FILL,
       paymentRequest: feeRefundPaymentRequest,
       type: Invoice.TYPES.OUTGOING,
-      purpose: Invoice.PURPOSES.FEE,
-    });
+      purpose: Invoice.PURPOSES.FEE
+    })
     const depositRefundInvoice = await Invoice.create({
       foreignId: fill._id,
       foreignType: Invoice.FOREIGN_TYPES.FILL,
       paymentRequest: depositRefundPaymentRequest,
       type: Invoice.TYPES.OUTGOING,
-      purpose: Invoice.PURPOSES.DEPOSIT,
-    });
+      purpose: Invoice.PURPOSES.DEPOSIT
+    })
 
     this.logger.info('Refund invoices have been stored on the Relayer', {
       deposit: depositRefundInvoice._id,
-      fee: feeRefundInvoice._id,
-    });
+      fee: feeRefundInvoice._id
+    })
 
     // TODO: Check that the taker and maker are both reachable to complete
 
-    await fill.accept();
+    await fill.accept()
 
     // note that the order does not get officially filled until `subscribeFill` takes it.
-    await this.messenger.set(`fill:${order._id}`, fill.fillId);
-    this.logger.info('order:filling', { orderId: order.orderId });
+    await this.messenger.set(`fill:${order._id}`, fill.fillId)
+    this.logger.info('order:filling', { orderId: order.orderId })
 
-    return cb(null, {});
+    return cb(null, {})
   } catch (e) {
     // TODO: filtering client friendly errors from internal errors
-    this.logger.error('Invalid Fill: Could not process', { error: e.toString() });
-    return cb({ message: e.message, code: status.INTERNAL });
+    this.logger.error('Invalid Fill: Could not process', { error: e.toString() })
+    // eslint-disable-next-line
+    return cb({ message: e.message, code: status.INTERNAL })
   }
 }
 
-module.exports = fillOrder;
+module.exports = fillOrder

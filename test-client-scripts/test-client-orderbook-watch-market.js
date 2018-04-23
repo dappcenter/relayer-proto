@@ -6,29 +6,29 @@
  * @author kinesis
  */
 
-const grpc = require('grpc');
-const path = require('path');
+const grpc = require('grpc')
+const path = require('path')
 
-const PROTO_PATH = path.resolve('./proto/relayer.proto');
-const PROTO_GRPC_TYPE = 'proto';
+const PROTO_PATH = path.resolve('./proto/relayer.proto')
+const PROTO_GRPC_TYPE = 'proto'
 const PROTO_GRPC_OPTIONS = {
   convertFieldsToCamelCase: true,
   binaryAsBase64: true,
-  longsAsStrings: true,
-};
-const TEST_ADDRESS = process.env.GRPC_TEST_CLIENT_ADDRESS || '0.0.0.0:50078';
+  longsAsStrings: true
+}
+const TEST_ADDRESS = process.env.GRPC_TEST_CLIENT_ADDRESS || '0.0.0.0:50078'
 
-const proto = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS);
-const orderbook = new proto.OrderBook(TEST_ADDRESS, grpc.credentials.createInsecure());
+const proto = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS)
+const orderbook = new proto.OrderBook(TEST_ADDRESS, grpc.credentials.createInsecure())
 
-function testAction() {
-  const watchMarket = orderbook.watchMarket({ baseSymbol: 'BTC', counterSymbol: 'LTC' });
+function testAction () {
+  const watchMarket = orderbook.watchMarket({ baseSymbol: 'BTC', counterSymbol: 'LTC' })
 
   watchMarket.on('data', (res) => {
-    console.log(res);
-  });
+    console.log(res)
+  })
 
-  watchMarket.on('error', err => console.error(err));
+  watchMarket.on('error', err => console.error(err))
 }
 
-testAction();
+testAction()
