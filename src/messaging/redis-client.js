@@ -20,7 +20,7 @@ class RedisClient {
     this.client = redis.createClient(redisOptions)
 
     COMMANDS.forEach((command) => {
-      this[command] = this.promisify(this.client[command].bind(this.client))
+      this[command] = (key) => this.promisify(key, this.client[command].bind(this.client))
     })
 
     this.on = this.client.on.bind(this.client)
@@ -28,9 +28,9 @@ class RedisClient {
     this.punsubscribe = this.client.punsubscribe.bind(this.client)
   }
 
-  promisify (fn) {
+  promisify (key, fn) {
     return new Promise((resolve, reject) => {
-      fn((err, res) => {
+      fn(key, (err, res) => {
         if (err) return reject(err)
         return resolve(res)
       })

@@ -18,7 +18,6 @@ async function cancelOrder (call, cb) {
     const order = await Order.findOne({ orderId })
 
     // TODO: ensure this user is authorized to cancel this order
-
     await order.cancel()
 
     this.eventHandler.emit('order:cancelled', order)

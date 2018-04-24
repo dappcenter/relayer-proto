@@ -17,7 +17,7 @@
     "start": "pm2-docker pm2.json --watch",
     "start-production": "pm2-docker pm2.json --env production",
     "pretest": "standard",
-    "test": "mocha 'src/**/*.spec.js' 'test/**/*.spec.js'",
+    "test": "NODE_PATH=. mocha 'src/**/*.spec.js' 'test/**/*.spec.js'",
     "build": "bash ./scripts/ascii.sh && bash ./scripts/clean.sh && bash ./scripts/build.sh",
     "metrics": "pm2 monit",
     "format": "standard --fix"
@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "chai": "4.1.2",
+    "dirty-chai": "2.0.1",
     "mocha": "5.0.5",
     "mock-require": "3.0.2",
     "pkg": "4.3.1",

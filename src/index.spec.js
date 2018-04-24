@@ -1,21 +1,13 @@
-const mock = require('mock-require')
-const chai = require('chai')
-const sinon = require('sinon')
+const { mock, chai, sinon } = require('test/test-helper.spec')
 
 const { expect } = chai
-
-chai.use(require('sinon-chai'))
 
 class GrpcServer {
   listen () {}
 }
 
 describe('Relayer', () => {
-  let sandbox
   let Relayer
-
-  before(() => { sandbox = sinon.sandbox.create() })
-  afterEach(() => { sandbox.restore() })
 
   const fakeDb = sinon.spy()
   const fakeLogger = sinon.spy()

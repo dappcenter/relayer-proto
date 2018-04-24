@@ -1,9 +1,6 @@
-const mock = require('mock-require')
-const chai = require('chai')
-const sinon = require('sinon')
+const { mock, chai, sinon } = require('test/test-helper.spec')
 
 const { expect } = chai
-chai.use(require('sinon-chai'))
 
 describe('Market', () => {
   let Market
