@@ -14,7 +14,7 @@ After nvm is installed, use `nvm use` to switch to the current node version for 
 
 #### Getting started
 
-Install dependencies and build the project w/ `npm i`
+Install dependencies and build the project w/ `npm i && npm run build`
 
 Then run `docker-compose up -d` to start the relayer containers.
 
@@ -32,6 +32,7 @@ Additionally, we use the [JavaScript Standard Style](https://standardjs.com/) fo
 
 - To view logs you can use `docker-compose logs --follow <container_name>` or `docker-compose logs -f <container_name>`
 - To run tests, use `npm test`
+- To rebuild gRPC, use `npm run build`
 - To start all relayer containers `docker-compose up -d`
 - To stop all relayer containers `docker-compose down`
 - To start lnd-engine `npm run lup`
