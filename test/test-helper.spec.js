@@ -8,6 +8,7 @@
 const sinon = require('sinon')
 const chai = require('chai')
 const mock = require('mock-require')
+const { Mockgoose } = require('mockgoose')
 const dirtyChai = require('dirty-chai')
 const sinonChai = require('sinon-chai')
 
@@ -25,5 +26,6 @@ afterEach(function () {
 module.exports = {
   chai,
   sinon,
-  mock
+  mock,
+  Mockgoose
 }
