@@ -22,8 +22,7 @@ const marketEventSchema = new Schema({
   marketName: { type: String, required: true, enum: Object.values(SUPPORTED_MARKETS) },
   orderId: { type: String, required: true },
   type: { type: String, required: true, enum: Object.values(EVENT_TYPES) },
-  payload: { type: Object, required: true },
-  createdAt: { type: Date, required: true, default: Date.now }
+  payload: { type: Object, required: true }
 })
 
 marketEventSchema.method({
@@ -37,7 +36,7 @@ marketEventSchema.method({
       eventId: this.eventId,
       orderId: this.orderId,
       eventType: this.type,
-      timestamp: Math.round(this.createdAt.getTime() / 1000)
+      timestamp: Math.floor(this._id.getTimestamp().getTime() / 1000)
     })
 
     return message
