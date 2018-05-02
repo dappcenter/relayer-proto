@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "config": {
+    "project_name": "relayer"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/kinesis-exchange/relayer"
@@ -13,13 +16,17 @@
     ]
   },
   "scripts": {
+    "preinstall": "bash ./scripts/preinstall.sh",
+    "postinstall": "bash ./scripts/postinstall.sh",
     "start": "pm2-docker pm2.json --watch",
     "start-production": "pm2-docker pm2.json --env production",
-    "pretest": "standard",
-    "test": "NODE_PATH=. mocha 'src/**/*.spec.js' 'test/**/*.spec.js'",
-    "build": "bash ./scripts/ascii.sh && bash ./scripts/clean.sh && bash ./scripts/build.sh",
+    "format": "standard --fix",
+    "pretest": "npm run format",
+    "test": "NODE_PATH=. nyc mocha 'src/**/*.spec.js' 'test/**/*.spec.js'",
     "metrics": "pm2 monit",
-    "format": "standard --fix"
+    "lup": "npm explore lnd-engine -- docker-compose -p $npm_package_config_project_name up -d",
+    "ld": "npm explore lnd-engine -- docker-compose -p $npm_package_config_project_name down -v",
+    "lps": "npm explore lnd-engine -- docker-compose -p $npm_package_config_project_name ps"
   },
   "author": "kinesis",
   "license": "UNLICENSED",
@@ -32,13 +39,17 @@
     "pm2": "2.10.2",
     "redis": "2.8.0",
     "uuid": "3.2.1",
-    "winston": "3.0.0-rc3"
+    "winston": "3.0.0-rc3",
+    "lnd-engine": "kinesis-exchange/lnd-engine"
   },
   "devDependencies": {
     "chai": "4.1.2",
     "dirty-chai": "2.0.1",
+    "eslint": "4.19.1",
+    "eslint-plugin-import": "2.11.0",
     "mocha": "5.0.5",
     "mock-require": "3.0.2",
+    "nyc": "11.7.1",
     "pkg": "4.3.1",
     "protobufjs": "6.8.6",
     "sinon": "4.5.0",

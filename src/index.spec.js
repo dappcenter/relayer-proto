@@ -22,7 +22,7 @@ describe('Relayer', () => {
     })
     mock('./events', {})
     mock('./grpc-server', fakeServer)
-    mock('./payment-engines', { LndEngine: fakeEngine })
+    mock('lnd-engine', fakeEngine)
 
     Relayer = require('./index')
   })

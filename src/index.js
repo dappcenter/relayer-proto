@@ -8,13 +8,13 @@
 const GrpcServer = require('./grpc-server')
 const { EventEmitter } = require('events')
 const { logger, db } = require('./utils')
-const { LndEngine } = require('./payment-engines')
+const LndEngine = require('lnd-engine')
 
 class Relayer {
   constructor (Server, EventHandler, Engine) {
     this.db = db
     this.logger = logger
-    this.engine = new Engine(this.logger)
+    this.engine = new Engine()
     this.eventHandler = new EventHandler()
     this.server = new Server(this.logger, this.eventHandler, this.engine)
 
