@@ -27,6 +27,13 @@ describe('Relayer', () => {
     Relayer = require('./index')
   })
 
+  afterEach(() => {
+    mock.stop('./utils')
+    mock.stop('./events')
+    mock.stop('./grpc-server')
+    mock.stop('lnd-engine')
+  })
+
   describe('intialization', () => {
     it('returns an intance of a db', () => {
       expect(Relayer.db).to.eq(fakeDb)

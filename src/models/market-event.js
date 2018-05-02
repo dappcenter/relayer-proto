@@ -5,8 +5,6 @@
  */
 
 const safeid = require('generate-safe-id')
-const utils = require('../utils/index.js')
-console.log('utils', Object.keys(utils))
 const { sequence } = require('../utils')
 const { SUPPORTED_MARKETS } = require('./market')
 const mongoose = require('mongoose')

@@ -4435,6 +4435,12 @@
         "normalize-path": "2.1.1"
       }
     },
+    "mockery": {
+      "version": "2.1.0",
+      "resolved": "https://registry.npmjs.org/mockery/-/mockery-2.1.0.tgz",
+      "integrity": "sha512-9VkOmxKlWXoDO/h1jDZaS4lH33aWfRiJiNT/tKj+8OGzrcFDLo8d0syGdbsc3Bc4GvRXPb+NMMvojotmuGJTvA==",
+      "dev": true
+    },
     "mockgoose": {
       "version": "7.3.5",
       "resolved": "https://registry.npmjs.org/mockgoose/-/mockgoose-7.3.5.tgz",
@@ -8510,6 +8516,15 @@
       "resolved": "https://registry.npmjs.org/ret/-/ret-0.1.15.tgz",
       "integrity": "sha512-TTlYpa+OL+vMMNG24xSlQGEJ3B/RzEfUlLct7b5G/ytav+wPrplCpVMFuwzXbkecJrb6IYo1iFb0S9v37754mg=="
     },
+    "rewire": {
+      "version": "4.0.1",
+      "resolved": "https://registry.npmjs.org/rewire/-/rewire-4.0.1.tgz",
+      "integrity": "sha512-+7RQ/BYwTieHVXetpKhT11UbfF6v1kGhKFrtZN7UDL2PybMsSt/rpLWeEUGF5Ndsl1D5BxiCB14VDJyoX+noYw==",
+      "dev": true,
+      "requires": {
+        "eslint": "4.19.1"
+      }
+    },
     "rimraf": {
       "version": "2.6.2",
       "resolved": "https://registry.npmjs.org/rimraf/-/rimraf-2.6.2.tgz",
@@ -9867,6 +9882,12 @@
       "requires": {
         "mkdirp": "0.5.1"
       }
+    },
+    "wtfnode": {
+      "version": "0.6.0",
+      "resolved": "https://registry.npmjs.org/wtfnode/-/wtfnode-0.6.0.tgz",
+      "integrity": "sha1-W0yt78M7r86gs4uptTq3EAuKbCU=",
+      "dev": true
     },
     "xtend": {
       "version": "4.0.1",
