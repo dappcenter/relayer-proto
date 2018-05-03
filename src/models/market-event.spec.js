@@ -1,4 +1,5 @@
 const { chai, sinon, mock } = require('test/test-helper.spec')
+const mongoose = require('mongoose')
 
 const { expect } = chai
 
@@ -7,12 +8,12 @@ describe('MarketEvent', () => {
     'ABC/XYZ': 'ABC/XYZ'
   }
   const safeid = sinon.stub().returns('fakeId')
-  const sequence = sinon.stub().returns(1000)
+  const nano = {
+    toString: sinon.stub().returns('1488895353025439741')
+  }
 
   mock('generate-safe-id', safeid)
-  mock('../utils', {
-    sequence
-  })
+  mock('nano-seconds', nano)
   mock('./market', {
     SUPPORTED_MARKETS
   })
@@ -21,13 +22,13 @@ describe('MarketEvent', () => {
 
   afterEach(() => {
     safeid.resetHistory()
-    sequence.resetHistory()
+    nano.toString.resetHistory()
   })
 
   after(() => {
     mock.stop('generate-safe-id')
-    mock.stop('../utils')
     mock.stop('./market')
+    mock.stop('nano-seconds')
   })
 
   describe('#create', () => {
@@ -47,7 +48,8 @@ describe('MarketEvent', () => {
     })
 
     it('generates a timestamp', async () => {
-      const timestamp = (new Date()).getTime()
+      const fakeTimestamp = '1488895353025439741'
+      nano.toString.returns(fakeTimestamp)
       const event = await MarketEvent.create({
         marketName: 'ABC/XYZ',
         orderId: 'asodfijasf',
@@ -55,26 +57,10 @@ describe('MarketEvent', () => {
         payload: {}
       })
 
+      expect(nano.toString).to.have.been.calledOnce()
       expect(event).to.have.property('timestamp')
-      expect(event.timestamp).to.be.a('number')
-      expect(event.timestamp).to.be.gte(timestamp)
-      expect(event.timestamp).to.be.lte(timestamp + 12000)
-    })
-
-    it('generates a sequence', async () => {
-      const fakeSequence = 1000
-      sequence.returns(fakeSequence)
-      const event = await MarketEvent.create({
-        marketName: 'ABC/XYZ',
-        orderId: 'asodfijasf',
-        type: MarketEvent.TYPES.PLACED,
-        payload: {}
-      })
-
-      expect(sequence).to.have.been.calledOnce()
-      expect(event).to.have.property('sequence')
-      expect(event.sequence).to.be.a('number')
-      expect(event.sequence).to.be.eql(fakeSequence)
+      expect(event.timestamp).to.be.an.instanceOf(mongoose.Types.Long)
+      expect(event.timestamp.toString()).to.be.eql(fakeTimestamp)
     })
   })
 
@@ -94,8 +80,7 @@ describe('MarketEvent', () => {
         'eventId',
         'orderId',
         'eventType',
-        'timestamp',
-        'sequence'
+        'timestamp'
       ])
     })
 
@@ -149,7 +134,8 @@ describe('MarketEvent', () => {
     })
 
     it('serializes the timestamp', async () => {
-      const timestamp = (new Date()).getTime()
+      const fakeTimestamp = '1488895353025439741'
+      nano.toString.returns(fakeTimestamp)
       const event = await MarketEvent.create({
         marketName: 'ABC/XYZ',
         orderId: 'asodfijasf',
@@ -160,27 +146,8 @@ describe('MarketEvent', () => {
       const serialized = event.serialize()
 
       expect(serialized).to.have.property('timestamp')
-      expect(serialized.timestamp).to.be.a('number')
-      expect(serialized.timestamp).to.be.gte(timestamp)
-      expect(serialized.timestamp).to.be.lte(timestamp + 12000)
-    })
-
-    it('serializes the sequence', async () => {
-      const fakeSequence = 1000
-      sequence.returns(fakeSequence)
-
-      const event = await MarketEvent.create({
-        marketName: 'ABC/XYZ',
-        orderId: 'asodfijasf',
-        type: MarketEvent.TYPES.PLACED,
-        payload: {}
-      })
-
-      const serialized = event.serialize()
-
-      expect(serialized).to.have.property('sequence')
-      expect(serialized.sequence).to.be.a('number')
-      expect(serialized.sequence).to.be.eql(fakeSequence)
+      expect(serialized.timestamp).to.be.a('string')
+      expect(serialized.timestamp).to.be.eql(fakeTimestamp)
     })
 
     it('serializes a non-empty payload', async () => {

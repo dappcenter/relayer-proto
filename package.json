@@ -35,13 +35,14 @@
     "big-integer": "1.6.27",
     "generate-safe-id": "1.0.2",
     "grpc": "1.10.0",
+    "lnd-engine": "kinesis-exchange/lnd-engine",
     "mongoose": "5.0.12",
     "mongoose-long": "0.2.0",
+    "nano-seconds": "1.2.2",
     "pm2": "2.10.2",
     "redis": "2.8.0",
     "uuid": "3.2.1",
-    "winston": "3.0.0-rc3",
-    "lnd-engine": "kinesis-exchange/lnd-engine"
+    "winston": "3.0.0-rc3"
   },
   "devDependencies": {
     "chai": "4.1.2",

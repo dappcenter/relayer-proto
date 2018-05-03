@@ -5,7 +5,7 @@
  */
 
 const safeid = require('generate-safe-id')
-const { sequence } = require('../utils')
+const nano = require('nano-seconds')
 const { SUPPORTED_MARKETS } = require('./market')
 const mongoose = require('mongoose')
 require('mongoose-long')(mongoose)
@@ -24,8 +24,7 @@ const marketEventSchema = new Schema({
   orderId: { type: String, required: true },
   type: { type: String, required: true, enum: Object.values(EVENT_TYPES) },
   payload: { type: Object, required: true },
-  timestamp: { type: Number, required: true, default: () => (new Date()).getTime() },
-  sequence: { type: Number, required: true, default: () => sequence() }
+  timestamp: { type: Schema.Types.Long, required: true, default: () => nano.toString() }
 })
 
 marketEventSchema.method({
@@ -39,8 +38,7 @@ marketEventSchema.method({
       eventId: this.eventId,
       orderId: this.orderId,
       eventType: this.type,
-      timestamp: this.timestamp,
-      sequence: this.sequence
+      timestamp: this.timestamp.toString()
     })
 
     return message
