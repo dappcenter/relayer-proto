@@ -9,6 +9,7 @@ const { createFill, fillOrder, subscribeExecute } = require('./taker')
 const { watchMarket, MarketEventPublisher } = require('./orderbook')
 const { getPublicKey } = require('./payment-network')
 const { MessageBox } = require('./messaging')
+const { check } = require('./health')
 
 const RELAYER_GRPC_HOST = process.env.RELAYER_GRPC_HOST || '0.0.0.0:28492'
 
@@ -43,7 +44,7 @@ class GrpcServer {
     this.takerService = this.proto.Taker.service
     this.orderBookService = this.proto.OrderBook.service
     this.paymentNetworkService = this.proto.PaymentNetwork.service
-
+    this.healthService = this.proto.Health.service
     this.action = new GrpcAction(this.eventHandler, this.messenger, this.logger, this.engine)
     this.marketAction = new GrpcMarketAction(this.marketEventPublisher, this.eventHandler, this.messenger, this.logger, this.engine)
 
@@ -68,6 +69,10 @@ class GrpcServer {
 
     this.server.addService(this.orderBookService, {
       watchMarket: watchMarket.bind(this.marketAction)
+    })
+
+    this.server.addService(this.healthService, {
+      check: check.bind(this.action)
     })
   }
 
