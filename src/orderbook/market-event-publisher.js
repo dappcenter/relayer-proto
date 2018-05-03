@@ -73,7 +73,7 @@ class MarketEventPublisher {
     this._currentStateLoaded = false
     this._addBuffer = []
     this._removeBuffer = []
-    const eventStream = MarketEvent.find().sort('timestamp sequence').cursor()
+    const eventStream = MarketEvent.find().sort('timestamp').cursor()
     eventStream.on('data', event => this.modifyState(event))
     eventStream.on('end', () => {
       this._currentStateLoaded = true
