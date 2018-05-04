@@ -1,7 +1,7 @@
 const { status } = require('grpc')
 
 async function check (call, cb) {
-  return 'success'
+  cb(null, {status: 'SERVING'})
 }
 
 module.exports = check
