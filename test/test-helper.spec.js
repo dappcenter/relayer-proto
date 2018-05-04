@@ -15,6 +15,8 @@ const sinonChai = require('sinon-chai')
 const mongoose = require('mongoose')
 const mockgoose = new Mockgoose(mongoose)
 
+const { expect, Assertion } = chai
+
 chai.use(dirtyChai)
 chai.use(sinonChai)
 
@@ -26,7 +28,11 @@ before(async () => {
 after(async () => {
   // SEE: https://github.com/Mockgoose/Mockgoose/issues/71
   await mongoose.disconnect()
+  let retval = new Promise(resolve => {
+    mockgoose.mongodHelper.mongoBin.childProcess.on('exit', resolve)
+  })
   mockgoose.mongodHelper.mongoBin.childProcess.kill('SIGTERM')
+  await retval
 })
 
 beforeEach(function () {
@@ -38,8 +44,17 @@ afterEach(async function () {
   await mockgoose.helper.reset()
 })
 
+Assertion.addMethod('implemented', function () {
+  this.assert(
+    (this._obj !== null && this._obj !== undefined)
+    , 'expected #{this} to be implemented (non null/undefined)'
+    , 'expected #{this} to not be implemented (null/undefined)'
+  )
+})
+
 module.exports = {
   chai,
+  expect,
   sinon,
   mock,
   rewire
