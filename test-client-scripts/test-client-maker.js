@@ -13,7 +13,7 @@ const PROTO_GRPC_OPTIONS = {
   binaryAsBase64: true,
   longsAsStrings: true
 }
-const TEST_ADDRESS = process.env.GRPC_TEST_CLIENT_ADDRESS || '0.0.0.0:50078'
+const TEST_ADDRESS = '0.0.0.0:28492'
 
 const proto = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS)
 const maker = new proto.Maker(TEST_ADDRESS, grpc.credentials.createInsecure())

@@ -6,8 +6,8 @@ const completeOrder = require('./complete-order')
 const cancelOrder = require('./cancel-order')
 
 module.exports = {
-  placeOrder,
   createOrder,
+  placeOrder,
   subscribeFill,
   executeOrder,
   completeOrder,

@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 
+// TODO: return a function instead of connecting in the require?
+// it leads to weird issues when you are just trying to require other `utils/` modules
 // TODO: throw this in a try catch and provide decent errors for development
 const MONGODB_URL = process.env.MONGODB_CONNECTION_URL
 
