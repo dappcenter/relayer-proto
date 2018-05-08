@@ -25,7 +25,8 @@ class Relayer {
    * @param {MessageBox} messenger
    * @param {Publisher} publisher
    */
-  constructor (EventHandler, Engine, Messenger, Publisher, logger) {
+  constructor (EventHandler, Engine, Messenger, Publisher, logger, connectDb) {
+    this.db = connectDb()
     this.logger = logger
     this.eventHandler = new EventHandler()
     this.engine = new Engine()
