@@ -15,6 +15,7 @@ describe('relayer', () => {
   let messenger
   let publisher
   let logger
+  let db
 
   beforeEach(() => {
     loadProto = {}
@@ -29,6 +30,7 @@ describe('relayer', () => {
       info: sinon.spy()
     }
     addServiceSpy = sinon.spy()
+    db = sinon.spy()
     server = sinon.stub()
     server.prototype.addService = addServiceSpy
     server.prototype.bind = sinon.spy()
@@ -48,7 +50,7 @@ describe('relayer', () => {
     })
     Relayer.__set__('listen', () => {})
 
-    relayer = new Relayer(eventHandler, engine, messenger, publisher, logger)
+    relayer = new Relayer(eventHandler, engine, messenger, publisher, logger, db)
   })
 
   afterEach(() => {
