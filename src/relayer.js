@@ -1,6 +1,6 @@
 const grpc = require('grpc')
 
-const { loadProto, addGrpcImplementation } = require('./utils')
+const { loadProto, addImplementations } = require('./grpc-utils')
 const maker = require('./maker')
 const taker = require('./taker')
 const paymentNetwork = require('./payment-network')
@@ -44,10 +44,10 @@ class Relayer {
     this.paymentNetwork = this.proto.PaymentNetwork.service
 
     this.server = new grpc.Server()
-    this.server.addService(this.maker, addGrpcImplementation(this, maker))
-    this.server.addService(this.taker, addGrpcImplementation(this, taker))
-    this.server.addService(this.paymentNetwork, addGrpcImplementation(this, paymentNetwork))
-    this.server.addService(this.orderbook, addGrpcImplementation(this, orderbook))
+    this.server.addService(this.maker, addImplementations(this, maker))
+    this.server.addService(this.taker, addImplementations(this, taker))
+    this.server.addService(this.paymentNetwork, addImplementations(this, paymentNetwork))
+    this.server.addService(this.orderbook, addImplementations(this, orderbook))
 
     try {
       this.listen()

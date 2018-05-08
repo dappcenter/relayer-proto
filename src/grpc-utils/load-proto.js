@@ -15,7 +15,7 @@ const PROTO_OPTIONS = {
  * @return {grpc proto}
  * @throws {Error} proto does not exist
  */
-function loadGrpc (protoPath) {
+function loadGrpcProto (protoPath) {
   if (!fs.existsSync(protoPath)) {
     throw new Error(`relayer.proto does not exist at ${protoPath}. please run 'npm run build'`)
   }
@@ -23,4 +23,4 @@ function loadGrpc (protoPath) {
   return grpc.load(protoPath, PROTO_FILE_TYPE, PROTO_OPTIONS)
 }
 
-module.exports = loadGrpc
+module.exports = loadGrpcProto

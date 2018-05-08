@@ -1,19 +1,17 @@
+const safeid = require('generate-safe-id')
+
+const { Market } = require('../models')
+
 /**
  * Stream of current state of order book and then will give you updates to the
  * order book.
  *
- * Orders
- * .where(baseSymbol = baseSymbol)
- * .where(counterSymbol = counterSymbol)
- * .series('SELECT * FROM Orders WHERE orderId = orderId LIMIT 1)
- * .where('status === 'PLACED' OR status === 'FILLING')
+ * @param {Object} req request data
+ * @param {grpc#call} call
+ * @return {Void}
  */
-
-const safeid = require('generate-safe-id')
-const { Market } = require('../models')
-
-async function watchMarket (call) {
-  const { baseSymbol, counterSymbol, lastUpdated } = call.request
+async function watchMarket (req, call) {
+  const { baseSymbol, counterSymbol, lastUpdated } = req
   const watcherId = safeid()
 
   this.logger.info('watchMarket: Received request to watch for market update', {

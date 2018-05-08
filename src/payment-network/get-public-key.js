@@ -1,15 +1,18 @@
-const { status } = require('grpc')
+const KEY_NOT_FOUND = 'Public key not found'
 
-async function getPublicKey (call, cb) {
-  const info = await this.engine.getInfo()
-  const { identityPubkey } = info
-
-  if (!identityPubkey) {
-    // eslint-disable-next-line
-    return cb({ message: `Public Key not available`, code: status.INVALID_ARGUMENT })
+/**
+ * Gets the relayers public key from our Engine instances
+ *
+ * @return {Array<Error, Object>} response
+ * @return {Array<Error, String>} error
+ */
+async function getPublicKey () {
+  try {
+    var info = await this.engine.getInfo()
+    return [null, { publicKey: info.identityPubkey }]
+  } catch (e) {
+    return [e, KEY_NOT_FOUND]
   }
-
-  return cb(null, { publicKey: identityPubkey })
 }
 
 module.exports = getPublicKey

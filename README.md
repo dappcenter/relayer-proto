@@ -62,6 +62,11 @@ localhost:27017 # MongoDB
 
 Using `GRPC_VERBOSITY=DEBUG` and `GRPC_TRACE=all` on the relayer is our best friend
 
+### Best practices for grpc event handlers
+
+1. use GrpcError classes for throwing errors that should be exposed to the client
+2. use `proto.YourResponseType` to identify the correct gprc response for your handler
+
 ### Documentation
 
 The following documents are materials that we have followed for developing this application

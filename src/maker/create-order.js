@@ -1,6 +1,6 @@
-const { status } = require('grpc')
 const bigInt = require('big-integer')
 
+const { FailedToCreateOrderError } = require('../errors')
 const { Order, Market, FeeInvoice, DepositInvoice } = require('../models')
 
 // ORDER_DEPOSIT is bigInt equivelent of 0.001
@@ -13,12 +13,44 @@ const ORDER_FEE = bigInt(1000)
 const INVOICE_EXPIRY = 120
 
 /**
- * Given a set of params, creates an order
+ * Create invoices in the relayer for a given order
  *
- * @param {*} createOrder RPC
- * @param {Function<err, message>} cb
+ * @todo Create a virtual attribute for order deposit to make sure this value is BigInt and not LONG
+ * @param {Order} order
+ * @return {Array<Invoice>} invoices
  */
-async function createOrder (call, cb) {
+async function generateInvoices (order, engine) {
+  const orderDeposit = ORDER_DEPOSIT.divide(order.baseAmount).value
+  const feeDeposit = ORDER_FEE.divide(order.baseAmount).value
+
+  // Create the invoices on the specified engine. If either of these calls fail, the
+  // invoices will be cleaned up after the expiry.
+  // TODO: prevent DDoS through invoice creation
+  const [deposit, fee] = Promise.all([
+    engine.addInvoice({ memo: order.orderId, expiry: INVOICE_EXPIRY, value: orderDeposit }),
+    engine.addInvoice({ memo: order.orderId, expiry: INVOICE_EXPIRY, value: feeDeposit })
+  ])
+
+  // Persist the invoices to the db
+  const [depositInvoice, feeInvoice] = Promise.all([
+    DepositInvoice.create({ foreignId: order._id, paymentRequest: deposit.paymentRequest, rHash: deposit.rHash }),
+    FeeInvoice.create({ foreignId: order._id, paymentRequest: fee.paymentRequest, rHash: fee.rHash })
+  ])
+
+  return [depositInvoice, feeInvoice]
+}
+
+/**
+ * Creates an order with the relayer
+ *
+ * @todo implement transactions to clean up data if any DB call fails
+ * @todo implement transaction so any invoice creations to lnd will be cleaned up
+ * @param {Object} req - request object
+ * @param {Grpc#Call} call - grpc call object
+ * @return {proto#CreateOrderResponse}
+ * @throws {GrpcError} client error
+ */
+async function createOrder (req, call) {
   const {
     payTo,
     ownerId,
@@ -27,82 +59,48 @@ async function createOrder (call, cb) {
     counterAmount,
     counterSymbol,
     side
-  } = call.request
+  } = req
 
-  //
-  // TODO: figure out what actions we want to take if fees/invoices cannot
-  //   be produced for this order
-  //
-  // TODO: figure out race condition where invoices are created, but we have failed
-  //   to create them in the db?
-  //
+  const market = Market.getByObject({
+    baseSymbol: String(baseSymbol),
+    counterSymbol: String(counterSymbol)
+  })
+
   try {
-    const market = Market.getByObject({
-      baseSymbol: String(baseSymbol),
-      counterSymbol: String(counterSymbol)
-    })
-
-    const params = {
+    var order = await Order.create({
       payTo: String(payTo),
       ownerId: String(ownerId),
       marketName: market.name,
       baseAmount: bigInt(baseAmount),
       counterAmount: bigInt(counterAmount),
       side: String(side)
-    }
-    const order = await Order.create(params)
-
-    this.logger.info('Order has been created', { ownerId, orderId: order.orderId })
-
-    // Create invoices w/ LND
-    //
-    const depositRequest = await this.engine.addInvoice({
-      memo: order.orderId,
-      // TODO: Create a virtual attribute to make sure this value is BigInt and not LONG
-      value: ORDER_DEPOSIT.divide(order.baseAmount).value,
-      expiry: INVOICE_EXPIRY
     })
-
-    const feeRequest = await this.engine.addInvoice({
-      memo: order.orderId,
-      // TODO: Create a virtual attribute to make sure this value is BigInt and not LONG
-      value: ORDER_FEE.divide(order.baseAmount).value,
-      expiry: INVOICE_EXPIRY
-    })
-
-    this.logger.info('Invoices have been created through LND')
-
-    // Persist the invoices to DB
-    const depositInvoice = await DepositInvoice.create({
-      foreignId: order._id,
-      paymentRequest: depositRequest.paymentRequest,
-      rHash: depositRequest.rHash
-    })
-
-    const feeInvoice = await FeeInvoice.create({
-      foreignId: order._id,
-      paymentRequest: feeRequest.paymentRequest,
-      rHash: feeRequest.rHash
-    })
-
-    this.logger.info('Invoices have been created through Relayer', {
-      deposit: depositInvoice._id,
-      fee: feeInvoice._id
-    })
-
-    this.eventHandler.emit('order:created', order)
-    this.logger.info('order:created', { orderId: order.orderId })
-
-    return cb(null, {
-      orderId: order.orderId,
-      depositPaymentRequest: depositInvoice.paymentRequest,
-      feePaymentRequest: feeInvoice.paymentRequest
-    })
-  } catch (e) {
-    this.logger.error('Invalid: Could not create order', { error: e.toString() })
-    // eslint-disable-next-line
-    return cb({ message: 'Could not create order', code: status.INTERNAL })
+  } catch (err) {
+    throw new FailedToCreateOrderError(err)
   }
+
+  this.logger.info('Order has been created', { ownerId, orderId: order.orderId })
+
+  try {
+    var [depositInvoice, feeInvoice] = await generateInvoices(order, this.engine)
+  } catch (err) {
+    throw new FailedToCreateOrderError(err)
+  }
+
+  this.logger.info('Invoices have been created through Relayer', {
+    deposit: depositInvoice._id,
+    fee: feeInvoice._id
+  })
+
+  this.eventHandler.emit('order:created', order)
+
+  this.logger.info('order:created', { orderId: order.orderId })
+
+  return new this.proto.CreateOrderResponse({
+    orderId: order.orderId,
+    depositPaymentRequest: depositInvoice.paymentRequest,
+    feePaymentRequest: feeInvoice.paymentRequest
+  })
 }
 
 module.exports = createOrder
