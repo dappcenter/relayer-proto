@@ -50,8 +50,7 @@ class Relayer {
     this.server.addService(this.taker, addImplementations(this, taker))
     this.server.addService(this.paymentNetwork, addImplementations(this, paymentNetwork))
     this.server.addService(this.orderbook, addImplementations(this, orderbook))
-    this.server.addService(this.health, addImplementations(this, health)
-
+    this.server.addService(this.health, addImplementations(this, health))
 
     try {
       this.listen()

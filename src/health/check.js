@@ -7,7 +7,6 @@ const STATUS_OK = 'OK'
  * @return {proto#HealthCheckResponse}
  */
 async function check (req, call) {
-
   return new this.proto.HealthCheckResponse({
     status: STATUS_OK
   })

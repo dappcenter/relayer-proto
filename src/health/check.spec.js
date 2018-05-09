@@ -1,13 +1,23 @@
-const check = require('./check')
-const { chai, sinon } = require('test/test-helper.spec')
+const path = require('path')
+const { chai, sinon, rewire } = require('test/test-helper.spec')
 const { expect } = chai
+const checkPath = path.resolve('src', 'health', 'check')
+const check = rewire(checkPath)
 
 describe('check', () => {
-  let cbSpy
-  cbSpy = sinon.spy()
+  let revert
+  let protoStub
+  let healthCheckResponseStub
 
-  it('calls the cb with the correct args', () => {
-    check(null, cbSpy)
-    expect(cbSpy).calledWith(null, {status: 'SERVING'})
+  healthCheckResponseStub = sinon.stub().callsFake((res) => res)
+  protoStub = { HealthCheckResponse: healthCheckResponseStub }
+  revert = check.__set__('proto', protoStub)
+
+  afterEach(() => {
+    revert()
+  })
+
+  it('returns the status', async () => {
+    expect(await check(null, null)).to.eql({status: 'OK'})
   })
 })

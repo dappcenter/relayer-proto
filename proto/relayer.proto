@@ -6,16 +6,12 @@ enum Side {
     ASK = 1;
 }
 
-message HealthCheckRequest {
-  string service = 1;
-}
-
 message HealthCheckResponse {
-  string status = 1;
-}
 
+    string status = 1;
+}
 service Health {
-  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+    rpc Check (google.protobuf.Empty) returns (HealthCheckResponse);
 }
 
 message CreateOrderRequest {
