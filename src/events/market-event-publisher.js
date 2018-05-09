@@ -52,6 +52,7 @@ class MarketEventPublisher {
   removeFromState (event, force = false) {
     if (force || this._currentStateLoaded) {
       // TODO: input checking here?
+      // what if the event is not in here? Would we remove the last item in the last (index -1)?
       const index = this.markets[event.marketName].findIndex(ev => ev.orderId === event.orderId)
       this.markets[event.marketName].splice(index, 1)
     } else {
@@ -72,8 +73,7 @@ class MarketEventPublisher {
     this._currentStateLoaded = false
     this._addBuffer = []
     this._removeBuffer = []
-    // TODO: what we really want is to say: give me all events for which orderId is unique
-    const eventStream = MarketEvent.find().cursor()
+    const eventStream = MarketEvent.find().sort('timestamp').cursor()
     eventStream.on('data', event => this.modifyState(event))
     eventStream.on('end', () => {
       this._currentStateLoaded = true

@@ -1,35 +1,39 @@
-const { mock, chai, sinon } = require('test/test-helper.spec')
+const { expect, mock, sinon } = require('test/test-helper.spec')
 
-const { expect } = chai
-
-class GrpcServer {
-  listen () {}
-}
-
-describe('Relayer', () => {
-  let Relayer
-
-  const fakeDb = sinon.spy()
-  const fakeLogger = sinon.spy()
-  const fakeEngine = sinon.spy()
-  const fakeServer = sinon.spy(() => sinon.createStubInstance(GrpcServer))
+describe('index', () => {
+  let relayerStub
+  let eventEmitter
+  let logger
+  let db
+  let messageBox
+  let marketEventPublisher
+  let lndEngine
 
   beforeEach(() => {
-    // Setup utils
-    mock('./utils', {
-      db: fakeDb,
-      logger: { error: fakeLogger }
-    })
-    mock('./events', {})
-    mock('./grpc-server', fakeServer)
-    mock('lnd-engine', fakeEngine)
+    relayerStub = sinon.stub()
+    eventEmitter = 'EventEmitter'
+    logger = 'Logger'
+    db = sinon.stub()
+    messageBox = 'MessageBox'
+    marketEventPublisher = 'MarketEventPublisher'
+    lndEngine = {}
 
-    Relayer = require('./index')
+    mock('lnd-engine', lndEngine)
+    mock('events', { EventEmitter: eventEmitter })
+    mock('./utils', { logger, db })
+    mock('./messaging', { MessageBox: messageBox })
+    mock('./events', { MarketEventPublisher: marketEventPublisher })
+    mock('./relayer', relayerStub)
   })
 
-  describe('intialization', () => {
-    it('returns an intance of a db', () => {
-      expect(Relayer.db).to.eq(fakeDb)
-    })
+  afterEach(() => {
+    mock.stopAll()
+  })
+
+  it('initializes the relayer', () => {
+    require('./index')
+    expect(relayerStub).to.have.been.calledWith(
+      eventEmitter, lndEngine, messageBox, marketEventPublisher, logger, db
+    )
   })
 })
