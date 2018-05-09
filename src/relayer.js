@@ -7,7 +7,6 @@ const paymentNetwork = require('./payment-network')
 const orderbook = require('./orderbook')
 const health = require('./health')
 
-
 const DEFAULT_GRPC_HOST = '0.0.0.0:28492'
 const RELAYER_PROTO_PATH = '../proto/relayer.proto'
 
@@ -52,6 +51,7 @@ class Relayer {
     this.server.addService(this.paymentNetwork, addImplementations(this, paymentNetwork))
     this.server.addService(this.orderbook, addImplementations(this, orderbook))
     this.server.addService(this.health, addImplementations(this, health)
+
 
     try {
       this.listen()
