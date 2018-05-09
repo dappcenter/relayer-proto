@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+message HealthCheckResponse {
+  string status = 0;
+}
+
+service Health {
+  rpc Check(google.protobuf.Empty) returns (HealthCheckResponse);
+}

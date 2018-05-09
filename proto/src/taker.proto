@@ -17,8 +17,8 @@ message CreateFillResponse {
 
 message FillOrderRequest {
   string fill_id = 0;
-  string deposit_refund_payment_request = 2;
-  string fee_refund_payment_request = 1;
+  string deposit_refund_payment_request = 1;
+  string fee_refund_payment_request = 2;
 }
 
 message SubscribeExecuteRequest {
