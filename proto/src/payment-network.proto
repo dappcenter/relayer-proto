@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+message GetPublicKeyResponse {
+  string public_key = 0;
+}
+
+service PaymentNetwork{
+  rpc GetPublicKey (google.protobuf.Empty) returns (GetPublicKeyResponse);
+}
