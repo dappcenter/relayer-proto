@@ -8,18 +8,12 @@ enum Side {
 
 message HealthCheckResponse {
 
-<<<<<<< HEAD
-    string status = 1;
-=======
     string status = 0;
->>>>>>> master
 }
 service Health {
     rpc Check (google.protobuf.Empty) returns (HealthCheckResponse);
 }
 
-<<<<<<< HEAD
-=======
 message google {
 
     message protobuf {
@@ -29,7 +23,6 @@ message google {
     }
 }
 
->>>>>>> master
 message CreateOrderRequest {
 
     string pay_to = 0;
