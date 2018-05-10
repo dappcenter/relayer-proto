@@ -51,10 +51,22 @@ async function watchMarket (req, call) {
     }
 
     oldEvents.forEach((event) => {
-      call.write(event.serialize())
+      call.write(new this.proto.WatchMarketResponse({
+        type: this.proto.WatchMarketResponse.ResponseTypes.EXISTING_EVENT,
+        marketEvent: event.serialize()
+      }))
     })
 
-    this.logger.info(`watchMarket: Wrote ${oldEvents.length} events as update`, {
+    this.logger.info(`watchMarket: Wrote ${oldEvents.length} existing events as update`, {
+      marketName: market.name,
+      watcherId
+    })
+
+    call.write(new this.proto.WatchMarketResponse({
+      type: this.proto.WatchMarketResponse.ResponseTypes.EXISTING_EVENTS_DONE
+    }))
+
+    this.logger.info(`watchMarket: send EXISTING_EVENTS_DONE to notify client they are caught up`, {
       marketName: market.name,
       watcherId
     })
@@ -67,9 +79,12 @@ async function watchMarket (req, call) {
         eventType: event.type
       })
 
-      call.write(event.serialize())
+      call.write(new this.proto.WatchMarketResponse({
+        type: this.proto.WatchMarketResponse.ResponseTypes.NEW_EVENT,
+        marketEvent: event.serialize()
+      }))
 
-      this.logger.info('watchMarket: Wrote market event to listener stream', {
+      this.logger.info('watchMarket: Wrote new market event to listener stream', {
         watcherId,
         event: event.serialize()
       })
