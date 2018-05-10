@@ -9,14 +9,30 @@ message MarketEvent {
     FILLED = 2;
   }
 
+  // Event Metadata
   string event_id = 0;
-  string order_id = 1;
-  int32 timestamp = 2;
-  EventType event_type = 3;
-  int64 base_amount = 4;
-  int64 counter_amount = 5;
-  int64 fill_amount = 6;
-  Side side = 7;
+  EventType event_type = 1;
+  int64 timestamp = 2;
+  string order_id = 3;
+  
+  // Order data
+  int64 base_amount = 10;
+  int64 counter_amount = 11;
+  Side side = 12;
+
+  // Fill data
+  int64 fill_amount = 20; 
+}
+
+message WatchMarketResponse {
+  enum ResponseType {
+    NEW_EVENT = 1;
+    EXISTING_EVENT = 2;
+    EXISTING_EVENTS_DONE = 3;
+  }
+
+  ResponseType type = 0;
+  optional MarketEvent market_event = 1;
 }
 
 message WatchMarketRequest {
@@ -26,5 +42,5 @@ message WatchMarketRequest {
 }
 
 service OrderBook {
-  rpc WatchMarket (WatchMarketRequest) returns (stream MarketEvent);
+  rpc WatchMarket (WatchMarketRequest) returns (stream WatchMarketResponse);
 }
