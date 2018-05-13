@@ -20,6 +20,8 @@ const { expect, Assertion } = chai
 chai.use(dirtyChai)
 chai.use(sinonChai)
 
+let sandbox = sinon.createSandbox()
+
 before(async () => {
   await mockgoose.prepareStorage()
   await mongoose.connect('mongodb://testdb')
@@ -35,12 +37,8 @@ after(async () => {
   await retval
 })
 
-beforeEach(function () {
-  this.sandbox = sinon.sandbox.create()
-})
-
 afterEach(async function () {
-  this.sandbox.restore()
+  sandbox.restore()
   await mockgoose.helper.reset()
 })
 
@@ -55,7 +53,7 @@ Assertion.addMethod('implemented', function () {
 module.exports = {
   chai,
   expect,
-  sinon,
+  sinon: sandbox,
   mock,
   rewire
 }

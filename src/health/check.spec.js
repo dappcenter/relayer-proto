@@ -1,5 +1,5 @@
 const path = require('path')
-const { chai, sinon, rewire } = require('test/test-helper.spec')
+const { chai, sinon, rewire } = require('test/test-helper')
 const { expect } = chai
 const checkPath = path.resolve('src', 'health', 'check')
 const check = rewire(checkPath)
