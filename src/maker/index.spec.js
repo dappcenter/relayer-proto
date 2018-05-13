@@ -1,4 +1,4 @@
-const { expect, mock } = require('test/test-helper.spec')
+const { expect, mock } = require('test/test-helper')
 
 describe('payment-network index', () => {
   let maker

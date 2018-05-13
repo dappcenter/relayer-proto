@@ -1,5 +1,5 @@
 const path = require('path')
-const { expect, rewire, sinon } = require('test/test-helper.spec')
+const { expect, rewire, sinon } = require('test/test-helper')
 
 const { PublicError } = require('../errors')
 const addImplementationsPath = path.resolve('src', 'grpc-utils', 'add-implementations')

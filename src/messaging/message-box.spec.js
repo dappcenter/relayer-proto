@@ -1,4 +1,4 @@
-const { sinon } = require('test/test-helper.spec')
+const { sinon } = require('test/test-helper')
 
 const MessageBox = require('./message-box')
 

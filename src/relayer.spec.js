@@ -1,5 +1,5 @@
 const path = require('path')
-const { sinon, mock, rewire, expect } = require('test/test-helper.spec')
+const { sinon, mock, rewire, expect } = require('test/test-helper')
 
 const relayerPath = path.resolve('src', 'relayer')
 const Relayer = rewire(relayerPath)

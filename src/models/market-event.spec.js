@@ -1,4 +1,4 @@
-const { chai, sinon, mock } = require('test/test-helper.spec')
+const { chai, sinon, mock } = require('test/test-helper')
 const mongoose = require('mongoose')
 
 const { expect } = chai

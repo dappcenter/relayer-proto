@@ -1,4 +1,4 @@
-const { expect } = require('test/test-helper.spec')
+const { expect } = require('test/test-helper')
 
 const PublicError = require('./public-error')
 

@@ -1,5 +1,5 @@
 const path = require('path')
-const { expect, rewire } = require('test/test-helper.spec')
+const { expect, rewire } = require('test/test-helper')
 
 const getPublicKeyPath = path.resolve('src', 'payment-network', 'get-public-key')
 const getPublicKey = rewire(getPublicKeyPath)

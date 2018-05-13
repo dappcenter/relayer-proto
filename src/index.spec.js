@@ -1,4 +1,4 @@
-const { expect, mock, sinon } = require('test/test-helper.spec')
+const { expect, mock, sinon } = require('test/test-helper')
 
 describe('index', () => {
   let relayerStub

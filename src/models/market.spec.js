@@ -1,13 +1,9 @@
-const { mock, chai, sinon } = require('test/test-helper.spec')
+const { mock, chai } = require('test/test-helper')
 
 const { expect } = chai
 
 describe('Market', () => {
   let Market
-  let sandbox
-
-  before(() => { sandbox = sinon.sandbox.create() })
-  afterEach(() => { sandbox.restore() })
 
   beforeEach(() => {
     mock('../../config/markets', [
