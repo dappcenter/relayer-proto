@@ -1,4 +1,4 @@
-version: '2'
+version: '2.4'
 
 services:
   # Kinesis Relayer
@@ -53,7 +53,7 @@ services:
     networks:
       - relayer
     sysctls:
-      net.core.somaxconn: '511'
+    - net.core.somaxconn: '511'
 
   # These services are imported from the lnd-engine
   repl:
