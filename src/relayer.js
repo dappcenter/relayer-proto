@@ -1,11 +1,10 @@
 const grpc = require('grpc')
 
-const { loadProto, addImplementations } = require('./grpc-utils')
-const maker = require('./maker')
-const taker = require('./taker')
-const paymentNetwork = require('./payment-network')
-const orderbook = require('./orderbook')
-const health = require('./health')
+const HealthService = require('./health-service')
+const OrderBookService = require('./orderbook-service')
+const MakerService = require('./maker-service')
+const TakerService = require('./taker-service')
+const PaymentNetworkService = require('./payment-network-service')
 
 const DEFAULT_GRPC_HOST = '0.0.0.0:28492'
 const RELAYER_PROTO_PATH = '../proto/relayer.proto'
@@ -36,21 +35,24 @@ class Relayer {
 
     this.host = process.env.RELAYER_GRPC_HOST || DEFAULT_GRPC_HOST
 
-    this.protoPath = require.resolve(RELAYER_PROTO_PATH)
-    this.proto = loadProto(this.protoPath)
-
-    this.maker = this.proto.Maker.service
-    this.taker = this.proto.Taker.service
-    this.orderbook = this.proto.OrderBook.service
-    this.paymentNetwork = this.proto.PaymentNetwork.service
-    this.health = this.proto.Health.service
-
     this.server = new grpc.Server()
-    this.server.addService(this.maker, addImplementations(this, maker))
-    this.server.addService(this.taker, addImplementations(this, taker))
-    this.server.addService(this.paymentNetwork, addImplementations(this, paymentNetwork))
-    this.server.addService(this.orderbook, addImplementations(this, orderbook))
-    this.server.addService(this.health, addImplementations(this, health))
+
+    this.protoPath = require.resolve(RELAYER_PROTO_PATH)
+
+    this.healthService = new HealthService(this.protoPath, this)
+    this.server.addService(this.healthService.definition, this.healthService.implementation)
+
+    this.orderBookService = new OrderBookService(this.protoPath, this)
+    this.server.addService(this.orderBookService.definition, this.orderBookService.implementation)
+
+    this.makerService = new MakerService(this.protoPath, this)
+    this.server.addService(this.makerService.definition, this.makerService.implementation)
+
+    this.takerService = new TakerService(this.protoPath, this)
+    this.server.addService(this.takerService.definition, this.takerService.implementation)
+
+    this.paymentNetworkService = new PaymentNetworkService(this.protoPath, this)
+    this.server.addService(this.paymentNetworkService.definition, this.paymentNetworkService.implementation)
 
     try {
       this.listen()

@@ -12,13 +12,16 @@ const rewire = require('rewire')
 const { Mockgoose } = require('mockgoose')
 const dirtyChai = require('dirty-chai')
 const sinonChai = require('sinon-chai')
+const chaiAsPromised = require('chai-as-promised')
 const mongoose = require('mongoose')
 const mockgoose = new Mockgoose(mongoose)
+const delay = require('timeout-as-promise')
 
 const { expect, Assertion } = chai
 
 chai.use(dirtyChai)
 chai.use(sinonChai)
+chai.use(chaiAsPromised)
 
 let sandbox = sinon.createSandbox()
 
@@ -55,5 +58,6 @@ module.exports = {
   expect,
   sinon: sandbox,
   mock,
-  rewire
+  rewire,
+  delay
 }
