@@ -53,7 +53,7 @@ services:
     networks:
       - relayer
     sysctls:
-    - net.core.somaxconn: '511'
+      net.core.somaxconn: '511'
 
   # These services are imported from the lnd-engine
   repl:
