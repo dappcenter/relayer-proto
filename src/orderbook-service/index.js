@@ -1,4 +1,4 @@
-const { GrpcServerStreamingMethod, loadProto } = require('../grpc-service')
+const { GrpcServerStreamingMethod, loadProto } = require('grpc-methods')
 const watchMarket = require('./watch-market')
 
 class OrderBookService {

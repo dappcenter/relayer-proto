@@ -1,4 +1,4 @@
-const PublicError = require('./public-error')
+const { PublicError } = require('grpc-methods')
 
 class FailedToCreateOrderError extends PublicError {
   constructor (err) {

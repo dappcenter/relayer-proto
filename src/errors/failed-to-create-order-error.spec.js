@@ -1,9 +1,9 @@
 const { expect } = require('test/test-helper')
 
-const PublicError = require('./public-error')
+const { PublicError } = require('grpc-methods')
 const FailedToCreateOrderError = require('./failed-to-create-order-error')
 
-describe('public-error', () => {
+describe('failed-to-create-order-error', () => {
   let createOrderError
   let err
 
@@ -13,7 +13,7 @@ describe('public-error', () => {
     createOrderError = new FailedToCreateOrderError(err)
   })
 
-  it('inherits from Error', () => {
+  it('inherits from PublicError', () => {
     expect(createOrderError instanceof PublicError).to.be.true()
   })
 

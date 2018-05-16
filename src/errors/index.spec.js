@@ -4,7 +4,7 @@ describe('errors index', () => {
   let errors
 
   beforeEach(() => {
-    mock('./public-error', {})
+    mock('grpc-methods', { PublicError: {} })
     mock('./failed-to-create-order-error', {})
 
     errors = require('./index')

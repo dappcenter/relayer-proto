@@ -1,5 +1,5 @@
 const check = require('./check')
-const { GrpcUnaryMethod, loadProto } = require('../grpc-service')
+const { GrpcUnaryMethod, loadProto } = require('grpc-methods')
 
 /**
  * @class grpc service for use in grpc.Server#addService
