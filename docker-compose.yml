@@ -13,6 +13,7 @@ services:
     depends_on:
       - mongo
       - redis
+      - lnd_btc
     environment:
       # - GRPC_VERBOSITY=INFO
       # - GRPC_TRACE=all
@@ -61,7 +62,8 @@ services:
       service: lnd_btc
     build:
       context: ./docker
-
+    depends_on:
+      - btcd
 
   btcd:
     extends:
