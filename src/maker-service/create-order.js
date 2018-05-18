@@ -26,13 +26,13 @@ async function generateInvoices (order, engine) {
   // Create the invoices on the specified engine. If either of these calls fail, the
   // invoices will be cleaned up after the expiry.
   // TODO: prevent DDoS through invoice creation
-  const [deposit, fee] = Promise.all([
+  const [deposit, fee] = await Promise.all([
     engine.addInvoice({ memo: order.orderId, expiry: INVOICE_EXPIRY, value: orderDeposit }),
     engine.addInvoice({ memo: order.orderId, expiry: INVOICE_EXPIRY, value: feeDeposit })
   ])
 
   // Persist the invoices to the db
-  const [depositInvoice, feeInvoice] = Promise.all([
+  const [depositInvoice, feeInvoice] = await Promise.all([
     DepositInvoice.create({ foreignId: order._id, paymentRequest: deposit.paymentRequest, rHash: deposit.rHash }),
     FeeInvoice.create({ foreignId: order._id, paymentRequest: fee.paymentRequest, rHash: fee.rHash })
   ])
