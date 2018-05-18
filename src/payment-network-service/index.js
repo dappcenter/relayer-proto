@@ -1,4 +1,5 @@
-const { GrpcUnaryMethod, loadProto } = require('grpc-methods')
+const { GrpcUnaryMethod } = require('grpc-methods')
+const { loadProto } = require('../utils')
 const getPublicKey = require('./get-public-key')
 
 class PaymentNetworkService {

@@ -1,4 +1,5 @@
-const { GrpcUnaryMethod, GrpcServerStreamingMethod, loadProto } = require('grpc-methods')
+const { GrpcUnaryMethod, GrpcServerStreamingMethod } = require('grpc-methods')
+const { loadProto } = require('../utils')
 const createOrder = require('./create-order')
 const placeOrder = require('./place-order')
 const subscribeFill = require('./subscribe-fill')
