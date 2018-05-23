@@ -13,8 +13,8 @@ const KEY_NOT_FOUND = 'Public key not found'
  */
 async function getPublicKey ({ engine }, { GetPublicKeyResponse }) {
   try {
-    var info = await engine.getInfo()
-    return new GetPublicKeyResponse({ publicKey: info.identityPubkey })
+    const publicKey = await engine.info.publicKey()
+    return new GetPublicKeyResponse({ publicKey })
   } catch (e) {
     throw new PublicError(e, KEY_NOT_FOUND)
   }

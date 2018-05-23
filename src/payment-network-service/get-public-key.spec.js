@@ -1,25 +1,27 @@
 const path = require('path')
 const { expect, rewire, sinon } = require('test/test-helper')
 
-const getPublicKeyPath = path.resolve('src', 'payment-network-service', 'get-public-key')
-const getPublicKey = rewire(getPublicKeyPath)
+const getPublicKey = rewire(path.resolve(__dirname, 'get-public-key'))
 
 describe('getPublicKey', () => {
   let engine
   let publicKey
-  let response
   let GetPublicKeyResponse
+  let publicKeyStub
 
   beforeEach(() => {
     publicKey = '12345'
-    response = { identityPubkey: publicKey }
-    engine = { getInfo: () => response }
+    publicKeyStub = sinon.stub().returns(publicKey)
+    engine = {
+      info: { publicKey: publicKeyStub }
+    }
     GetPublicKeyResponse = sinon.stub().returnsArg(0)
   })
 
   it('calls an engine to get public key info', async () => {
     const res = await getPublicKey({ engine }, { GetPublicKeyResponse })
     const expectedResponse = { publicKey: publicKey }
+    expect(publicKeyStub).to.have.been.calledOnce()
     expect(res).to.eql(expectedResponse)
   })
 

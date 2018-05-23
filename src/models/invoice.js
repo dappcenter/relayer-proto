@@ -28,7 +28,6 @@ const options = { discriminatorKey: 'kind' }
 const invoiceSchema = new Schema({
   foreignId: { type: String, required: true },
   foreignType: { type: String, required: true, enum: Object.values(FOREIGN_TYPES) },
-  paymentRequest: { type: String, required: true },
   rHash: { type: String, required: true },
   type: { type: String, required: true, enum: Object.values(INVOICE_TYPES) },
   purpose: { type: String, required: true, enum: Object.values(INVOICE_PURPOSES) }

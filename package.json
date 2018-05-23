@@ -35,7 +35,6 @@
     "generate-safe-id": "1.0.2",
     "grpc": "1.11.3",
     "grpc-methods": "github:kinesis-exchange/grpc-methods",
-    "lnd-engine": "github:kinesis-exchange/lnd-engine",
     "mongoose": "5.0.12",
     "mongoose-long": "0.2.0",
     "nano-seconds": "1.2.2",

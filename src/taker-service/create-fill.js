@@ -68,19 +68,7 @@ async function createFill ({ params, logger, eventHandler }, { CreateFillRespons
   // This code theoretically will work for LND payments, but I need to hook
   // up a node so that we can test it (preferably on testnet)
   //
-  // const depositRequest = await this.engine.addInvoice({
-  //   memo: depositMemo,
-  //   value: 10,
-  //   expiry: INVOICE_EXPIRY,
-  // });
-  // const feeRequest = await this.engine.addInvoice({
-  //   memo: feeMemo,
-  //   value: 10,
-  //   expiry: INVOICE_EXPIRY,
-  // });
-  //
-  // const depositPaymentRequest = depositRequest.payment_request;
-  // const feePaymentRequest = feeRequest.payment_request;
+  // SEE: create-order for an example of creating invoices
 
   const depositPaymentRequest = 'TESTFILLDEPOSIT'
   const feePaymentRequest = 'TESTFILLFEE'

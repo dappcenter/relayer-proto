@@ -48,7 +48,7 @@ async function completeOrder ({ params, logger, eventHandler }, { CompleteOrderR
   if (!orderDepositRefundInvoice) {
     logger.error('No refund invoice found for order', { orderId: order.orderId })
   } else {
-    // await this.engine.sendPayment(orderDepositRefundInvoice.paymentRequest);
+    // pay the refund invoice
   }
 
   const fillDepositRefundInvoice = await Invoice.findOne({
@@ -61,7 +61,7 @@ async function completeOrder ({ params, logger, eventHandler }, { CompleteOrderR
   if (!fillDepositRefundInvoice) {
     logger.error('No refund invoice found for fill on order', { orderId: order.orderId })
   } else {
-    // await this.engine.sendPayment(fillDepositRefundInvoice.paymentRequest);
+    // pay the refund invoice
   }
 
   await order.complete()
