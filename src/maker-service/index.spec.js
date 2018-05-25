@@ -31,7 +31,7 @@ describe('MakerService', () => {
   beforeEach(() => {
     protoPath = 'fakePath'
     proto = {
-      Maker: {
+      MakerService: {
         service: 'fakeService'
       },
       CreateOrderResponse: sinon.stub(),
@@ -100,13 +100,13 @@ describe('MakerService', () => {
 
   it('assigns the definition', () => {
     expect(server).to.have.property('definition')
-    expect(server.definition).to.be.equal(proto.Maker.service)
+    expect(server.definition).to.be.equal(proto.MakerService.service)
   })
 
   it('creates a name', () => {
     expect(server).to.have.property('serviceName')
     expect(server.serviceName).to.be.a('string')
-    expect(server.serviceName).to.be.eql('Maker')
+    expect(server.serviceName).to.be.eql('MakerService')
   })
 
   it('exposes an implementation', () => {
@@ -138,7 +138,7 @@ describe('MakerService', () => {
     })
 
     it('provides a message id', () => {
-      expect(callArgs[1]).to.be.equal('[Maker:createOrder]')
+      expect(callArgs[1]).to.be.equal('[MakerService:createOrder]')
     })
 
     describe('request options', () => {
@@ -187,7 +187,7 @@ describe('MakerService', () => {
     })
 
     it('provides a message id', () => {
-      expect(callArgs[1]).to.be.equal('[Maker:placeOrder]')
+      expect(callArgs[1]).to.be.equal('[MakerService:placeOrder]')
     })
 
     describe('request options', () => {
@@ -231,7 +231,7 @@ describe('MakerService', () => {
     })
 
     it('provides a message id', () => {
-      expect(callArgs[1]).to.be.equal('[Maker:subscribeFill]')
+      expect(callArgs[1]).to.be.equal('[MakerService:subscribeFill]')
     })
 
     describe('request options', () => {
@@ -280,7 +280,7 @@ describe('MakerService', () => {
     })
 
     it('provides a message id', () => {
-      expect(callArgs[1]).to.be.equal('[Maker:executeOrder]')
+      expect(callArgs[1]).to.be.equal('[MakerService:executeOrder]')
     })
 
     describe('request options', () => {
@@ -329,7 +329,7 @@ describe('MakerService', () => {
     })
 
     it('provides a message id', () => {
-      expect(callArgs[1]).to.be.equal('[Maker:completeOrder]')
+      expect(callArgs[1]).to.be.equal('[MakerService:completeOrder]')
     })
 
     describe('request options', () => {
@@ -373,7 +373,7 @@ describe('MakerService', () => {
     })
 
     it('provides a message id', () => {
-      expect(callArgs[1]).to.be.equal('[Maker:cancelOrder]')
+      expect(callArgs[1]).to.be.equal('[MakerService:cancelOrder]')
     })
 
     describe('request options', () => {

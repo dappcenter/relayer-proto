@@ -13,8 +13,8 @@ class MakerService {
     this.proto = loadProto(this.protoPath)
     this.logger = logger
 
-    this.definition = this.proto.Maker.service
-    this.serviceName = 'Maker'
+    this.definition = this.proto.MakerService.service
+    this.serviceName = 'MakerService'
 
     const { CreateOrderResponse,
       PlaceOrderResponse,

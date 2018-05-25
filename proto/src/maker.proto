@@ -47,7 +47,7 @@ message CompleteOrderRequest {
   bytes swap_preimage = 1;
 }
 
-service Maker {
+service MakerService {
   rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse);
   rpc PlaceOrder (PlaceOrderRequest) returns (google.protobuf.Empty);
   rpc CancelOrder (CancelOrderRequest) returns (google.protobuf.Empty);
