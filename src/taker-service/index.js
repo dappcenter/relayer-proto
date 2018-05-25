@@ -10,8 +10,8 @@ class TakerService {
     this.proto = loadProto(this.protoPath)
     this.logger = logger
 
-    this.serviceName = 'Taker'
-    this.definition = this.proto.Taker.service
+    this.serviceName = 'TakerService'
+    this.definition = this.proto.TakerService.service
 
     const { CreateFillResponse, FillOrderResponse, SubscribeExecuteResponse } = this.proto
 
