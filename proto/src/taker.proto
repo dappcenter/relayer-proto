@@ -29,7 +29,7 @@ message SubscribeExecuteResponse {
   string pay_to = 0;
 }
 
-service Taker {
+service TakerService {
   rpc CreateFill (CreateFillRequest) returns (CreateFillResponse);
   rpc FillOrder (FillOrderRequest) returns (google.protobuf.Empty);
   rpc SubscribeExecute (SubscribeExecuteRequest) returns (stream SubscribeExecuteResponse);

@@ -16,7 +16,7 @@ const PROTO_GRPC_OPTIONS = {
 const TEST_ADDRESS = '0.0.0.0:28492'
 
 const proto = grpc.load(PROTO_PATH, PROTO_GRPC_TYPE, PROTO_GRPC_OPTIONS)
-const maker = new proto.Maker(TEST_ADDRESS, grpc.credentials.createInsecure())
+const maker = new proto.MakerService(TEST_ADDRESS, grpc.credentials.createInsecure())
 
 const order = {
   ownerId: '123455678',

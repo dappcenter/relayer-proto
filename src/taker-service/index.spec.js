@@ -28,7 +28,7 @@ describe('TakerService', () => {
   beforeEach(() => {
     protoPath = 'fakePath'
     proto = {
-      Taker: {
+      TakerService: {
         service: 'fakeService'
       },
       CreateFillResponse: sinon.stub(),
@@ -88,13 +88,13 @@ describe('TakerService', () => {
 
   it('assigns the definition', () => {
     expect(server).to.have.property('definition')
-    expect(server.definition).to.be.equal(proto.Taker.service)
+    expect(server.definition).to.be.equal(proto.TakerService.service)
   })
 
   it('creates a name', () => {
     expect(server).to.have.property('serviceName')
     expect(server.serviceName).to.be.a('string')
-    expect(server.serviceName).to.be.eql('Taker')
+    expect(server.serviceName).to.be.eql('TakerService')
   })
 
   it('exposes an implementation', () => {
@@ -126,7 +126,7 @@ describe('TakerService', () => {
     })
 
     it('provides a message id', () => {
-      expect(callArgs[1]).to.be.equal('[Taker:createFill]')
+      expect(callArgs[1]).to.be.equal('[TakerService:createFill]')
     })
 
     describe('request options', () => {
@@ -175,7 +175,7 @@ describe('TakerService', () => {
     })
 
     it('provides a message id', () => {
-      expect(callArgs[1]).to.be.equal('[Taker:fillOrder]')
+      expect(callArgs[1]).to.be.equal('[TakerService:fillOrder]')
     })
 
     describe('request options', () => {
@@ -224,7 +224,7 @@ describe('TakerService', () => {
     })
 
     it('provides a message id', () => {
-      expect(callArgs[1]).to.be.equal('[Taker:subscribeExecute]')
+      expect(callArgs[1]).to.be.equal('[TakerService:subscribeExecute]')
     })
 
     describe('request options', () => {

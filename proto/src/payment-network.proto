@@ -6,6 +6,6 @@ message GetPublicKeyResponse {
   string public_key = 0;
 }
 
-service PaymentNetwork{
+service PaymentNetworkService{
   rpc GetPublicKey (google.protobuf.Empty) returns (GetPublicKeyResponse);
 }
