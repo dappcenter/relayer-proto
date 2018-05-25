@@ -24,7 +24,7 @@ describe('OrderBookService', () => {
   beforeEach(() => {
     protoPath = 'fakePath'
     proto = {
-      OrderBook: {
+      OrderBookService: {
         service: 'fakeService'
       },
       WatchMarketResponse: sinon.stub()
@@ -76,13 +76,13 @@ describe('OrderBookService', () => {
 
   it('assigns the definition', () => {
     expect(server).to.have.property('definition')
-    expect(server.definition).to.be.equal(proto.OrderBook.service)
+    expect(server.definition).to.be.equal(proto.OrderBookService.service)
   })
 
   it('creates a name', () => {
     expect(server).to.have.property('serviceName')
     expect(server.serviceName).to.be.a('string')
-    expect(server.serviceName).to.be.eql('OrderBook')
+    expect(server.serviceName).to.be.eql('OrderBookService')
   })
 
   it('exposes an implementation', () => {
@@ -114,7 +114,7 @@ describe('OrderBookService', () => {
     })
 
     it('provides a message id', () => {
-      expect(callArgs[1]).to.be.equal('[OrderBook:watchMarket]')
+      expect(callArgs[1]).to.be.equal('[OrderBookService:watchMarket]')
     })
 
     describe('request options', () => {

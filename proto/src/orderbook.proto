@@ -14,14 +14,14 @@ message MarketEvent {
   EventType event_type = 1;
   int64 timestamp = 2;
   string order_id = 3;
-  
+
   // Order data
   int64 base_amount = 10;
   int64 counter_amount = 11;
   Side side = 12;
 
   // Fill data
-  int64 fill_amount = 20; 
+  int64 fill_amount = 20;
 }
 
 message WatchMarketResponse {
@@ -41,6 +41,6 @@ message WatchMarketRequest {
   optional int64 last_updated = 2;
 }
 
-service OrderBook {
+service OrderBookService {
   rpc WatchMarket (WatchMarketRequest) returns (stream WatchMarketResponse);
 }
