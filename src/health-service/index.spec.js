@@ -21,7 +21,7 @@ describe('HealthService', () => {
   beforeEach(() => {
     protoPath = 'fakePath'
     proto = {
-      Health: {
+      HealthService: {
         service: 'fakeService'
       },
       HealthCheckResponse: sinon.stub()
@@ -70,13 +70,13 @@ describe('HealthService', () => {
 
   it('assigns the definition', () => {
     expect(server).to.have.property('definition')
-    expect(server.definition).to.be.equal(proto.Health.service)
+    expect(server.definition).to.be.equal(proto.HealthService.service)
   })
 
   it('creates a name', () => {
     expect(server).to.have.property('serviceName')
     expect(server.serviceName).to.be.a('string')
-    expect(server.serviceName).to.be.eql('Health')
+    expect(server.serviceName).to.be.eql('HealthService')
   })
 
   it('exposes an implementation', () => {
@@ -108,7 +108,7 @@ describe('HealthService', () => {
     })
 
     it('provides a message id', () => {
-      expect(callArgs[1]).to.be.equal('[Health:check]')
+      expect(callArgs[1]).to.be.equal('[HealthService:check]')
     })
 
     describe('request options', () => {

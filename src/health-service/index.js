@@ -13,14 +13,13 @@ class HealthService {
    * @return {HealthService}
    */
   constructor (protoPath, { logger }) {
-    this.serviceName = 'Health'
+    this.serviceName = 'HealthService'
 
     this.protoPath = protoPath
     this.proto = loadProto(this.protoPath)
 
     this.logger = logger
-
-    this.definition = this.proto.Health.service
+    this.definition = this.proto.HealthService.service
 
     const { HealthCheckResponse } = this.proto
 

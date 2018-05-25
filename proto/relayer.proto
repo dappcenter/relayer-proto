@@ -10,7 +10,7 @@ message HealthCheckResponse {
 
     string status = 0;
 }
-service Health {
+service HealthService {
     rpc Check (google.protobuf.Empty) returns (HealthCheckResponse);
 }
 
