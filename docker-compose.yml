@@ -64,6 +64,8 @@ services:
       context: ./docker
     depends_on:
       - btcd
+    ports:
+      - '10111:10111'
 
   btcd:
     extends:
