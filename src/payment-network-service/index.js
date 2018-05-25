@@ -8,8 +8,8 @@ class PaymentNetworkService {
     this.proto = loadProto(this.protoPath)
     this.logger = logger
 
-    this.serviceName = 'PaymentNetwork'
-    this.definition = this.proto.PaymentNetwork.service
+    this.serviceName = 'PaymentNetworkService'
+    this.definition = this.proto.PaymentNetworkService.service
 
     const { GetPublicKeyResponse } = this.proto
 

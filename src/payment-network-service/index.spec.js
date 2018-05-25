@@ -23,7 +23,7 @@ describe('PaymentNetworkService', () => {
   beforeEach(() => {
     protoPath = 'fakePath'
     proto = {
-      PaymentNetwork: {
+      PaymentNetworkService: {
         service: 'fakeService'
       },
       GetPublicKeyResponse: sinon.stub()
@@ -74,13 +74,13 @@ describe('PaymentNetworkService', () => {
 
   it('assigns the definition', () => {
     expect(server).to.have.property('definition')
-    expect(server.definition).to.be.equal(proto.PaymentNetwork.service)
+    expect(server.definition).to.be.equal(proto.PaymentNetworkService.service)
   })
 
   it('creates a name', () => {
     expect(server).to.have.property('serviceName')
     expect(server.serviceName).to.be.a('string')
-    expect(server.serviceName).to.be.eql('PaymentNetwork')
+    expect(server.serviceName).to.be.eql('PaymentNetworkService')
   })
 
   it('exposes an implementation', () => {
@@ -112,7 +112,7 @@ describe('PaymentNetworkService', () => {
     })
 
     it('provides a message id', () => {
-      expect(callArgs[1]).to.be.equal('[PaymentNetwork:getPublicKey]')
+      expect(callArgs[1]).to.be.equal('[PaymentNetworkService:getPublicKey]')
     })
 
     describe('request options', () => {
