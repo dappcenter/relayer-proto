@@ -27,8 +27,8 @@ async function generateInvoices (order, engine) {
   // invoices will be cleaned up after the expiry.
   // TODO: prevent DDoS through invoice creation
   const [depositHash, feeHash] = await Promise.all([
-    engine.invoices.create(order.orderId, INVOICE_EXPIRY, orderDeposit),
-    engine.invoices.create(order.orderId, INVOICE_EXPIRY, feeDeposit)
+    engine.createInvoice(order.orderId, INVOICE_EXPIRY, orderDeposit),
+    engine.createInvoice(order.orderId, INVOICE_EXPIRY, feeDeposit)
   ])
 
   // Persist the invoices to the db

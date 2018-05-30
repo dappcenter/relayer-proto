@@ -48,8 +48,8 @@ async function placeOrder ({ params, logger, eventHandler }, { PlaceOrderRespons
     throw new PublicError(FRIENDLY_ERRORS.NOT_PLACED(order.orderId))
   }
 
-  const feeStatus = await this.engine.invoices.status(feeInvoice.rHash)
-  const depositStatus = await this.engine.invoices.status(depositInvoice.rHash)
+  const feeStatus = await this.engine.getInvoice(feeInvoice.rHash)
+  const depositStatus = await this.engine.getInvoice(depositInvoice.rHash)
 
   if (!feeStatus.settled) {
     logger.error('Fee not paid for order', { orderId: order.orderId })

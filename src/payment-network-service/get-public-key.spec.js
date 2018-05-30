@@ -12,9 +12,7 @@ describe('getPublicKey', () => {
   beforeEach(() => {
     publicKey = '12345'
     publicKeyStub = sinon.stub().returns(publicKey)
-    engine = {
-      info: { publicKey: publicKeyStub }
-    }
+    engine = { getPublicKey: publicKeyStub }
     GetPublicKeyResponse = sinon.stub().returnsArg(0)
   })
 
