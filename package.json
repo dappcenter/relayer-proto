@@ -26,6 +26,8 @@
     "test": "NODE_PATH=. mocha 'src/**/*.spec.js'",
     "coverage": "nyc npm test",
     "metrics": "pm2 monit",
+    "fund": "bash ./scripts/fund-simnet-wallet.sh",
+    "fund-confirm": "bash ./scripts/confirm-simnet.sh",
     "proto": "pbjs -t proto3 constants.proto health.proto maker.proto taker.proto orderbook.proto payment-network.proto -p ./proto/src -o ./proto/relayer.proto"
   },
   "author": "kinesis",

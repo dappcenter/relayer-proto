@@ -24,13 +24,15 @@ describe('getPublicKey', () => {
   })
 
   describe('engine failure', () => {
+    let status
+
     beforeEach(() => {
-      engine = { getInfo: () => { throw new Error() } }
+      status = getPublicKey.__get__('KEY_NOT_FOUND')
+      engine = { getPublicKey: () => { throw new Error(status) } }
     })
 
     it('throws a key not found error if the engine call fails', async () => {
-      const status = getPublicKey.__get__('KEY_NOT_FOUND')
-      expect(getPublicKey({ engine }, { GetPublicKeyResponse })).to.be.rejectedWith(status)
+      return expect(getPublicKey({ engine }, { GetPublicKeyResponse })).to.be.rejectedWith(status)
     })
   })
 })

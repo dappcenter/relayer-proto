@@ -21,8 +21,8 @@ services:
       - RELAYER_GRPC_HOST=0.0.0.0:28492
       - MONGODB_CONNECTION_URL=mongodb://mongo/relayer
       - LND_HOST=lnd_btc:10009
-      - TLS_CERT_PATH=/secure/lnd-engine-tls.cert
-      - LND_MACAROON_PATH=/shared/lnd-engine-admin.macaroon
+      - LND_TLS_CERT=/shared/lnd-engine-tls.cert
+      - LND_MACAROON=/shared/lnd-engine-admin.macaroon
       - REDIS_HOST=redis
       - GRPC_SSL_CIPHER_SUITES=HIGH+ECDSA
     ports:
@@ -64,8 +64,13 @@ services:
       context: ./docker
     depends_on:
       - btcd
+    # Port configuration required to setup the correct interal/external ports
+    # of the relayers LND engine
     ports:
       - '10111:10111'
+    environment:
+      - LISTEN=0.0.0.0:10111
+      - EXTERNAL_ADDRESS=docker.for.mac.host.internal:10111
 
   btcd:
     extends:

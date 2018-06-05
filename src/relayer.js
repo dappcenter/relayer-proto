@@ -6,6 +6,11 @@ const MakerService = require('./maker-service')
 const TakerService = require('./taker-service')
 const PaymentNetworkService = require('./payment-network-service')
 
+const {
+  LND_HOST,
+  LND_TLS_CERT,
+  LND_MACAROON
+} = process.env
 const DEFAULT_GRPC_HOST = '0.0.0.0:28492'
 const RELAYER_PROTO_PATH = '../proto/relayer.proto'
 
@@ -29,7 +34,7 @@ class Relayer {
     this.db = connectDb()
     this.logger = logger
     this.eventHandler = new EventHandler()
-    this.engine = new Engine()
+    this.engine = new Engine(LND_HOST, { logger: this.logger, tlsCertPath: LND_TLS_CERT, macaroonPath: LND_MACAROON })
     this.messenger = new Messenger()
     this.marketEventPublisher = new Publisher(this.eventHandler)
 
