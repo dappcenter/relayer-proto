@@ -21,14 +21,14 @@ const INVOICE_EXPIRY = 120
  */
 async function generateInvoices (order, engine) {
   const orderDeposit = ORDER_DEPOSIT.divide(order.baseAmount).value
-  const feeDeposit = ORDER_FEE.divide(order.baseAmount).value
+  const orderFee = ORDER_FEE.divide(order.baseAmount).value
 
   // Create the invoices on the specified engine. If either of these calls fail, the
   // invoices will be cleaned up after the expiry.
   // TODO: prevent DDoS through invoice creation
   const [depositHash, feeHash] = await Promise.all([
     engine.createInvoice(order.orderId, INVOICE_EXPIRY, orderDeposit),
-    engine.createInvoice(order.orderId, INVOICE_EXPIRY, feeDeposit)
+    engine.createInvoice(order.orderId, INVOICE_EXPIRY, orderFee)
   ])
 
   // Persist the invoices to the db
