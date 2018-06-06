@@ -33,8 +33,8 @@ async function generateInvoices (order, engine) {
 
   // Persist the invoices to the db
   const [depositInvoice, feeInvoice] = await Promise.all([
-    DepositInvoice.create({ foreignId: order._id, rHash: depositHash }),
-    FeeInvoice.create({ foreignId: order._id, rHash: feeHash })
+    DepositInvoice.create({ foreignId: order._id, paymentRequest: depositHash }),
+    FeeInvoice.create({ foreignId: order._id, paymentRequest: feeHash })
   ])
 
   return [depositInvoice, feeInvoice]
@@ -102,8 +102,8 @@ async function createOrder ({ params, logger, eventHandler, engine }, { CreateOr
 
   return new CreateOrderResponse({
     orderId: order.orderId,
-    depositRequest: depositInvoice.rHash,
-    feeRequest: feeInvoice.rHash
+    depositRequest: depositInvoice.paymentRequest,
+    feeRequest: feeInvoice.paymentRequest
   })
 }
 

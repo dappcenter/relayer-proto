@@ -48,8 +48,8 @@ async function placeOrder ({ params, logger, eventHandler }, { PlaceOrderRespons
     throw new PublicError(FRIENDLY_ERRORS.NOT_PLACED(order.orderId))
   }
 
-  const feeStatus = await this.engine.getInvoice(feeInvoice.rHash)
-  const depositStatus = await this.engine.getInvoice(depositInvoice.rHash)
+  const feeStatus = await this.engine.getInvoice(feeInvoice.paymentRequest)
+  const depositStatus = await this.engine.getInvoice(depositInvoice.paymentRequest)
 
   if (!feeStatus.settled) {
     logger.error('Fee not paid for order', { orderId: order.orderId })
@@ -67,13 +67,11 @@ async function placeOrder ({ params, logger, eventHandler }, { PlaceOrderRespons
   await FeeRefundInvoice.create({
     foreignId: order._id,
     paymentRequest: feeRefundPaymentRequest
-    // We need the rHash
   })
 
   await DepositRefundInvoice.create({
     foreignId: order._id,
     paymentRequest: depositRefundPaymentRequest
-    // We need the rHash
   })
 
   logger.info('Refund invoices have been stored on the Relayer')

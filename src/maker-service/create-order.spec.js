@@ -37,7 +37,7 @@ describe('createOrder', () => {
     orderStub = { create: sinon.stub().returns({orderId: '2'}) }
 
     eventHandler = {emit: sinon.stub()}
-    generateInvoicesStub = sinon.stub().returns([{_id: '1', rHash: '1234'}, {_id: '2', rHash: '4321'}])
+    generateInvoicesStub = sinon.stub().returns([{_id: '1', paymentRequest: '1234'}, {_id: '2', paymentRequest: '4321'}])
     CreateOrderResponse = sinon.stub()
     revertMarketStub = createOrder.__set__('Market', marketStub)
     revertOrderStub = createOrder.__set__('Order', orderStub)
@@ -130,8 +130,8 @@ describe('generateInvoices', () => {
   it('creates fee and deposit invoices in the database', async () => {
     await generateInvoices(order, engine)
 
-    expect(feeInvoiceStub.create).to.have.been.calledWith({ foreignId: '1', rHash: '1234' })
-    expect(depositInvoiceStub.create).to.have.been.calledWith({ foreignId: '1', rHash: '1234' })
+    expect(feeInvoiceStub.create).to.have.been.calledWith({ foreignId: '1', paymentRequest: '1234' })
+    expect(depositInvoiceStub.create).to.have.been.calledWith({ foreignId: '1', paymentRequest: '1234' })
   })
 
   it('returns the deposit and fee invoice recors', async () => {
