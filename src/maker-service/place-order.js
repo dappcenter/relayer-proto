@@ -64,13 +64,13 @@ async function placeOrder ({ params, logger, eventHandler, engine }, { PlaceOrde
 
   const feeRefundInvoice = await engine.getPaymentRequestDetails(feeRefundPaymentRequest)
 
-  if (feeStatus.value !== feeRefundInvoice.numSatoshis) {
+  if (feeStatus.value !== feeRefundInvoice.value) {
     logger.error('Fee invoice refund amount does not equal fee invoice amount', { orderId: order.orderId })
     throw new PublicError(FRIENDLY_ERRORS.FEE_VALUES_UNEQUAL(order.orderId))
   }
 
   const depositRefundInvoice = await engine.getPaymentRequestDetails(depositRefundPaymentRequest)
-  if (depositStatus.value !== depositRefundInvoice.numSatoshis) {
+  if (depositStatus.value !== depositRefundInvoice.value) {
     logger.error('Deposit invoice refund amount does not equal deposit invoice amount', { orderId: order.orderId })
 
     throw new PublicError(FRIENDLY_ERRORS.DEPOSIT_VALUES_UNEQUAL(order.orderId))

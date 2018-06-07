@@ -39,8 +39,8 @@ describe('placeOrder', () => {
     }
     feeInvoice = {settled: true, value: 100}
     depositInvoice = {settled: true, value: 100}
-    feeRefundInvoice = {numSatoshis: 100}
-    depositRefundInvoice = {numSatoshis: 100}
+    feeRefundInvoice = {value: 100}
+    depositRefundInvoice = {value: 100}
     feeInvoicePaymentRequest = 'asdfasdf'
     depositInvoicePaymentRequest = 'zxcvasdf'
     feeRefundPaymentRequest = 'asdf1234'
@@ -158,7 +158,7 @@ describe('placeOrder', () => {
   })
 
   it('throws an error if the fee invoice value is not equal to the fee refund invoice value', async () => {
-    const feeRefundInvoice = {numSatoshis: 1000}
+    const feeRefundInvoice = {value: 1000}
     engine.getPaymentRequestDetails.withArgs(feeRefundPaymentRequest).resolves(feeRefundInvoice)
 
     const errorMessage = `Fee Invoice Refund value is not the same as Fee Invoice value. Order id: 2`
@@ -167,7 +167,7 @@ describe('placeOrder', () => {
   })
 
   it('throws an error if the deposit invoice value is not equal to the deposit refund invoice value', async () => {
-    const depositRefundInvoice = {numSatoshis: 1000}
+    const depositRefundInvoice = {value: 1000}
     engine.getPaymentRequestDetails.withArgs(depositRefundPaymentRequest).resolves(depositRefundInvoice)
 
     const errorMessage = `Deposit Invoice Refund value is not the same as Deposit Invoice value. Order id: 2`
