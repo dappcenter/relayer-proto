@@ -26,7 +26,7 @@ class MakerService {
 
     this.implementation = {
       createOrder: new GrpcUnaryMethod(createOrder, this.messageId('createOrder'), { logger, eventHandler, engine }, { CreateOrderResponse }).register(),
-      placeOrder: new GrpcUnaryMethod(placeOrder, this.messageId('placeOrder'), { logger, eventHandler }, { PlaceOrderResponse }).register(),
+      placeOrder: new GrpcUnaryMethod(placeOrder, this.messageId('placeOrder'), { logger, eventHandler, engine }, { PlaceOrderResponse }).register(),
       subscribeFill: new GrpcServerStreamingMethod(subscribeFill, this.messageId('subscribeFill'), { logger, eventHandler, messenger }, { SubscribeFillResponse }).register(),
       executeOrder: new GrpcUnaryMethod(executeOrder, this.messageId('executeOrder'), { logger, eventHandler, messenger }, { ExecuteOrderResponse }).register(),
       completeOrder: new GrpcUnaryMethod(completeOrder, this.messageId('completeOrder'), { logger, eventHandler }, { CompleteOrderResponse }).register(),
