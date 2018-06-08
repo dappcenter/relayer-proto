@@ -7,7 +7,9 @@ const FRIENDLY_ERRORS = {
   FEE_NOT_PAID: id => `Fee Invoice has not been paid. Order id: ${id}`,
   DEPOSIT_NOT_PAID: id => `Deposit Invoice has not been paid. Order id: ${id}`,
   FEE_VALUES_UNEQUAL: id => `Fee Invoice Refund value is not the same as Fee Invoice value. Order id: ${id}`,
-  DEPOSIT_VALUES_UNEQUAL: id => `Deposit Invoice Refund value is not the same as Deposit Invoice value. Order id: ${id}`
+  DEPOSIT_VALUES_UNEQUAL: id => `Deposit Invoice Refund value is not the same as Deposit Invoice value. Order id: ${id}`,
+  INSUFFICIENT_FUNDS_OUTBOUND: id => `Outbound channel does not have sufficient balance. Order id: ${id}`,
+  INSUFFICIENT_FUNDS_INBOUND: id => `Inbound channel does not have sufficient balance. Order id: ${id}`
 }
 
 /**
@@ -60,6 +62,16 @@ async function placeOrder ({ params, logger, eventHandler, engine }, { PlaceOrde
   if (!depositStatus.settled) {
     logger.error('Deposit not paid for order', { orderId: order.orderId })
     throw new PublicError(FRIENDLY_ERRORS.DEPOSIT_NOT_PAID(order.orderId))
+  }
+
+  const sufficientBalanceInOutboundChannel = await engine.isBalanceSufficient(order.payTo.slice(3), order.counterAmount, {outbound: true})
+  if (!sufficientBalanceInOutboundChannel) {
+    throw new PublicError(FRIENDLY_ERRORS.INSUFFICIENT_FUNDS_OUTBOUND(order.orderId))
+  }
+
+  const sufficientBalanceInInboundChannel = await engine.isBalanceSufficient(order.payTo.slice(3), order.baseAmount, {outbound: false})
+  if (!sufficientBalanceInInboundChannel) {
+    throw new PublicError(FRIENDLY_ERRORS.INSUFFICIENT_FUNDS_INBOUND(order.orderId))
   }
 
   const feeRefundInvoice = await engine.getPaymentRequestDetails(feeRefundPaymentRequest)
