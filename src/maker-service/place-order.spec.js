@@ -1,6 +1,6 @@
 const path = require('path')
 const { chai, rewire, sinon } = require('test/test-helper')
-// const bigInt = require('big-integer')
+const bigInt = require('big-integer')
 
 const { expect } = chai
 
@@ -31,6 +31,7 @@ describe('placeOrder', () => {
   let feeRefundInvoiceStub
   let depositRefundInvoiceStub
   let placeStub
+  let order
 
   beforeEach(() => {
     logger = {
@@ -48,24 +49,29 @@ describe('placeOrder', () => {
 
     engine = {
       getInvoice: sinon.stub(),
-      getPaymentRequestDetails: sinon.stub()
+      getPaymentRequestDetails: sinon.stub(),
+      isBalanceSufficient: sinon.stub()
     }
     params = {
       orderId: '1',
       feeRefundPaymentRequest,
       depositRefundPaymentRequest
     }
+    placeStub = sinon.stub()
+    order = {orderId: '2', _id: 'asfd', place: placeStub, payTo: 'ln:asdf1234', counterAmount: bigInt(1000), baseAmount: bigInt(100)}
+
     engine.getInvoice.withArgs(feeInvoicePaymentRequest).resolves(feeInvoice)
     engine.getInvoice.withArgs(depositInvoicePaymentRequest).resolves(depositInvoice)
     engine.getPaymentRequestDetails.withArgs(feeRefundPaymentRequest).resolves(feeRefundInvoice)
     engine.getPaymentRequestDetails.withArgs(depositRefundPaymentRequest).resolves(depositRefundInvoice)
+    engine.isBalanceSufficient.withArgs('asdf1234', bigInt(1000), {outbound: true}).resolves(true)
+    engine.isBalanceSufficient.withArgs('asdf1234', bigInt(100), {outbound: false}).resolves(true)
 
     feeInvoiceStub = { findOne: sinon.stub().resolves({paymentRequest: feeInvoicePaymentRequest}) }
     depositInvoiceStub = { findOne: sinon.stub().resolves({paymentRequest: depositInvoicePaymentRequest}) }
     feeRefundInvoiceStub = {create: sinon.stub()}
     depositRefundInvoiceStub = {create: sinon.stub()}
-    placeStub = sinon.stub()
-    orderStub = { findOne: sinon.stub().resolves({orderId: '2', _id: 'asfd', place: placeStub}) }
+    orderStub = { findOne: sinon.stub().resolves(order) }
     eventHandler = {emit: sinon.stub()}
     PlaceOrderResponse = sinon.stub()
     revertOrderStub = placeOrder.__set__('Order', orderStub)
@@ -196,12 +202,40 @@ describe('placeOrder', () => {
   it('emits an order:placed event', async () => {
     await placeOrder({ params, logger, eventHandler, engine }, { PlaceOrderResponse })
 
-    expect(eventHandler.emit).to.have.been.calledWith('order:placed', {orderId: '2', _id: 'asfd', place: placeStub})
+    expect(eventHandler.emit).to.have.been.calledWith('order:placed', order)
   })
 
   it('returns an OrderPlacedResponse', async () => {
     await placeOrder({ params, logger, eventHandler, engine }, { PlaceOrderResponse })
 
     expect(PlaceOrderResponse).to.have.been.calledWith({})
+  })
+
+  it('checks if there is an outbound channel with sufficient funds to place the order', async () => {
+    await placeOrder({ params, logger, eventHandler, engine }, { PlaceOrderResponse })
+
+    expect(engine.isBalanceSufficient).to.have.been.calledWith('asdf1234', bigInt(1000), {outbound: true})
+  })
+
+  it('checks if there is an inbound channel with sufficient funds to place the order', async () => {
+    await placeOrder({ params, logger, eventHandler, engine }, { PlaceOrderResponse })
+
+    expect(engine.isBalanceSufficient).to.have.been.calledWith('asdf1234', bigInt(100), {outbound: false})
+  })
+
+  it('throws an error if there is not an outbound channel with sufficient funds to place the order', async () => {
+    engine.isBalanceSufficient.withArgs('asdf1234', bigInt(1000), {outbound: true}).resolves(false)
+
+    const errorMessage = `Outbound channel does not have sufficient balance. Order id: 2`
+
+    return expect(placeOrder({ params, logger, eventHandler, engine }, { PlaceOrderResponse })).to.eventually.be.rejectedWith(errorMessage)
+  })
+
+  it('throws an error if there is not an inbound channel with sufficient funds to place the order', async () => {
+    engine.isBalanceSufficient.withArgs('asdf1234', bigInt(100), {outbound: false}).resolves(false)
+
+    const errorMessage = `Inbound channel does not have sufficient balance. Order id: 2`
+
+    return expect(placeOrder({ params, logger, eventHandler, engine }, { PlaceOrderResponse })).to.eventually.be.rejectedWith(errorMessage)
   })
 })
