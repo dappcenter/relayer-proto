@@ -55,7 +55,7 @@ async function createFill ({ params, logger, eventHandler, engine }, { CreateFil
   logger.info('createFill: Fill has been created', { orderId: order.orderId, fillId: fill.fillId })
 
   try {
-    var [depositInvoice, feeInvoice] = await generateInvoices(fill.fillAmount, fill.fillId, fill._id, engine, Invoice.FOREIGN_TYPES.FILL)
+    var [depositInvoice, feeInvoice] = await generateInvoices(fill.fillAmount, fill.fillId, fill._id, engine, Invoice.FOREIGN_TYPES.FILL, logger)
   } catch (err) {
     throw new FailedToCreateFillError(err)
   }

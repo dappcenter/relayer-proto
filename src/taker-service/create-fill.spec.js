@@ -112,7 +112,7 @@ describe('createFill', () => {
   it('generateInvoices', async () => {
     await createFill({ params, logger, eventHandler, engine }, { CreateFillResponse })
 
-    expect(generateInvoicesStub).to.have.been.calledWith(1000, '1', 'asdf', engine, 'FILL')
+    expect(generateInvoicesStub).to.have.been.calledWith(1000, '1', 'asdf', engine, 'FILL', logger)
   })
 
   it('throws an error if generating an order fails', () => {
