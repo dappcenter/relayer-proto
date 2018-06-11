@@ -51,38 +51,47 @@ async function placeOrder ({ params, logger, eventHandler, engine }, { PlaceOrde
     throw new PublicError(FRIENDLY_ERRORS.NOT_PLACED(order.orderId))
   }
 
-  const feeStatus = await engine.getInvoice(feeInvoice.paymentRequest)
-  const depositStatus = await engine.getInvoice(depositInvoice.paymentRequest)
+  const feeInvoicePaid = await engine.isInvoicePaid(feeInvoice.paymentRequest)
+  const depositInvoicePaid = await engine.isInvoicePaid(depositInvoice.paymentRequest)
 
-  if (!feeStatus.settled) {
+  if (!feeInvoicePaid) {
     logger.error('Fee not paid for order', { orderId: order.orderId })
     throw new PublicError(FRIENDLY_ERRORS.FEE_NOT_PAID(order.orderId))
   }
 
-  if (!depositStatus.settled) {
+  if (!depositInvoicePaid) {
     logger.error('Deposit not paid for order', { orderId: order.orderId })
     throw new PublicError(FRIENDLY_ERRORS.DEPOSIT_NOT_PAID(order.orderId))
   }
 
   const sufficientBalanceInOutboundChannel = await engine.isBalanceSufficient(order.payTo.slice(3), order.counterAmount, {outbound: true})
+
   if (!sufficientBalanceInOutboundChannel) {
+    logger.error('Insufficient funds in outbound channel for order', { orderId: order.orderId })
     throw new PublicError(FRIENDLY_ERRORS.INSUFFICIENT_FUNDS_OUTBOUND(order.orderId))
   }
 
   const sufficientBalanceInInboundChannel = await engine.isBalanceSufficient(order.payTo.slice(3), order.baseAmount, {outbound: false})
+
   if (!sufficientBalanceInInboundChannel) {
+    logger.error('Insufficient funds in inbound channel for order', { orderId: order.orderId })
     throw new PublicError(FRIENDLY_ERRORS.INSUFFICIENT_FUNDS_INBOUND(order.orderId))
   }
 
-  const feeRefundInvoice = await engine.getPaymentRequestDetails(feeRefundPaymentRequest)
+  // TODO: Change getPaymentRequestDetails to isInvoiceMatched() or something
+  const { value: feeInvoiceValue } = await engine.getPaymentRequestDetails(feeInvoice.paymentRequest)
+  const { value: feeRefundInvoiceValue } = await engine.getPaymentRequestDetails(feeRefundPaymentRequest)
 
-  if (feeStatus.value !== feeRefundInvoice.value) {
+  if (feeInvoiceValue !== feeRefundInvoiceValue) {
     logger.error('Fee invoice refund amount does not equal fee invoice amount', { orderId: order.orderId })
     throw new PublicError(FRIENDLY_ERRORS.FEE_VALUES_UNEQUAL(order.orderId))
   }
 
-  const depositRefundInvoice = await engine.getPaymentRequestDetails(depositRefundPaymentRequest)
-  if (depositStatus.value !== depositRefundInvoice.value) {
+  // TODO: Change getPaymentRequestDetails to isInvoiceMatched() or something
+  const { value: depositInvoiceValue } = await engine.getPaymentRequestDetails(depositInvoice.paymentRequest)
+  const { value: depositRefundInvoiceValue } = await engine.getPaymentRequestDetails(depositRefundPaymentRequest)
+
+  if (depositInvoiceValue !== depositRefundInvoiceValue) {
     logger.error('Deposit invoice refund amount does not equal deposit invoice amount', { orderId: order.orderId })
 
     throw new PublicError(FRIENDLY_ERRORS.DEPOSIT_VALUES_UNEQUAL(order.orderId))

@@ -48,7 +48,7 @@ describe('placeOrder', () => {
     depositRefundPaymentRequest = 'qwer1234'
 
     engine = {
-      getInvoice: sinon.stub(),
+      isInvoicePaid: sinon.stub(),
       getPaymentRequestDetails: sinon.stub(),
       isBalanceSufficient: sinon.stub()
     }
@@ -60,10 +60,12 @@ describe('placeOrder', () => {
     placeStub = sinon.stub()
     order = {orderId: '2', _id: 'asfd', place: placeStub, payTo: 'ln:asdf1234', counterAmount: bigInt(1000), baseAmount: bigInt(100)}
 
-    engine.getInvoice.withArgs(feeInvoicePaymentRequest).resolves(feeInvoice)
-    engine.getInvoice.withArgs(depositInvoicePaymentRequest).resolves(depositInvoice)
+    engine.isInvoicePaid.withArgs(feeInvoicePaymentRequest).resolves(feeInvoice)
+    engine.isInvoicePaid.withArgs(depositInvoicePaymentRequest).resolves(depositInvoice)
     engine.getPaymentRequestDetails.withArgs(feeRefundPaymentRequest).resolves(feeRefundInvoice)
     engine.getPaymentRequestDetails.withArgs(depositRefundPaymentRequest).resolves(depositRefundInvoice)
+    engine.getPaymentRequestDetails.withArgs(feeInvoicePaymentRequest).resolves(feeInvoice)
+    engine.getPaymentRequestDetails.withArgs(depositInvoicePaymentRequest).resolves(depositInvoice)
     engine.isBalanceSufficient.withArgs('asdf1234', bigInt(1000), {outbound: true}).resolves(true)
     engine.isBalanceSufficient.withArgs('asdf1234', bigInt(100), {outbound: false}).resolves(true)
 
@@ -124,18 +126,17 @@ describe('placeOrder', () => {
   it('fetches the fee invoice from the engine', async () => {
     await placeOrder({ params, logger, eventHandler, engine }, { PlaceOrderResponse })
 
-    expect(engine.getInvoice).to.have.been.calledWith('asdfasdf')
+    expect(engine.isInvoicePaid).to.have.been.calledWith('asdfasdf')
   })
 
   it('fetches the deposit invoice from the engine', async () => {
     await placeOrder({ params, logger, eventHandler, engine }, { PlaceOrderResponse })
 
-    expect(engine.getInvoice).to.have.been.calledWith('zxcvasdf')
+    expect(engine.isInvoicePaid).to.have.been.calledWith('zxcvasdf')
   })
 
   it('throws an error if the fee invoice has not been paid', async () => {
-    feeInvoice = {settled: false, value: 100}
-    engine.getInvoice.withArgs(feeInvoicePaymentRequest).resolves(feeInvoice)
+    engine.isInvoicePaid.withArgs(feeInvoicePaymentRequest).resolves(false)
 
     const errorMessage = `Fee Invoice has not been paid. Order id: 2`
 
@@ -143,8 +144,7 @@ describe('placeOrder', () => {
   })
 
   it('throws an error if the fee invoice has not been paid', async () => {
-    depositInvoice = {settled: false, value: 100}
-    engine.getInvoice.withArgs(depositInvoicePaymentRequest).resolves(depositInvoice)
+    engine.isInvoicePaid.withArgs(depositInvoicePaymentRequest).resolves(false)
 
     const errorMessage = `Deposit Invoice has not been paid. Order id: 2`
 

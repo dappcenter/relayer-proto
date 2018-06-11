@@ -56,14 +56,14 @@ async function fillOrder ({ params, logger, messenger }, { FillOrderResponse }) 
   }
 
   // Need to add this functionality to the LND engine
-  // const feeStatus = await this.engine.getInvoice(feeInvoice.paymentRequest);
-  // const depositStatus = await this.engine.getInvoice(depositInvoice.paymentRequest);
+  // const feeStatus = await this.engine.isInvoicePaid(feeInvoice.paymentRequest);
+  // const depositStatus = await this.engine.isInvoicePaid(depositInvoice.paymentRequest);
 
-  // if(feeStatus !== 'PAID') {
+  // if(!feeStatus) {
   //   throw new Error(`Fee Invoice for Order ${orderId} has not been paid.`);
   // }
 
-  // if(depositStatus !== 'PAID') {
+  // if(!depositStatus) {
   //   throw new Error(`Deposit Invoice for Order ${orderId} has not been paid.`);
   // }
 
