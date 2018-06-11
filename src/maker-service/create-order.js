@@ -50,7 +50,7 @@ async function createOrder ({ params, logger, eventHandler, engine }, { CreateOr
   logger.info('Order has been created', { ownerId, orderId: order.orderId })
 
   try {
-    var [depositInvoice, feeInvoice] = await generateInvoices(order.baseAmount, order.orderId, order._id, engine, Invoice.FOREIGN_TYPES.ORDER)
+    var [depositInvoice, feeInvoice] = await generateInvoices(order.baseAmount, order.orderId, order._id, engine, Invoice.FOREIGN_TYPES.ORDER, logger)
   } catch (err) {
     throw new FailedToCreateOrderError(err)
   }

@@ -1,13 +1,28 @@
 const { FeeInvoice, DepositInvoice } = require('../models')
-const bigInt = require('big-integer')
 
-// DEPOSIT is bigInt equivelent of 0.001
-const DEPOSIT = bigInt(1000)
+/**
+ * @todo calculate the correct order deposit
+ * @constant
+ * @type {Number}
+ * @default
+ */
+const DEPOSIT = 1000
 
-// FEE is bigInt equivelent of 0.001
-const FEE = bigInt(1000)
+/**
+ * @todo calculate the correct order fee
+ * @constant
+ * @type {Number}
+ * @default
+ */
+const FEE = 1000
 
-// 2 minute expiry for invoices (in seconds)
+/**
+ * 2 minute expiry for invoices to be paid by the broker
+ *
+ * @constant
+ * @type {Number}
+ * @default
+ */
 const INVOICE_EXPIRY = 120
 
 /**
@@ -19,12 +34,19 @@ const INVOICE_EXPIRY = 120
  * @param {String} _id id of order/fill
  * @param {Object} engine - Lightning Network engine
  * @param {String} foreign type (either order or fill)
-
- * @return {Array<Invoice>} invoices
+ * @param {Logger} logger
+ *
+ * @return {Array<PaymentRequestHash>} invoices
  */
-async function generateInvoices (amount, id, _id, engine, foreignType) {
-  const deposit = DEPOSIT.divide(amount).value
-  const fee = FEE.divide(amount).value
+async function generateInvoices (amount, id, _id, engine, foreignType, logger) {
+  const deposit = DEPOSIT
+  const fee = FEE
+
+  logger.info(`Creating invoices for ${id}`, {
+    deposit,
+    fee,
+    baseAmount: amount
+  })
 
   // Create the invoices on the specified engine. If either of these calls fail, the
   // invoices will be cleaned up after the expiry.

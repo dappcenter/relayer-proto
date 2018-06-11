@@ -93,7 +93,7 @@ describe('createOrder', () => {
   it('generateInvoices', async () => {
     await createOrder({ params, logger, eventHandler, engine }, { CreateOrderResponse })
 
-    expect(generateInvoicesStub).to.have.been.calledWith(100, '2', '1', engine, 'ORDER')
+    expect(generateInvoicesStub).to.have.been.calledWith(100, '2', '1', engine, 'ORDER', logger)
   })
 
   it('throws an error if generating an order fails', () => {
