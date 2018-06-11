@@ -18,6 +18,10 @@ describe('createOrder', () => {
   let revertOrderStub
   let revertMarketStub
   let revertGenerateInvoicesStub
+  let invoiceStub
+  let order
+  let revertInvoiceStub
+  let FailedToCreateOrderError
 
   beforeEach(() => {
     logger = {
@@ -33,8 +37,16 @@ describe('createOrder', () => {
       counterSymbol: 'LTC',
       side: 'BID'
     }
+    order = Object.assign({orderId: '2', _id: '1'}, params)
     marketStub = { getByObject: sinon.stub().returns({name: 'BTC/LTC'}) }
-    orderStub = { create: sinon.stub().returns({orderId: '2'}) }
+    orderStub = { create: sinon.stub().returns(order) }
+
+    invoiceStub = {
+      FOREIGN_TYPES: {
+        ORDER: 'ORDER',
+        FILL: 'FILL'
+      }
+    }
 
     eventHandler = {emit: sinon.stub()}
     generateInvoicesStub = sinon.stub().returns([{_id: '1', paymentRequest: '1234'}, {_id: '2', paymentRequest: '4321'}])
@@ -42,12 +54,15 @@ describe('createOrder', () => {
     revertMarketStub = createOrder.__set__('Market', marketStub)
     revertOrderStub = createOrder.__set__('Order', orderStub)
     revertGenerateInvoicesStub = createOrder.__set__('generateInvoices', generateInvoicesStub)
+    revertInvoiceStub = createOrder.__set__('Invoice', invoiceStub)
+    FailedToCreateOrderError = createOrder.__get__('FailedToCreateOrderError')
   })
 
   afterEach(() => {
     revertMarketStub()
     revertOrderStub()
     revertGenerateInvoicesStub()
+    revertInvoiceStub()
   })
 
   it('finds the correct market', () => {
@@ -69,74 +84,33 @@ describe('createOrder', () => {
     })
   })
 
+  it('throws an error if creating an order fails', () => {
+    orderStub.create.rejects('error')
+
+    return expect(createOrder({ params, logger, eventHandler, engine }, { CreateOrderResponse })).to.eventually.be.rejectedWith(FailedToCreateOrderError)
+  })
+
   it('generateInvoices', async () => {
     await createOrder({ params, logger, eventHandler, engine }, { CreateOrderResponse })
 
-    expect(generateInvoicesStub).to.have.been.calledWith({orderId: '2'}, engine)
+    expect(generateInvoicesStub).to.have.been.calledWith(100, '2', '1', engine, 'ORDER')
+  })
+
+  it('throws an error if generating an order fails', () => {
+    orderStub.create.rejects('error')
+
+    return expect(createOrder({ params, logger, eventHandler, engine }, { CreateOrderResponse })).to.eventually.be.rejectedWith(FailedToCreateOrderError)
   })
 
   it('emits an event order:created event', async () => {
     await createOrder({ params, logger, eventHandler, engine }, { CreateOrderResponse })
 
-    expect(eventHandler.emit).to.have.been.calledWith('order:created', {orderId: '2'})
+    expect(eventHandler.emit).to.have.been.calledWith('order:created', order)
   })
 
   it('returns a CreateOrderResponse', async () => {
     await createOrder({ params, logger, eventHandler, engine }, { CreateOrderResponse })
 
     expect(CreateOrderResponse).to.have.been.calledWith({orderId: '2', depositRequest: '1234', feeRequest: '4321'})
-  })
-})
-
-describe('generateInvoices', () => {
-  let order
-  let engine
-  let feeInvoiceStub
-  let depositInvoiceStub
-  let revertDepositInvoicestub
-  let revertFeeInvoiceStub
-  let generateInvoices
-
-  beforeEach(() => {
-    order = {
-      baseAmount: bigInt(100),
-      orderId: '1234',
-      _id: '1'
-    }
-    engine = {createInvoice: sinon.stub().returns('1234')}
-
-    feeInvoiceStub = { create: sinon.stub().returns({}) }
-    depositInvoiceStub = { create: sinon.stub().returns({}) }
-
-    generateInvoices = createOrder.__get__('generateInvoices')
-
-    revertDepositInvoicestub = createOrder.__set__('DepositInvoice', feeInvoiceStub)
-    revertFeeInvoiceStub = createOrder.__set__('FeeInvoice', depositInvoiceStub)
-  })
-
-  afterEach(() => {
-    revertDepositInvoicestub()
-    revertFeeInvoiceStub()
-  })
-
-  it('creates deposit and fee invoices in the engine', () => {
-    generateInvoices(order, engine)
-
-    expect(engine.createInvoice).to.have.been.calledTwice()
-    expect(engine.createInvoice).to.have.been.calledWith('1234', 120, 10)
-    expect(engine.createInvoice).to.have.been.calledWith('1234', 120, 10)
-  })
-
-  it('creates fee and deposit invoices in the database', async () => {
-    await generateInvoices(order, engine)
-
-    expect(feeInvoiceStub.create).to.have.been.calledWith({ foreignId: '1', paymentRequest: '1234' })
-    expect(depositInvoiceStub.create).to.have.been.calledWith({ foreignId: '1', paymentRequest: '1234' })
-  })
-
-  it('returns the deposit and fee invoice recors', async () => {
-    const res = await generateInvoices(order, engine)
-
-    expect(res).to.eql([{}, {}])
   })
 })

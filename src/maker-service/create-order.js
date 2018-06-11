@@ -1,44 +1,8 @@
 const bigInt = require('big-integer')
 
 const { FailedToCreateOrderError } = require('../errors')
-const { Order, Market, FeeInvoice, DepositInvoice } = require('../models')
-
-// ORDER_DEPOSIT is bigInt equivelent of 0.001
-const ORDER_DEPOSIT = bigInt(1000)
-
-// ORDER_FEE is bigInt equivelent of 0.001
-const ORDER_FEE = bigInt(1000)
-
-// 2 minute expiry for invoices (in seconds)
-const INVOICE_EXPIRY = 120
-
-/**
- * Create invoices in the relayer for a given order
- *
- * @todo Create a virtual attribute for order deposit to make sure this value is BigInt and not LONG
- * @param {Order} order
- * @return {Array<Invoice>} invoices
- */
-async function generateInvoices (order, engine) {
-  const orderDeposit = ORDER_DEPOSIT.divide(order.baseAmount).value
-  const orderFee = ORDER_FEE.divide(order.baseAmount).value
-
-  // Create the invoices on the specified engine. If either of these calls fail, the
-  // invoices will be cleaned up after the expiry.
-  // TODO: prevent DDoS through invoice creation
-  const [depositHash, feeHash] = await Promise.all([
-    engine.createInvoice(order.orderId, INVOICE_EXPIRY, orderDeposit),
-    engine.createInvoice(order.orderId, INVOICE_EXPIRY, orderFee)
-  ])
-
-  // Persist the invoices to the db
-  const [depositInvoice, feeInvoice] = await Promise.all([
-    DepositInvoice.create({ foreignId: order._id, paymentRequest: depositHash }),
-    FeeInvoice.create({ foreignId: order._id, paymentRequest: feeHash })
-  ])
-
-  return [depositInvoice, feeInvoice]
-}
+const { Order, Market, Invoice } = require('../models')
+const { generateInvoices } = require('../utils')
 
 /**
  * Creates an order with the relayer
@@ -86,7 +50,7 @@ async function createOrder ({ params, logger, eventHandler, engine }, { CreateOr
   logger.info('Order has been created', { ownerId, orderId: order.orderId })
 
   try {
-    var [depositInvoice, feeInvoice] = await generateInvoices(order, engine)
+    var [depositInvoice, feeInvoice] = await generateInvoices(order.baseAmount, order.orderId, order._id, engine, Invoice.FOREIGN_TYPES.ORDER)
   } catch (err) {
     throw new FailedToCreateOrderError(err)
   }

@@ -1,5 +1,7 @@
 const bigInt = require('big-integer')
-const { Order, Invoice, Fill } = require('../models')
+const { Order, Fill, Invoice } = require('../models')
+const { generateInvoices } = require('../utils')
+const { FailedToCreateFillError } = require('../errors')
 
 /**
  * Given an order and set of params, creates a pending fill
@@ -12,7 +14,7 @@ const { Order, Invoice, Fill } = require('../models')
  * @param {function} responses.CreateFillResponse - constructor for CreateFillResponse messages
  * @return {responses.CreateFillResponse}
  */
-async function createFill ({ params, logger, eventHandler }, { CreateFillResponse }) {
+async function createFill ({ params, logger, eventHandler, engine }, { CreateFillResponse }) {
   const {
     orderId,
     swapHash,
@@ -44,52 +46,23 @@ async function createFill ({ params, logger, eventHandler }, { CreateFillRespons
     throw new Error(`Order ID ${safeParams.orderId} is not in a state to be filled.`)
   }
 
-  const fill = await Fill.create({
-    order_id: order._id,
-    swapHash: safeParams.swapHash,
-    fillAmount: safeParams.fillAmount
-  })
+  try {
+    var fill = await Fill.create({
+      order_id: order._id,
+      swapHash: safeParams.swapHash,
+      fillAmount: safeParams.fillAmount
+    })
+  } catch (err) {
+    throw new FailedToCreateFillError(err)
+  }
 
   logger.info('createFill: Fill has been created', { orderId: order.orderId, fillId: fill.fillId })
 
-  // Create invoices w/ LND
-  // TODO: need to figure out how we are going to calculate fees
-  /* eslint-disable no-unused-vars */
-  const FILL_FEE = 0.001
-  const FILL_DEPOSIT = 0.001
-
-  // 2 minute expiry for invoices (in seconds)
-  const INVOICE_EXPIRY = 120
-
-  // TODO: figure out a better way to encode this
-  const feeMemo = JSON.stringify({ type: 'fee', fillId: fill.fillId })
-  const depositMemo = JSON.stringify({ type: 'deposit', fillId: fill.fillId })
-
-  // This code theoretically will work for LND payments, but I need to hook
-  // up a node so that we can test it (preferably on testnet)
-  //
-  // SEE: create-order for an example of creating invoices
-
-  const depositPaymentRequest = 'TESTFILLDEPOSIT'
-  const feePaymentRequest = 'TESTFILLFEE'
-
-  logger.info('createFill: Invoices have been created through LND')
-
-  // Persist the invoices to DB
-  const depositInvoice = await Invoice.create({
-    foreignId: fill._id,
-    foreignType: Invoice.FOREIGN_TYPES.FILL,
-    paymentRequest: depositPaymentRequest,
-    type: Invoice.TYPES.INCOMING,
-    purpose: Invoice.PURPOSES.DEPOSIT
-  })
-  const feeInvoice = await Invoice.create({
-    foreignId: fill._id,
-    foreignType: Invoice.FOREIGN_TYPES.FILL,
-    paymentRequest: feePaymentRequest,
-    type: Invoice.TYPES.INCOMING,
-    purpose: Invoice.PURPOSES.FEE
-  })
+  try {
+    var [depositInvoice, feeInvoice] = await generateInvoices(fill.fillAmount, fill.fillId, fill._id, engine, Invoice.FOREIGN_TYPES.FILL)
+  } catch (err) {
+    throw new FailedToCreateFillError(err)
+  }
 
   logger.info('createFill: Invoices have been created through Relayer', {
     deposit: depositInvoice._id,
