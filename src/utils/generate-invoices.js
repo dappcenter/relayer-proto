@@ -15,8 +15,8 @@ const INVOICE_EXPIRY = 120
  *
  * @todo Create a virtual attribute for order/fill deposit to make sure this value is BigInt and not LONG
  * @param {Integer} amount for the invoice
- * @param {String} id of order/fill
- * @param {String} _id of order/fill
+ * @param {String} id public id of order/fill
+ * @param {String} _id id of order/fill
  * @param {Object} engine - Lightning Network engine
  * @param {String} foreign type (either order or fill)
 

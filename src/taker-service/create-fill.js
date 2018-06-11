@@ -2,6 +2,7 @@ const bigInt = require('big-integer')
 const { Order, Fill, Invoice } = require('../models')
 const { generateInvoices } = require('../utils')
 const { FailedToCreateFillError } = require('../errors')
+const { PublicError } = require('grpc-methods')
 
 /**
  * Given an order and set of params, creates a pending fill
@@ -21,15 +22,6 @@ async function createFill ({ params, logger, eventHandler, engine }, { CreateFil
     fillAmount
   } = params
 
-  // TODO: We need to figure out a way to handle async calls AND only expose
-  // errors that the client cares about
-  //
-  // TODO: figure out what actions we want to take if fees/invoices cannot
-  //   be produced for this order
-  //
-  // TODO: figure out race condition where invoices are created, but we have failed
-  //   to create them in the db?
-  //
   const safeParams = {
     orderId: String(orderId),
     swapHash: Buffer.from(swapHash, 'base64'),
@@ -47,7 +39,7 @@ async function createFill ({ params, logger, eventHandler, engine }, { CreateFil
   }
 
   if (bigInt(fillAmount).greater(order.baseAmount)) {
-    throw new Error(`Fill amount is larger than order baseAmount for Order ID ${safeParams.orderId}.`)
+    throw new PublicError(`Fill amount is larger than order baseAmount for Order ID ${safeParams.orderId}.`)
   }
 
   try {
