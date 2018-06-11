@@ -3,13 +3,29 @@ const bigInt = require('big-integer')
 const { FailedToCreateOrderError } = require('../errors')
 const { Order, Market, FeeInvoice, DepositInvoice } = require('../models')
 
-// ORDER_DEPOSIT is bigInt equivelent of 0.001
-const ORDER_DEPOSIT = bigInt(1000)
+/**
+ * @todo calculate the correct order deposit
+ * @constant
+ * @type {Number}
+ * @default
+ */
+const ORDER_DEPOSIT = 1000
 
-// ORDER_FEE is bigInt equivelent of 0.001
-const ORDER_FEE = bigInt(1000)
+/**
+ * @todo calculate the correct order fee
+ * @constant
+ * @type {Number}
+ * @default
+ */
+const ORDER_FEE = 1000
 
-// 2 minute expiry for invoices (in seconds)
+/**
+ * 2 minute expiry for invoices to be paid by the broker
+ *
+ * @constant
+ * @type {Number}
+ * @default
+ */
 const INVOICE_EXPIRY = 120
 
 /**
@@ -17,11 +33,19 @@ const INVOICE_EXPIRY = 120
  *
  * @todo Create a virtual attribute for order deposit to make sure this value is BigInt and not LONG
  * @param {Order} order
- * @return {Array<Invoice>} invoices
+ * @param {Engine} engine
+ * @param {Logger} logger
+ * @return {Array<PaymentRequestHash>} invoices
  */
-async function generateInvoices (order, engine) {
-  const orderDeposit = ORDER_DEPOSIT.divide(order.baseAmount).value
-  const orderFee = ORDER_FEE.divide(order.baseAmount).value
+async function generateInvoices (order, engine, logger) {
+  const orderDeposit = ORDER_DEPOSIT
+  const orderFee = ORDER_FEE
+
+  logger.info(`Creating invoices for ${order.orderId}`, {
+    orderDeposit,
+    orderFee,
+    baseAmount: order.baseAmount
+  })
 
   // Create the invoices on the specified engine. If either of these calls fail, the
   // invoices will be cleaned up after the expiry.
@@ -86,7 +110,7 @@ async function createOrder ({ params, logger, eventHandler, engine }, { CreateOr
   logger.info('Order has been created', { ownerId, orderId: order.orderId })
 
   try {
-    var [depositInvoice, feeInvoice] = await generateInvoices(order, engine)
+    var [depositInvoice, feeInvoice] = await generateInvoices(order, engine, logger)
   } catch (err) {
     throw new FailedToCreateOrderError(err)
   }

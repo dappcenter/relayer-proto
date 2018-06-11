@@ -96,6 +96,7 @@ describe('generateInvoices', () => {
   let revertDepositInvoicestub
   let revertFeeInvoiceStub
   let generateInvoices
+  let logger
 
   beforeEach(() => {
     order = {
@@ -103,7 +104,10 @@ describe('generateInvoices', () => {
       orderId: '1234',
       _id: '1'
     }
-    engine = {createInvoice: sinon.stub().returns('1234')}
+    engine = { createInvoice: sinon.stub().returns('1234') }
+    logger = {
+      info: sinon.stub()
+    }
 
     feeInvoiceStub = { create: sinon.stub().returns({}) }
     depositInvoiceStub = { create: sinon.stub().returns({}) }
@@ -119,23 +123,23 @@ describe('generateInvoices', () => {
     revertFeeInvoiceStub()
   })
 
-  it('creates deposit and fee invoices in the engine', () => {
-    generateInvoices(order, engine)
+  it('creates deposit and fee invoices in the engine', async () => {
+    await generateInvoices(order, engine, logger)
 
     expect(engine.createInvoice).to.have.been.calledTwice()
-    expect(engine.createInvoice).to.have.been.calledWith('1234', 120, 10)
-    expect(engine.createInvoice).to.have.been.calledWith('1234', 120, 10)
+    expect(engine.createInvoice).to.have.been.calledWith('1234', 120, 1000)
+    expect(engine.createInvoice).to.have.been.calledWith('1234', 120, 1000)
   })
 
   it('creates fee and deposit invoices in the database', async () => {
-    await generateInvoices(order, engine)
+    await generateInvoices(order, engine, logger)
 
     expect(feeInvoiceStub.create).to.have.been.calledWith({ foreignId: '1', paymentRequest: '1234' })
     expect(depositInvoiceStub.create).to.have.been.calledWith({ foreignId: '1', paymentRequest: '1234' })
   })
 
   it('returns the deposit and fee invoice recors', async () => {
-    const res = await generateInvoices(order, engine)
+    const res = await generateInvoices(order, engine, logger)
 
     expect(res).to.eql([{}, {}])
   })
