@@ -46,6 +46,10 @@ async function createFill ({ params, logger, eventHandler, engine }, { CreateFil
     throw new Error(`Order ID ${safeParams.orderId} is not in a state to be filled.`)
   }
 
+  if (bigInt(fillAmount).greater(order.baseAmount)) {
+    throw new Error(`Fill amount is larger than order baseAmount for Order ID ${safeParams.orderId}.`)
+  }
+
   try {
     var fill = await Fill.create({
       order_id: order._id,
