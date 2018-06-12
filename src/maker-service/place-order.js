@@ -35,7 +35,7 @@ const FRIENDLY_ERRORS = {
  * @return {responses.PlaceOrderResponse}
  */
 /* eslint-disable standard/no-callback-literal */
-async function placeOrder ({ params, logger, eventHandler, engine }, { PlaceOrderResponse }) {
+async function placeOrder ({ params, logger, eventHandler, engine }, { EmptyResponse }) {
   const { orderId, feeRefundPaymentRequest, depositRefundPaymentRequest } = params
 
   // TODO: validate ownership of the order
@@ -51,8 +51,10 @@ async function placeOrder ({ params, logger, eventHandler, engine }, { PlaceOrde
     throw new PublicError(FRIENDLY_ERRORS.NOT_PLACED(order.orderId))
   }
 
-  const feeInvoicePaid = await engine.isInvoicePaid(feeInvoice.paymentRequest)
-  const depositInvoicePaid = await engine.isInvoicePaid(depositInvoice.paymentRequest)
+  const [feeInvoicePaid, depositInvoicePaid] = await Promise.all([
+    engine.isInvoicePaid(feeInvoice.paymentRequest),
+    engine.isInvoicePaid(depositInvoice.paymentRequest)
+  ])
 
   if (!feeInvoicePaid) {
     logger.error('Fee not paid for order', { orderId: order.orderId })
@@ -64,48 +66,46 @@ async function placeOrder ({ params, logger, eventHandler, engine }, { PlaceOrde
     throw new PublicError(FRIENDLY_ERRORS.DEPOSIT_NOT_PAID(order.orderId))
   }
 
-  const sufficientBalanceInOutboundChannel = await engine.isBalanceSufficient(order.payTo.slice(3), order.counterAmount, {outbound: true})
+  const [sufficientBalanceInOutboundChannel, sufficientBalanceInInboundChannel] = await Promise.all([
+    engine.isBalanceSufficient(order.payTo.slice(3), order.counterAmount, {outbound: true}),
+    engine.isBalanceSufficient(order.payTo.slice(3), order.baseAmount, {outbound: false})
+  ])
 
   if (!sufficientBalanceInOutboundChannel) {
     logger.error('Insufficient funds in outbound channel for order', { orderId: order.orderId })
     throw new PublicError(FRIENDLY_ERRORS.INSUFFICIENT_FUNDS_OUTBOUND(order.orderId))
   }
 
-  const sufficientBalanceInInboundChannel = await engine.isBalanceSufficient(order.payTo.slice(3), order.baseAmount, {outbound: false})
-
   if (!sufficientBalanceInInboundChannel) {
     logger.error('Insufficient funds in inbound channel for order', { orderId: order.orderId })
     throw new PublicError(FRIENDLY_ERRORS.INSUFFICIENT_FUNDS_INBOUND(order.orderId))
   }
 
-  // TODO: Change getPaymentRequestDetails to isInvoiceMatched() or something
-  const { value: feeInvoiceValue } = await engine.getPaymentRequestDetails(feeInvoice.paymentRequest)
-  const { value: feeRefundInvoiceValue } = await engine.getPaymentRequestDetails(feeRefundPaymentRequest)
+  const [feeValue, feeRefundValue] = await Promise.all([
+    engine.getInvoiceValue(feeInvoice.paymentRequest),
+    engine.getInvoiceValue(feeRefundPaymentRequest)
+  ])
 
-  if (feeInvoiceValue !== feeRefundInvoiceValue) {
+  if (feeValue !== feeRefundValue) {
     logger.error('Fee invoice refund amount does not equal fee invoice amount', { orderId: order.orderId })
     throw new PublicError(FRIENDLY_ERRORS.FEE_VALUES_UNEQUAL(order.orderId))
   }
 
-  // TODO: Change getPaymentRequestDetails to isInvoiceMatched() or something
-  const { value: depositInvoiceValue } = await engine.getPaymentRequestDetails(depositInvoice.paymentRequest)
-  const { value: depositRefundInvoiceValue } = await engine.getPaymentRequestDetails(depositRefundPaymentRequest)
+  const [depositValue, depositRefundValue] = await Promise.all([
+    engine.getInvoiceValue(depositInvoice.paymentRequest),
+    engine.getInvoiceValue(depositRefundPaymentRequest)
+  ])
 
-  if (depositInvoiceValue !== depositRefundInvoiceValue) {
+  if (depositValue !== depositRefundValue) {
     logger.error('Deposit invoice refund amount does not equal deposit invoice amount', { orderId: order.orderId })
-
     throw new PublicError(FRIENDLY_ERRORS.DEPOSIT_VALUES_UNEQUAL(order.orderId))
   }
 
-  await FeeRefundInvoice.create({
-    foreignId: order._id,
-    paymentRequest: feeRefundPaymentRequest
-  })
-
-  await DepositRefundInvoice.create({
-    foreignId: order._id,
-    paymentRequest: depositRefundPaymentRequest
-  })
+  // TODO: Handle DB failure in case of one record failing to be created
+  await Promise.all([
+    FeeRefundInvoice.create({ foreignId: order._id, paymentRequest: feeRefundPaymentRequest }),
+    DepositRefundInvoice.create({ foreignId: order._id, paymentRequest: depositRefundPaymentRequest })
+  ])
 
   logger.info('Refund invoices have been stored on the Relayer')
 
@@ -114,7 +114,7 @@ async function placeOrder ({ params, logger, eventHandler, engine }, { PlaceOrde
   eventHandler.emit('order:placed', order)
   logger.info('order:placed', { orderId: order.orderId })
 
-  return new PlaceOrderResponse({})
+  return new EmptyResponse({})
 }
 
 module.exports = placeOrder
