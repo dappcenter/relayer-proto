@@ -35,11 +35,11 @@ describe('MakerService', () => {
         service: 'fakeService'
       },
       CreateOrderResponse: sinon.stub(),
-      PlaceOrderResponse: sinon.stub(),
       SubscribeFillResponse: sinon.stub(),
       ExecuteOrderResponse: sinon.stub(),
       CompleteOrderResponse: sinon.stub(),
-      CancelOrderResponse: sinon.stub()
+      CancelOrderResponse: sinon.stub(),
+      google: { protobuf: { Empty: sinon.stub() } }
     }
     logger = {
       info: sinon.stub(),
@@ -203,7 +203,7 @@ describe('MakerService', () => {
     })
 
     it('passes in the response', () => {
-      expect(callArgs[3]).to.be.eql({ PlaceOrderResponse: proto.PlaceOrderResponse })
+      expect(callArgs[3]).to.be.eql({ EmptyResponse: proto.google.protobuf.Empty })
     })
   })
 
