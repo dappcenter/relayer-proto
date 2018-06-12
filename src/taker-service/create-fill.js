@@ -1,5 +1,5 @@
-const bigInt = require('big-integer')
-const { Order, Fill, Invoice } = require('../models')
+const big = require('big.js')
+const { Order, Fill, FeeInvoice } = require('../models')
 const { generateInvoices } = require('../utils')
 const { FailedToCreateFillError } = require('../errors')
 const { PublicError } = require('grpc-methods')
@@ -25,7 +25,7 @@ async function createFill ({ params, logger, eventHandler, engine }, { CreateFil
   const safeParams = {
     orderId: String(orderId),
     swapHash: Buffer.from(swapHash, 'base64'),
-    fillAmount: bigInt(fillAmount)
+    fillAmount: big(fillAmount)
   }
 
   const order = await Order.findOne({ orderId: safeParams.orderId })
@@ -38,7 +38,7 @@ async function createFill ({ params, logger, eventHandler, engine }, { CreateFil
     throw new Error(`Order ID ${safeParams.orderId} is not in a state to be filled.`)
   }
 
-  if (bigInt(fillAmount).greater(order.baseAmount)) {
+  if (big(fillAmount).gt(big(order.baseAmount))) {
     throw new PublicError(`Fill amount is larger than order baseAmount for Order ID ${safeParams.orderId}.`)
   }
 
@@ -55,7 +55,7 @@ async function createFill ({ params, logger, eventHandler, engine }, { CreateFil
   logger.info('createFill: Fill has been created', { orderId: order.orderId, fillId: fill.fillId })
 
   try {
-    var [depositInvoice, feeInvoice] = await generateInvoices(fill.fillAmount, fill.fillId, fill._id, engine, Invoice.FOREIGN_TYPES.FILL, logger)
+    var [depositInvoice, feeInvoice] = await generateInvoices(fill.fillAmount, fill.fillId, fill._id, engine, FeeInvoice.FOREIGN_TYPES.FILL, logger)
   } catch (err) {
     throw new FailedToCreateFillError(err)
   }

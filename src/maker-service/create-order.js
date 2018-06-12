@@ -1,7 +1,7 @@
 const bigInt = require('big-integer')
 
 const { FailedToCreateOrderError } = require('../errors')
-const { Order, Market, Invoice } = require('../models')
+const { Order, Market, FeeInvoice } = require('../models')
 const { generateInvoices } = require('../utils')
 
 /**
@@ -50,7 +50,7 @@ async function createOrder ({ params, logger, eventHandler, engine }, { CreateOr
   logger.info('Order has been created', { ownerId, orderId: order.orderId })
 
   try {
-    var [depositInvoice, feeInvoice] = await generateInvoices(order.baseAmount, order.orderId, order._id, engine, Invoice.FOREIGN_TYPES.ORDER, logger)
+    var [depositInvoice, feeInvoice] = await generateInvoices(order.baseAmount, order.orderId, order._id, engine, FeeInvoice.FOREIGN_TYPES.ORDER, logger)
   } catch (err) {
     throw new FailedToCreateOrderError(err)
   }
