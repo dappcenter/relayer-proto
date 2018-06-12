@@ -1,6 +1,6 @@
 const path = require('path')
 const { chai, rewire, sinon } = require('test/test-helper')
-const bigInt = require('big-integer')
+const big = require('big.js')
 
 const { expect } = chai
 
@@ -20,8 +20,8 @@ describe('createFill', () => {
   let FailedToCreateFillError
   let revertFillStub
   let fill
-  let invoiceStub
-  let revertInvoiceStub
+  let FeeInvoiceStub
+  let revertFeeInvoiceStub
 
   beforeEach(() => {
     logger = {
@@ -38,13 +38,13 @@ describe('createFill', () => {
       fillId: '1',
       _id: 'asdf'
     }
-    invoiceStub = {
+    FeeInvoiceStub = {
       FOREIGN_TYPES: {
         ORDER: 'ORDER',
         FILL: 'FILL'
       }
     }
-    orderStub = { findOne: sinon.stub().resolves({orderId: '2', _id: 'asdf', status: 'PLACED', baseAmount: bigInt(1000)}), STATUSES: { PLACED: 'PLACED' } }
+    orderStub = { findOne: sinon.stub().resolves({orderId: '2', _id: 'asdf', status: 'PLACED', baseAmount: big(1000)}), STATUSES: { PLACED: 'PLACED' } }
     fillStub = { create: sinon.stub().resolves(fill) }
     eventHandler = {emit: sinon.stub()}
     generateInvoicesStub = sinon.stub().resolves([{_id: '1', paymentRequest: '1234'}, {_id: '2', paymentRequest: '4321'}])
@@ -53,14 +53,14 @@ describe('createFill', () => {
     revertOrderStub = createFill.__set__('Order', orderStub)
     revertGenerateInvoicesStub = createFill.__set__('generateInvoices', generateInvoicesStub)
     FailedToCreateFillError = createFill.__get__('FailedToCreateFillError')
-    revertInvoiceStub = createFill.__set__('Invoice', invoiceStub)
+    revertFeeInvoiceStub = createFill.__set__('Invoice', FeeInvoiceStub)
   })
 
   afterEach(() => {
     revertFillStub()
     revertOrderStub()
     revertGenerateInvoicesStub()
-    revertInvoiceStub()
+    revertFeeInvoiceStub()
   })
 
   it('finds the order with the associated order id', () => {
@@ -86,7 +86,7 @@ describe('createFill', () => {
   })
 
   it('throws an error if the fill amount is larger than order baseAmount', () => {
-    orderStub.findOne.resolves({orderId: '2', _id: 'asdf', status: 'PLACED', baseAmount: bigInt(100)})
+    orderStub.findOne.resolves({orderId: '2', _id: 'asdf', status: 'PLACED', baseAmount: big(100)})
     const errorMessage = 'Fill amount is larger than order baseAmount for Order ID 2'
     createFill({ params, logger, eventHandler, engine }, { CreateFillResponse })
 
@@ -99,7 +99,7 @@ describe('createFill', () => {
     expect(fillStub.create).to.have.been.calledWith({
       order_id: 'asdf',
       swapHash: Buffer.from(params.swapHash, 'base64'),
-      fillAmount: bigInt(params.fillAmount)
+      fillAmount: big(params.fillAmount)
     })
   })
 

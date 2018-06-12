@@ -1,6 +1,6 @@
 const path = require('path')
 const { chai, rewire, sinon } = require('test/test-helper')
-const bigInt = require('big-integer')
+const big = require('big.js')
 
 const { expect } = chai
 
@@ -18,7 +18,7 @@ describe('createOrder', () => {
   let revertOrderStub
   let revertMarketStub
   let revertGenerateInvoicesStub
-  let invoiceStub
+  let FeeInvoiceStub
   let order
   let revertInvoiceStub
   let FailedToCreateOrderError
@@ -41,7 +41,7 @@ describe('createOrder', () => {
     marketStub = { getByObject: sinon.stub().returns({name: 'BTC/LTC'}) }
     orderStub = { create: sinon.stub().returns(order) }
 
-    invoiceStub = {
+    FeeInvoiceStub = {
       FOREIGN_TYPES: {
         ORDER: 'ORDER',
         FILL: 'FILL'
@@ -54,7 +54,7 @@ describe('createOrder', () => {
     revertMarketStub = createOrder.__set__('Market', marketStub)
     revertOrderStub = createOrder.__set__('Order', orderStub)
     revertGenerateInvoicesStub = createOrder.__set__('generateInvoices', generateInvoicesStub)
-    revertInvoiceStub = createOrder.__set__('Invoice', invoiceStub)
+    revertInvoiceStub = createOrder.__set__('FeeInvoice', FeeInvoiceStub)
     FailedToCreateOrderError = createOrder.__get__('FailedToCreateOrderError')
   })
 
@@ -78,8 +78,8 @@ describe('createOrder', () => {
       payTo: 'payTo',
       ownerId: '1',
       marketName: 'BTC/LTC',
-      baseAmount: bigInt(100),
-      counterAmount: bigInt(1000),
+      baseAmount: big(100),
+      counterAmount: big(1000),
       side: 'BID'
     })
   })

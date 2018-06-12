@@ -1,4 +1,4 @@
-const bigInt = require('big-integer')
+const big = require('big.js')
 
 const { FailedToCreateOrderError } = require('../errors')
 const { Order, Market, FeeInvoice } = require('../models')
@@ -39,8 +39,8 @@ async function createOrder ({ params, logger, eventHandler, engine }, { CreateOr
       payTo: String(payTo),
       ownerId: String(ownerId),
       marketName: market.name,
-      baseAmount: bigInt(baseAmount),
-      counterAmount: bigInt(counterAmount),
+      baseAmount: big(baseAmount),
+      counterAmount: big(counterAmount),
       side: String(side)
     })
   } catch (err) {
