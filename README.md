@@ -14,19 +14,17 @@ After nvm is installed, use `nvm use` to switch to the current node version for 
 
 #### Getting started
 
-Install dependencies and build the project w/ `npm i && npm run build`
+Install dependencies and build the project w/ `npm run build`
 
 Then run `docker-compose up -d` to start the relayer containers.
 
 The relayer uses a convention called `Engines` which provides functionality to different implementations of the lightning network.
 
-LND-Engine is currently installed on the relayer. To start the engine, use `npm run lup`. See below for additional commands
+We use the [JavaScript Standard Style](https://standardjs.com/) for our project. Make sure to download a plugin for your prefered editor.
 
-NOTE: Docker will try to bind to ports 27017/28492 on your host/local machine. These are ports for mongo/relayer respectively.
+NOTE: Docker will try to bind to ports 10111/27017/28492 on your host/local machine. These are ports for lnd/mongo/relayer respectively.
 
-NOTE: We only expose the mongo port so you can attach a GUI to it like [Mongo Compass Community](https://www.mongodb.com/download-center#compass)
-
-Additionally, we use the [JavaScript Standard Style](https://standardjs.com/) for our project. Make sure to download a plugin for your prefered editor.
+NOTE: Mongo port is exposed so you can attach a GUI to it like [Mongo Compass Community](https://www.mongodb.com/download-center#compass)
 
 ### Commands
 
@@ -35,14 +33,14 @@ Additionally, we use the [JavaScript Standard Style](https://standardjs.com/) fo
 - To rebuild gRPC, use `npm run build`
 - To start all relayer containers `docker-compose up -d`
 - To stop all relayer containers `docker-compose down`
-- To start lnd-engine `npm run lup`
-- To stop lnd-engine `npm run ldown`
-- To view status of lnd-engine `npm run lps`
+- To create a channel to the broker `npm run create-channel`
+- To fund the relayer on simnet `npm run fund`
 
 ##### Ports that are exposed to the host (through docker)
 
 ```
-localhost:50078 # Relayer
+localhost:28492 # Relayer rpc
+localhost:10111 # Relayer LND
 localhost:27017 # MongoDB
 ```
 
@@ -54,38 +52,18 @@ localhost:27017 # MongoDB
 - Relayer Events - any action that is triggered by implementations
 - Relayer Subscriptions - client hooks for actions emitted by the relayer
 
+### Funding the relayer
+
+Make sure you have pulled the latest relayer code, built the project w/ `npm run build` and rebuilt all images with `docker-compose build --force-rm`. You can then run `npm run fund`.
+
+### Opening a channel w/ the broker
+
+After you've received a host address and public key from the broker, you can run `npm run create-channel`. You will be prompted in terminal to supply both the address and key.
+
 ### Additional Notes
 
-- All amounts come into the application as a string that represented a 64 bit integer. In order to support this in JS (js support is weird for 64 bit numbers) we use BigInteger AND mongoose long (64 type)
+- All amounts come into the application as a string that represented a 64 bit integer. In order to support this in JS (js support is weird for 64 bit numbers) we use Big AND mongoose long (64 type)
 
 ### Troubleshooting
 
 Using `GRPC_VERBOSITY=DEBUG` and `GRPC_TRACE=all` on the relayer is our best friend
-
-### Best practices for grpc event handlers
-
-1. use GrpcError classes for throwing errors that should be exposed to the client
-2. use `proto.YourResponseType` to identify the correct gprc response for your handler
-
-### Documentation
-
-The following documents are materials that we have followed for developing this application
-
-##### Application
-
-- [gRPC NodeJS](https://grpc.io/grpc/node/grpc.Server.html#addService)
-- [NodeJS Directory Structure Best Practices](https://blog.risingstack.com/node-hero-node-js-project-structure-tutorial/)
-- [gRPC basic - Bidirectional Streaming](https://grpc.io/docs/guides/concepts.html#bidirectional-streaming-rpc)
-- [LND w/ NodeJS](https://github.com/lightningnetwork/lnd/blob/master/docs/grpc/javascript.md)
-- [LND API Reference](http://api.lightning.community/)
-- [BigInteger so we can support int64](https://github.com/peterolson/BigInteger.js)
-- [Adding methods to mongoose schemas](http://mongoosejs.com/docs/2.7.x/docs/methods-statics.html)
-- [Mongo DB Compass](https://www.mongodb.com/download-center#compass)
-
-##### Infrastructure
-
-- [PM2 application declaration](http://pm2.keymetrics.io/docs/usage/application-declaration/)
-- [Docker Compose reference](https://docs.docker.com/compose/compose-file/)
-- [Creating a lightning network cluster w/ docker](https://github.com/lightningnetwork/lnd/tree/master/docker)
-- [Redis Command reference](https://redis.io/commands)
-- [Mongoose Documentation](http://mongoosejs.com/docs/)
