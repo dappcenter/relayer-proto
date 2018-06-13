@@ -63,14 +63,6 @@ After you've received a host address and public key from the broker, you can run
 
 ### Additional Notes
 
-- [gRPC NodeJS](https://grpc.io/grpc/node/grpc.Server.html#addService)
-- [NodeJS Directory Structure Best Practices](https://blog.risingstack.com/node-hero-node-js-project-structure-tutorial/)
-- [gRPC basic - Bidirectional Streaming](https://grpc.io/docs/guides/concepts.html#bidirectional-streaming-rpc)
-- [LND w/ NodeJS](https://github.com/lightningnetwork/lnd/blob/master/docs/grpc/javascript.md)
-- [LND API Reference](http://api.lightning.community/)
-- [Big.js so we can support int64](https://github.com/MikeMcl/big.js/)
-- [Adding methods to mongoose schemas](http://mongoosejs.com/docs/2.7.x/docs/methods-statics.html)
-- [Mongo DB Compass](https://www.mongodb.com/download-center#compass)
 - All amounts come into the application as a string that represented a 64 bit integer. In order to support this in JS (js support is weird for 64 bit numbers) we use Big AND mongoose long (64 type)
 
 ### Troubleshooting
