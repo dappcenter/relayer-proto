@@ -5,10 +5,8 @@ const { Big } = require('../utils')
 const { expect } = chai
 
 const invoicePath = path.resolve(__dirname, 'generate-invoices')
-console.log(invoicePath)
 const generateInvoices = rewire(invoicePath)
 
-console.log(generateInvoices)
 describe('generateInvoices', () => {
   let amount
   let id
