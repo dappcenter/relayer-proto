@@ -1,6 +1,6 @@
 const path = require('path')
 const { chai, rewire, sinon } = require('test/test-helper')
-const bigInt = require('big-integer')
+const { Big } = require('../utils')
 
 const { expect } = chai
 
@@ -58,7 +58,7 @@ describe('placeOrder', () => {
       depositRefundPaymentRequest
     }
     placeStub = sinon.stub()
-    order = {orderId: '2', _id: 'asfd', place: placeStub, payTo: 'ln:asdf1234', counterAmount: bigInt(1000), baseAmount: bigInt(100)}
+    order = {orderId: '2', _id: 'asfd', place: placeStub, payTo: 'ln:asdf1234', counterAmount: Big(1000), baseAmount: Big(100)}
 
     engine.isInvoicePaid.withArgs(feeInvoicePaymentRequest).resolves(feeInvoice.settled)
     engine.isInvoicePaid.withArgs(depositInvoicePaymentRequest).resolves(depositInvoice.settled)
@@ -66,8 +66,8 @@ describe('placeOrder', () => {
     engine.getInvoiceValue.withArgs(depositRefundPaymentRequest).resolves(depositRefundInvoice.value)
     engine.getInvoiceValue.withArgs(feeInvoicePaymentRequest).resolves(feeInvoice.value)
     engine.getInvoiceValue.withArgs(depositInvoicePaymentRequest).resolves(depositInvoice.value)
-    engine.isBalanceSufficient.withArgs('asdf1234', bigInt(1000), {outbound: true}).resolves(true)
-    engine.isBalanceSufficient.withArgs('asdf1234', bigInt(100), {outbound: false}).resolves(true)
+    engine.isBalanceSufficient.withArgs('asdf1234', Big(1000), {outbound: true}).resolves(true)
+    engine.isBalanceSufficient.withArgs('asdf1234', Big(100), {outbound: false}).resolves(true)
 
     feeInvoiceStub = { findOne: sinon.stub().resolves({paymentRequest: feeInvoicePaymentRequest}) }
     depositInvoiceStub = { findOne: sinon.stub().resolves({paymentRequest: depositInvoicePaymentRequest}) }
@@ -214,17 +214,17 @@ describe('placeOrder', () => {
   it('checks if there is an outbound channel with sufficient funds to place the order', async () => {
     await placeOrder({ params, logger, eventHandler, engine }, { EmptyResponse })
 
-    expect(engine.isBalanceSufficient).to.have.been.calledWith('asdf1234', bigInt(1000), {outbound: true})
+    expect(engine.isBalanceSufficient).to.have.been.calledWith('asdf1234', Big(1000), {outbound: true})
   })
 
   it('checks if there is an inbound channel with sufficient funds to place the order', async () => {
     await placeOrder({ params, logger, eventHandler, engine }, { EmptyResponse })
 
-    expect(engine.isBalanceSufficient).to.have.been.calledWith('asdf1234', bigInt(100), {outbound: false})
+    expect(engine.isBalanceSufficient).to.have.been.calledWith('asdf1234', Big(100), {outbound: false})
   })
 
   it('throws an error if there is not an outbound channel with sufficient funds to place the order', async () => {
-    engine.isBalanceSufficient.withArgs('asdf1234', bigInt(1000), {outbound: true}).resolves(false)
+    engine.isBalanceSufficient.withArgs('asdf1234', Big(1000), {outbound: true}).resolves(false)
 
     const errorMessage = `Outbound channel does not have sufficient balance. Order id: 2`
 
@@ -232,7 +232,7 @@ describe('placeOrder', () => {
   })
 
   it('throws an error if there is not an inbound channel with sufficient funds to place the order', async () => {
-    engine.isBalanceSufficient.withArgs('asdf1234', bigInt(100), {outbound: false}).resolves(false)
+    engine.isBalanceSufficient.withArgs('asdf1234', Big(100), {outbound: false}).resolves(false)
 
     const errorMessage = `Inbound channel does not have sufficient balance. Order id: 2`
 

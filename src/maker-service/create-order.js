@@ -1,8 +1,6 @@
-const big = require('big.js')
-
 const { FailedToCreateOrderError } = require('../errors')
 const { Order, Market, FeeInvoice } = require('../models')
-const { generateInvoices } = require('../utils')
+const { generateInvoices, Big } = require('../utils')
 
 /**
  * Creates an order with the relayer
@@ -39,8 +37,8 @@ async function createOrder ({ params, logger, eventHandler, engine }, { CreateOr
       payTo: String(payTo),
       ownerId: String(ownerId),
       marketName: market.name,
-      baseAmount: big(baseAmount),
-      counterAmount: big(counterAmount),
+      baseAmount: Big(baseAmount),
+      counterAmount: Big(counterAmount),
       side: String(side)
     })
   } catch (err) {

@@ -56,7 +56,7 @@ localhost:27017 # MongoDB
 
 ### Additional Notes
 
-- All amounts come into the application as a string that represented a 64 bit integer. In order to support this in JS (js support is weird for 64 bit numbers) we use BigInteger AND mongoose long (64 type)
+- All amounts come into the application as a string that represented a 64 bit integer. In order to support this in JS (js support is weird for 64 bit numbers) we use Big.js AND mongoose long (64 type)
 
 ### Troubleshooting
 
@@ -78,7 +78,7 @@ The following documents are materials that we have followed for developing this 
 - [gRPC basic - Bidirectional Streaming](https://grpc.io/docs/guides/concepts.html#bidirectional-streaming-rpc)
 - [LND w/ NodeJS](https://github.com/lightningnetwork/lnd/blob/master/docs/grpc/javascript.md)
 - [LND API Reference](http://api.lightning.community/)
-- [BigInteger so we can support int64](https://github.com/peterolson/BigInteger.js)
+- [Big.js so we can support int64](https://github.com/MikeMcl/big.js/)
 - [Adding methods to mongoose schemas](http://mongoosejs.com/docs/2.7.x/docs/methods-statics.html)
 - [Mongo DB Compass](https://www.mongodb.com/download-center#compass)
 

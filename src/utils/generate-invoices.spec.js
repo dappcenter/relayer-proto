@@ -1,6 +1,6 @@
 const path = require('path')
 const { chai, rewire, sinon } = require('test/test-helper')
-const bigInt = require('big-integer')
+const { Big } = require('../utils')
 
 const { expect } = chai
 
@@ -22,7 +22,7 @@ describe('generateInvoices', () => {
   let logger
 
   beforeEach(() => {
-    amount = bigInt(100)
+    amount = Big(100)
     id = '1234'
     _id = '1'
     foreignType = 'ORDER'

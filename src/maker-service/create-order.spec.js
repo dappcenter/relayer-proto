@@ -1,6 +1,6 @@
 const path = require('path')
 const { chai, rewire, sinon } = require('test/test-helper')
-const big = require('big.js')
+const { Big } = require('../utils')
 
 const { expect } = chai
 
@@ -78,8 +78,8 @@ describe('createOrder', () => {
       payTo: 'payTo',
       ownerId: '1',
       marketName: 'BTC/LTC',
-      baseAmount: big(100),
-      counterAmount: big(1000),
+      baseAmount: Big(100),
+      counterAmount: Big(1000),
       side: 'BID'
     })
   })

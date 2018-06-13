@@ -1,6 +1,5 @@
-const big = require('big.js')
 const { Order, Fill, FeeInvoice } = require('../models')
-const { generateInvoices } = require('../utils')
+const { generateInvoices, Big } = require('../utils')
 const { FailedToCreateFillError } = require('../errors')
 const { PublicError } = require('grpc-methods')
 
@@ -25,7 +24,7 @@ async function createFill ({ params, logger, eventHandler, engine }, { CreateFil
   const safeParams = {
     orderId: String(orderId),
     swapHash: Buffer.from(swapHash, 'base64'),
-    fillAmount: big(fillAmount)
+    fillAmount: Big(fillAmount)
   }
 
   const order = await Order.findOne({ orderId: safeParams.orderId })
@@ -38,7 +37,7 @@ async function createFill ({ params, logger, eventHandler, engine }, { CreateFil
     throw new Error(`Order ID ${safeParams.orderId} is not in a state to be filled.`)
   }
 
-  if (big(fillAmount).gt(big(order.baseAmount))) {
+  if (Big(fillAmount).gt(Big(order.baseAmount))) {
     throw new PublicError(`Fill amount is larger than order baseAmount for Order ID ${safeParams.orderId}.`)
   }
 

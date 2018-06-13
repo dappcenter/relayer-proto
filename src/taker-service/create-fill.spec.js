@@ -1,6 +1,6 @@
 const path = require('path')
 const { chai, rewire, sinon } = require('test/test-helper')
-const big = require('big.js')
+const { Big } = require('../utils')
 
 const { expect } = chai
 
@@ -44,7 +44,7 @@ describe('createFill', () => {
         FILL: 'FILL'
       }
     }
-    orderStub = { findOne: sinon.stub().resolves({orderId: '2', _id: 'asdf', status: 'PLACED', baseAmount: big(1000)}), STATUSES: { PLACED: 'PLACED' } }
+    orderStub = { findOne: sinon.stub().resolves({orderId: '2', _id: 'asdf', status: 'PLACED', baseAmount: Big(1000)}), STATUSES: { PLACED: 'PLACED' } }
     fillStub = { create: sinon.stub().resolves(fill) }
     eventHandler = {emit: sinon.stub()}
     generateInvoicesStub = sinon.stub().resolves([{_id: '1', paymentRequest: '1234'}, {_id: '2', paymentRequest: '4321'}])
@@ -86,7 +86,7 @@ describe('createFill', () => {
   })
 
   it('throws an error if the fill amount is larger than order baseAmount', () => {
-    orderStub.findOne.resolves({orderId: '2', _id: 'asdf', status: 'PLACED', baseAmount: big(100)})
+    orderStub.findOne.resolves({orderId: '2', _id: 'asdf', status: 'PLACED', baseAmount: Big(100)})
     const errorMessage = 'Fill amount is larger than order baseAmount for Order ID 2'
     createFill({ params, logger, eventHandler, engine }, { CreateFillResponse })
 
@@ -99,7 +99,7 @@ describe('createFill', () => {
     expect(fillStub.create).to.have.been.calledWith({
       order_id: 'asdf',
       swapHash: Buffer.from(params.swapHash, 'base64'),
-      fillAmount: big(params.fillAmount)
+      fillAmount: Big(params.fillAmount)
     })
   })
 

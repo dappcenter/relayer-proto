@@ -28,7 +28,7 @@ const INVOICE_EXPIRY = 120
 /**
  * Create invoices in the relayer for a given order/fill
  *
- * @todo Create a virtual attribute for order/fill deposit to make sure this value is BigInt and not LONG
+ * @todo Create a virtual attribute for order/fill deposit to make sure this value is Big and not LONG
  * @param {Integer} amount for the invoice
  * @param {String} id public id of order/fill
  * @param {String} _id id of order/fill
