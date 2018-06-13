@@ -8,4 +8,3 @@ console.log(lnd.client)
 
 lnd.client.getInfo({}, (_, res) => console.log(res))
 lnd.client.listChannels({}, (_, res) => console.log(res))
-lnd.client.listInvoices({}, (_, res) => console.log(res))
