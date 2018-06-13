@@ -1,68 +1,6 @@
-const bigInt = require('big-integer')
-
 const { FailedToCreateOrderError } = require('../errors')
-const { Order, Market, FeeInvoice, DepositInvoice } = require('../models')
-
-/**
- * @todo calculate the correct order deposit
- * @constant
- * @type {Number}
- * @default
- */
-const ORDER_DEPOSIT = 1000
-
-/**
- * @todo calculate the correct order fee
- * @constant
- * @type {Number}
- * @default
- */
-const ORDER_FEE = 1000
-
-/**
- * 2 minute expiry for invoices to be paid by the broker
- *
- * @constant
- * @type {Number}
- * @default
- */
-const INVOICE_EXPIRY = 120
-
-/**
- * Create invoices in the relayer for a given order
- *
- * @todo Create a virtual attribute for order deposit to make sure this value is BigInt and not LONG
- * @param {Order} order
- * @param {Engine} engine
- * @param {Logger} logger
- * @return {Array<PaymentRequestHash>} invoices
- */
-async function generateInvoices (order, engine, logger) {
-  const orderDeposit = ORDER_DEPOSIT
-  const orderFee = ORDER_FEE
-
-  logger.info(`Creating invoices for ${order.orderId}`, {
-    orderDeposit,
-    orderFee,
-    baseAmount: order.baseAmount
-  })
-
-  // Create the invoices on the specified engine. If either of these calls fail, the
-  // invoices will be cleaned up after the expiry.
-  // TODO: prevent DDoS through invoice creation
-  const [depositHash, feeHash] = await Promise.all([
-    engine.createInvoice(order.orderId, INVOICE_EXPIRY, orderDeposit),
-    engine.createInvoice(order.orderId, INVOICE_EXPIRY, orderFee)
-  ])
-
-  // Persist the invoices to the db
-  const [depositInvoice, feeInvoice] = await Promise.all([
-    DepositInvoice.create({ foreignId: order._id, paymentRequest: depositHash }),
-    FeeInvoice.create({ foreignId: order._id, paymentRequest: feeHash })
-  ])
-
-  return [depositInvoice, feeInvoice]
-}
+const { Order, Market, FeeInvoice } = require('../models')
+const { generateInvoices, Big } = require('../utils')
 
 /**
  * Creates an order with the relayer
@@ -99,8 +37,8 @@ async function createOrder ({ params, logger, eventHandler, engine }, { CreateOr
       payTo: String(payTo),
       ownerId: String(ownerId),
       marketName: market.name,
-      baseAmount: bigInt(baseAmount),
-      counterAmount: bigInt(counterAmount),
+      baseAmount: Big(baseAmount),
+      counterAmount: Big(counterAmount),
       side: String(side)
     })
   } catch (err) {
@@ -110,7 +48,7 @@ async function createOrder ({ params, logger, eventHandler, engine }, { CreateOr
   logger.info('Order has been created', { ownerId, orderId: order.orderId })
 
   try {
-    var [depositInvoice, feeInvoice] = await generateInvoices(order, engine, logger)
+    var [depositInvoice, feeInvoice] = await generateInvoices(order.baseAmount, order.orderId, order._id, engine, FeeInvoice.FOREIGN_TYPES.ORDER, logger)
   } catch (err) {
     throw new FailedToCreateOrderError(err)
   }

@@ -52,6 +52,7 @@ localhost:27017 # MongoDB
 - Relayer Events - any action that is triggered by implementations
 - Relayer Subscriptions - client hooks for actions emitted by the relayer
 
+
 ### Funding the relayer
 
 Make sure you have pulled the latest relayer code, built the project w/ `npm run build` and rebuilt all images with `docker-compose build --force-rm`. You can then run `npm run fund`.

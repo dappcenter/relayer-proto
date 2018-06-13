@@ -1,5 +1,7 @@
-const bigInt = require('big-integer')
-const { Order, Invoice, Fill } = require('../models')
+const { Order, Fill, FeeInvoice } = require('../models')
+const { generateInvoices, Big } = require('../utils')
+const { FailedToCreateFillError } = require('../errors')
+const { PublicError } = require('grpc-methods')
 
 /**
  * Given an order and set of params, creates a pending fill
@@ -12,26 +14,17 @@ const { Order, Invoice, Fill } = require('../models')
  * @param {function} responses.CreateFillResponse - constructor for CreateFillResponse messages
  * @return {responses.CreateFillResponse}
  */
-async function createFill ({ params, logger, eventHandler }, { CreateFillResponse }) {
+async function createFill ({ params, logger, eventHandler, engine }, { CreateFillResponse }) {
   const {
     orderId,
     swapHash,
     fillAmount
   } = params
 
-  // TODO: We need to figure out a way to handle async calls AND only expose
-  // errors that the client cares about
-  //
-  // TODO: figure out what actions we want to take if fees/invoices cannot
-  //   be produced for this order
-  //
-  // TODO: figure out race condition where invoices are created, but we have failed
-  //   to create them in the db?
-  //
   const safeParams = {
     orderId: String(orderId),
     swapHash: Buffer.from(swapHash, 'base64'),
-    fillAmount: bigInt(fillAmount)
+    fillAmount: Big(fillAmount)
   }
 
   const order = await Order.findOne({ orderId: safeParams.orderId })
@@ -44,52 +37,27 @@ async function createFill ({ params, logger, eventHandler }, { CreateFillRespons
     throw new Error(`Order ID ${safeParams.orderId} is not in a state to be filled.`)
   }
 
-  const fill = await Fill.create({
-    order_id: order._id,
-    swapHash: safeParams.swapHash,
-    fillAmount: safeParams.fillAmount
-  })
+  if (Big(fillAmount).gt(Big(order.baseAmount))) {
+    throw new PublicError(`Fill amount is larger than order baseAmount for Order ID ${safeParams.orderId}.`)
+  }
+
+  try {
+    var fill = await Fill.create({
+      order_id: order._id,
+      swapHash: safeParams.swapHash,
+      fillAmount: safeParams.fillAmount
+    })
+  } catch (err) {
+    throw new FailedToCreateFillError(err)
+  }
 
   logger.info('createFill: Fill has been created', { orderId: order.orderId, fillId: fill.fillId })
 
-  // Create invoices w/ LND
-  // TODO: need to figure out how we are going to calculate fees
-  /* eslint-disable no-unused-vars */
-  const FILL_FEE = 0.001
-  const FILL_DEPOSIT = 0.001
-
-  // 2 minute expiry for invoices (in seconds)
-  const INVOICE_EXPIRY = 120
-
-  // TODO: figure out a better way to encode this
-  const feeMemo = JSON.stringify({ type: 'fee', fillId: fill.fillId })
-  const depositMemo = JSON.stringify({ type: 'deposit', fillId: fill.fillId })
-
-  // This code theoretically will work for LND payments, but I need to hook
-  // up a node so that we can test it (preferably on testnet)
-  //
-  // SEE: create-order for an example of creating invoices
-
-  const depositPaymentRequest = 'TESTFILLDEPOSIT'
-  const feePaymentRequest = 'TESTFILLFEE'
-
-  logger.info('createFill: Invoices have been created through LND')
-
-  // Persist the invoices to DB
-  const depositInvoice = await Invoice.create({
-    foreignId: fill._id,
-    foreignType: Invoice.FOREIGN_TYPES.FILL,
-    paymentRequest: depositPaymentRequest,
-    type: Invoice.TYPES.INCOMING,
-    purpose: Invoice.PURPOSES.DEPOSIT
-  })
-  const feeInvoice = await Invoice.create({
-    foreignId: fill._id,
-    foreignType: Invoice.FOREIGN_TYPES.FILL,
-    paymentRequest: feePaymentRequest,
-    type: Invoice.TYPES.INCOMING,
-    purpose: Invoice.PURPOSES.FEE
-  })
+  try {
+    var [depositInvoice, feeInvoice] = await generateInvoices(fill.fillAmount, fill.fillId, fill._id, engine, FeeInvoice.FOREIGN_TYPES.FILL, logger)
+  } catch (err) {
+    throw new FailedToCreateFillError(err)
+  }
 
   logger.info('createFill: Invoices have been created through Relayer', {
     deposit: depositInvoice._id,
