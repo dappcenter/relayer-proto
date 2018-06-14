@@ -1,12 +1,12 @@
 const path = require('path')
 const { chai, rewire, sinon } = require('test/test-helper')
-const bigInt = require('big-integer')
+const { Big } = require('../utils')
 
 const { expect } = chai
 
 const subscribeFill = rewire(path.resolve(__dirname, 'subscribe-fill'))
 
-describe.only('subscribeFill', () => {
+describe('subscribeFill', () => {
   let params
   let logger
   let send
@@ -51,7 +51,7 @@ describe.only('subscribeFill', () => {
     }
     metadata = {}
     fillOrderStub = sinon.stub()
-    order = { orderId: '2', _id: 'asfd', status: orderStatuses.PLACED, fill: fillOrderStub, payTo: 'ln:asdf1234', counterAmount: bigInt(1000), baseAmount: bigInt(100) }
+    order = { orderId: '2', _id: 'asfd', status: orderStatuses.PLACED, fill: fillOrderStub, payTo: 'ln:asdf1234', counterAmount: Big(1000), baseAmount: Big(100) }
     fill = { fillId: '3', orderId: '2', order_id: 'asfd', status: fillStatuses.ACCEPTED, swapHash: '2309402394', fillAmount: '100' }
 
     params = { orderId: '2' }
