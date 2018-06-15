@@ -18,7 +18,6 @@ describe('subscribeFill', () => {
   let fill
   let fillStub
   let orderStub
-  let fillOrderStub
   let orderStatuses = {
     CREATED: 'CREATED',
     PLACED: 'PLACED',
@@ -50,8 +49,7 @@ describe('subscribeFill', () => {
       get: sinon.stub().resolves(fillId)
     }
     metadata = {}
-    fillOrderStub = sinon.stub()
-    order = { orderId: '2', _id: 'asfd', status: orderStatuses.PLACED, fill: fillOrderStub, payTo: 'ln:asdf1234', counterAmount: Big(1000), baseAmount: Big(100) }
+    order = { orderId: '2', _id: 'asfd', status: orderStatuses.PLACED, payTo: 'ln:asdf1234', counterAmount: Big(1000), baseAmount: Big(100) }
     fill = { fillId: '3', orderId: '2', order_id: 'asfd', status: fillStatuses.ACCEPTED, swapHash: '2309402394', fillAmount: '100' }
 
     params = { orderId: '2' }
@@ -119,13 +117,6 @@ describe('subscribeFill', () => {
   it('throws if the fill is in a bad state', () => {
     fill.status = fillStatuses.CREATED
     return expect(subscribeFill({ params, send, logger, metadata, eventHandler, messenger }, { SubscribeFillResponse })).to.eventually.rejectedWith('is not a valid fill')
-  })
-
-  it('fills the order', async () => {
-    await subscribeFill({ params, send, logger, metadata, eventHandler, messenger }, { SubscribeFillResponse })
-
-    expect(fillOrderStub).to.have.been.calledOnce()
-    expect(fillOrderStub).to.have.been.calledOn(order)
   })
 
   it('sends the response to the client', async () => {
