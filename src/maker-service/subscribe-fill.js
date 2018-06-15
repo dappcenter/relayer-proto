@@ -4,6 +4,8 @@
  * @param {GrpcServerStreamingMethod~request} request - request object
  * @param {Object} request.params - Request parameters from the client
  * @param {function} request.send - Send a chunk of data to the client
+ * @param {function} request.onCancel - handler for if the client cancels
+ * @param {function} request.onError - handler for if the stream errors
  * @param {Object} request.logger - logger for messages about the method
  * @param {EventEmitter} request.eventHandler - Event bus to put order messages onto
  * @param {MessageBox} request.messenger
@@ -13,7 +15,7 @@
  */
 const { Order, Fill } = require('../models')
 
-async function subscribeFill ({ params, send, logger, eventHandler, messenger }, { SubscribeFillResponse }) {
+async function subscribeFill ({ params, send, onCancel, onError, logger, eventHandler, messenger }, { SubscribeFillResponse }) {
   const { orderId } = params
 
   const order = await Order.findOne({ orderId })
@@ -21,6 +23,8 @@ async function subscribeFill ({ params, send, logger, eventHandler, messenger },
   if (!order) {
     throw new Error(`No order with ID ${orderId}.`)
   }
+
+  // TODO: ensure this user is authorized to connect to this order's stream
 
   /**
    * Return only the order status if it is in a cancelled state and close the stream
@@ -32,13 +36,30 @@ async function subscribeFill ({ params, send, logger, eventHandler, messenger },
     return
   }
 
-  // TODO: ensure this user is authorized to connect to this order's stream
-
   if (order.status !== Order.STATUSES.PLACED) {
     throw new Error(`Cannot setup a fill listener for order in ${order.status} status.`)
   }
 
-  // TODO: if they drop connection how do we make sure this listener doesn't get called
+  /**
+   * When clients close the connection to subscribe fill we should cancel their orders to
+   * prevent orphaned orders from staying alive.
+   * @todo Cancel orders for which there is no stream opened every
+   * @see {@link https://trello.com/c/Qc4cJ5Df/331-combine-placeorder-and-subscribefill}
+   * @return {Promise} Resolves when the order is cancelled
+   */
+  async function earlyClose () {
+    // TODO: do we need to check order status to make sure it hasn't been filled, etc ?
+    logger.info(`Maker for order ${orderId} dropped the connection, cancelling order`)
+
+    await order.cancel()
+
+    eventHandler.emit('order:cancelled', order)
+    // TODO: refund invoices
+  }
+
+  onCancel(earlyClose)
+  onError(earlyClose)
+
   const fillId = await messenger.get(`fill:${order._id}`)
   const fill = await Fill.findOne({ fillId })
 
