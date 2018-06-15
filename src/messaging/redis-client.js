@@ -4,38 +4,24 @@
  * @author kinesis
  */
 
+const { promisify } = require('util')
 const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1'
 
 const redis = require('redis')
 
-const COMMANDS = [
-  'get',
-  'set',
-  'exists'
-]
+function createRedisClient (options = {}) {
+  const redisOptions = Object.assign({ host: REDIS_HOST }, options)
+  const client = redis.createClient(redisOptions)
 
-class RedisClient {
-  constructor (options = {}) {
-    const redisOptions = Object.assign({ host: REDIS_HOST }, options)
-    this.client = redis.createClient(redisOptions)
-
-    COMMANDS.forEach((command) => {
-      this[command] = (key) => this.promisify(key, this.client[command].bind(this.client))
-    })
-
-    this.on = this.client.on.bind(this.client)
-    this.psubscribe = this.client.psubscribe.bind(this.client)
-    this.punsubscribe = this.client.punsubscribe.bind(this.client)
-  }
-
-  promisify (key, fn) {
-    return new Promise((resolve, reject) => {
-      fn(key, (err, res) => {
-        if (err) return reject(err)
-        return resolve(res)
-      })
-    })
+  return {
+    subscribe: client.subscribe.bind(client),
+    unsubscribe: client.unsubscribe.bind(client),
+    on: client.on.bind(client),
+    publish: client.publish.bind(client),
+    get: promisify(client.get.bind(client)),
+    set: promisify(client.set.bind(client)),
+    exists: promisify(client.exists.bind(client))
   }
 }
 
-module.exports = RedisClient
+module.exports = createRedisClient

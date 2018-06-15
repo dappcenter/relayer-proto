@@ -5,42 +5,40 @@
  *
  */
 
-const RedisClient = require('./redis-client')
+const createRedisClient = require('./redis-client')
 const EventEmitter = require('events')
+
+const MESSAGEBOX_CHANNEL = 'messagebox-set'
 
 class MessageBox extends EventEmitter {
   constructor (redisOptions) {
     super()
-    this._client = new RedisClient(redisOptions)
-    this._subscriber = new RedisClient(redisOptions)
-    this._subscriber.on('pmessage', async (pattern, channel, message) => {
-      if (message === 'set') {
-        // channels for this subscription are in the form of '__keyspace@<db>__:<key>'
-        // the below extracts the name of the key from the channel, but preserves any
-        // colon (:) characters that may be in the key.
-        // e.g. '__keyspace@0__:abc' -> 'abc'
-        // e.g. '__keyspace@0__:custom_namespace:abc' -> 'custom_namespace:abc'
-        const key = channel.split(':').slice(1).join(':')
-        this.emit(`set:${key}`)
+    this._client = createRedisClient(redisOptions)
+    this._subscriber = createRedisClient(redisOptions)
+    this._subscriber.on('message', async (channel, message) => {
+      if (channel === MESSAGEBOX_CHANNEL) {
+        this.emit(`set:${message}`)
       }
     })
+    this._subscriber.subscribe(MESSAGEBOX_CHANNEL)
   }
 
   async set (key, item) {
-    return this._client.set([key, item])
+    await this._client.set(key, item)
+    this._client.publish(MESSAGEBOX_CHANNEL, key)
   }
 
   async get (key) {
-    return new Promise(async (resolve) => {
-      const keyExists = await this._client.exists(key)
-      let item
-      if (keyExists) {
-        item = await this.retrieve(key)
-      } else {
-        item = await this.nextAtKey(key)
-      }
+    return new Promise(async (resolve, reject) => {
+      try {
+        if (await this._client.exists(key)) {
+          return resolve(this.retrieve(key))
+        }
 
-      return resolve(item)
+        return resolve(await this.nextAtKey(key))
+      } catch (e) {
+        reject(e)
+      }
     })
   }
 
@@ -49,15 +47,14 @@ class MessageBox extends EventEmitter {
   }
 
   nextAtKey (key) {
-    const pattern = `__keyspace@*__:${key}`
-
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       this.once(`set:${key}`, async () => {
-        this._subscriber.punsubscribe(pattern)
-        resolve(await this.retrieve(key))
+        try {
+          resolve(await this.retrieve(key))
+        } catch (e) {
+          reject(e)
+        }
       })
-
-      this._subscriber.psubscribe(pattern)
     })
   }
 }

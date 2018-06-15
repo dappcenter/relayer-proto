@@ -19,7 +19,7 @@ async function subscribeExecute ({ params, send }, { SubscribeExecuteResponse })
     throw new Error(`No fill with ID ${fillId}.`)
   }
 
-  const order = await Order.findOne({ order_id: fill.order_id })
+  const order = await Order.findOne({ _id: fill.order_id })
 
   if (!order) {
     throw new Error(`No order associated with Fill ${fillId}.`)

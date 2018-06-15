@@ -53,12 +53,11 @@ async function subscribeFill ({ params, send, logger, eventHandler, messenger },
     orderStatus: order.status,
     fill: {
       swapHash: fill.swapHash,
-      fillAmount: fill.fillAmount
+      fillAmount: fill.fillAmount.toString()
     }
   }))
 
-  // TODO: this should probably be sent after the message is sent to the client
-  eventHandler.emit('order:filled', order)
+  eventHandler.emit('order:filled', order, fill)
 }
 
 module.exports = subscribeFill
