@@ -55,6 +55,7 @@ async function fillOrder ({ params, logger, messenger, engine }, { FillOrderResp
   }
 
   await fill.accept()
+  await order.fill()
 
   // note that the order does not get officially filled until `subscribeFill` takes it.
   await messenger.set(`fill:${order._id}`, fill.fillId)
