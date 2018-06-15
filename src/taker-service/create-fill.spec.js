@@ -31,7 +31,8 @@ describe('createFill', () => {
     params = {
       orderId: '2',
       swapHash: 'asdf1234',
-      fillAmount: 1000
+      fillAmount: 1000,
+      takerPayTo: 'ln:asdfasdf'
     }
     fill = {
       fillAmount: 1000,
@@ -99,7 +100,8 @@ describe('createFill', () => {
     expect(fillStub.create).to.have.been.calledWith({
       order_id: 'asdf',
       swapHash: Buffer.from(params.swapHash, 'base64'),
-      fillAmount: Big(params.fillAmount)
+      fillAmount: Big(params.fillAmount),
+      takerPayTo: 'ln:asdfasdf'
     })
   })
 

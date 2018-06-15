@@ -40,7 +40,6 @@ async function subscribeFill ({ params, send, logger, eventHandler, messenger },
 
   // TODO: if they drop connection how do we make sure this listener doesn't get called
   const fillId = await messenger.get(`fill:${order._id}`)
-
   const fill = await Fill.findOne({ fillId })
 
   // TODO: how to handle this? this is an error on the application side, not on the client side

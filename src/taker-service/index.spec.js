@@ -193,6 +193,11 @@ describe('TakerService', () => {
         expect(callArgs[2]).to.have.property('messenger')
         expect(callArgs[2].messenger).to.be.equal(messenger)
       })
+
+      it('engine', () => {
+        expect(callArgs[2]).to.have.property('engine')
+        expect(callArgs[2].engine).to.be.equal(engine)
+      })
     })
 
     it('passes in the response', () => {

@@ -18,7 +18,8 @@ async function createFill ({ params, logger, eventHandler, engine }, { CreateFil
   const {
     orderId,
     swapHash,
-    fillAmount
+    fillAmount,
+    takerPayTo
   } = params
 
   const safeParams = {
@@ -45,7 +46,8 @@ async function createFill ({ params, logger, eventHandler, engine }, { CreateFil
     var fill = await Fill.create({
       order_id: order._id,
       swapHash: safeParams.swapHash,
-      fillAmount: safeParams.fillAmount
+      fillAmount: safeParams.fillAmount,
+      takerPayTo: takerPayTo
     })
   } catch (err) {
     throw new FailedToCreateFillError(err)

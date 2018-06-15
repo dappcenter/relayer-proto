@@ -17,7 +17,7 @@ class TakerService {
 
     this.implementation = {
       createFill: new GrpcUnaryMethod(createFill, this.messageId('createFill'), { logger, eventHandler, engine }, { CreateFillResponse }).register(),
-      fillOrder: new GrpcUnaryMethod(fillOrder, this.messageId('fillOrder'), { logger, eventHandler, messenger }, { FillOrderResponse }).register(),
+      fillOrder: new GrpcUnaryMethod(fillOrder, this.messageId('fillOrder'), { logger, eventHandler, messenger, engine }, { FillOrderResponse }).register(),
       subscribeExecute: new GrpcServerStreamingMethod(subscribeExecute, this.messageId('subscribeExecute'), { logger, eventHandler, messenger }, { SubscribeExecuteResponse }).register()
     }
   }

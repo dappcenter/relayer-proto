@@ -22,7 +22,17 @@ const fillSchema = new Schema({
   fillAmount: { type: SchemaTypes.Long, required: true },
   swapHash: { type: String, required: true },
   swapPreimage: { type: String, required: false },
-  status: { type: String, required: true, enum: Object.values(STATUSES), default: STATUSES.CREATED }
+  status: { type: String, required: true, enum: Object.values(STATUSES), default: STATUSES.CREATED },
+  takerPayTo: {
+    type: String,
+    required: true,
+    validate: {
+      validator (v) {
+        return v.startsWith('ln:')
+      },
+      message: '{VALUE} is not a valid payTo Address. Must start with a LN: prefix'
+    }
+  }
 })
 
 /**
