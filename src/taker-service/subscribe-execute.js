@@ -10,20 +10,14 @@ const { Order, Fill } = require('../models')
  * @param {function} responses.SubscribeExecuteResponse - constructor for SubscribeExecuteResponse messages
  * @return {void}
  */
-async function subscribeExecute ({ params, send }, { SubscribeExecuteResponse }) {
+async function subscribeExecute ({ params, send, messenger }, { SubscribeExecuteResponse }) {
   const { fillId } = params
 
   const fill = await Fill.findOne({ fillId })
-
-  if (!fill) {
-    throw new Error(`No fill with ID ${fillId}.`)
-  }
+  if (!fill) throw new Error(`No fill with ID ${fillId}.`)
 
   const order = await Order.findOne({ _id: fill.order_id })
-
-  if (!order) {
-    throw new Error(`No order associated with Fill ${fillId}.`)
-  }
+  if (!order) throw new Error(`No order associated with Fill ${fillId}.`)
 
   // TODO: ensure this user is authorized to connect to this fill's stream
   if (fill.status !== Fill.STATUSES.ACCEPTED) {
@@ -34,7 +28,7 @@ async function subscribeExecute ({ params, send }, { SubscribeExecuteResponse })
     throw new Error(`Cannot setup execution listener for order in ${order.status} status`)
   }
 
-  const payTo = await this.messenger.get(`execute:${order._id}`)
+  const payTo = await messenger.get(`execute:${order._id}`)
 
   send(new SubscribeExecuteResponse({ payTo }))
 }

@@ -7,11 +7,9 @@ const { Order, Fill } = require('../models')
  * @param {Object} request.params - Request parameters from the client
  * @param {Object} request.logger - logger for messages about the method
  * @param {MessageBox} request.messenger
- * @param {Object} responses
- * @param {function} responses.ExecuteOrderResponse - constructor for ExecuteOrderResponse messages
- * @return {responses.ExecuteOrderResponse}
+ * @return {Object}
  */
-async function executeOrder ({ params, logger, messenger }, { ExecuteOrderResponse }) {
+async function executeOrder ({ params, logger, messenger }) {
   const { orderId } = params
 
   const order = await Order.findOne({ orderId })
@@ -35,7 +33,7 @@ async function executeOrder ({ params, logger, messenger }, { ExecuteOrderRespon
 
   await messenger.set(`execute:${order._id}`, order.payTo)
 
-  return new ExecuteOrderResponse({})
+  return {}
 }
 
 module.exports = executeOrder
