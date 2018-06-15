@@ -16,7 +16,8 @@ const { PublicError } = require('../errors')
 
 const FRIENDLY_ERRORS = {
   INSUFFICIENT_FUNDS_OUTBOUND: id => `Outbound channel does not have sufficient balance. Order id: ${id}`,
-  INSUFFICIENT_FUNDS_INBOUND: id => `Inbound channel does not have sufficient balance. Order id: ${id}`
+  INSUFFICIENT_FUNDS_INBOUND: id => `Inbound channel does not have sufficient balance. Order id: ${id}`,
+  ORDER_NOT_PLACED: id => `Order is not in a placed status, refunds have been executed. Order id: ${id}`
 }
 
 async function fillOrder ({ params, logger, messenger, engine }, { FillOrderResponse }) {
@@ -52,6 +53,7 @@ async function fillOrder ({ params, logger, messenger, engine }, { FillOrderResp
       engine.payInvoice(feeRefundPaymentRequest),
       engine.payInvoice(depositRefundPaymentRequest)
     ])
+    throw new PublicError(FRIENDLY_ERRORS.ORDER_NOT_PLACED(order.orderId))
   }
 
   await fill.accept()
