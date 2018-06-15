@@ -47,8 +47,6 @@ async function subscribeFill ({ params, send, logger, eventHandler, messenger },
     throw new Error(`${fillId} is not a valid fill in the ${Fill.STATUSES.ACCEPTED} status.`)
   }
 
-  await order.fill()
-
   send(new SubscribeFillResponse({
     orderStatus: order.status,
     fill: {
