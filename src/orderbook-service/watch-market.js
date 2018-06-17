@@ -9,13 +9,15 @@ const neverResolve = new Promise(() => {})
  * @param {Object} request.params - Request parameters from the client
  * @param {function} request.send - Send a chunk of data to the client
  * @param {Object} request.logger - logger for messages about the method
+ * @param {Function} request.onCancel
+ * @param {Function} request.onError
  * @param {MarketEventPublisher} request.marketEventPublisher
  * @param {EventEmitter} request.eventHandler - Event bus to put order messages onto
  * @param {Object} responses
  * @param {function} responses.WatchMarketResponse - constructor for WatchMarketResponse messages
  * @return {void}
  */
-async function watchMarket ({ params, send, logger, marketEventPublisher, eventHandler }, { WatchMarketResponse }) {
+async function watchMarket ({ params, send, logger, onCancel, onError, marketEventPublisher, eventHandler }, { WatchMarketResponse }) {
   params = {
     baseSymbol: String(params.baseSymbol),
     counterSymbol: String(params.counterSymbol),
@@ -60,7 +62,7 @@ async function watchMarket ({ params, send, logger, marketEventPublisher, eventH
     marketName: market.name
   })
 
-  eventHandler.on(`market:${market.name}`, (event) => {
+  const onMarketUpdate = (event) => {
     logger.info('watchMarket: Detected market event', {
       marketName: market.name,
       eventId: event.eventId,
@@ -75,6 +77,16 @@ async function watchMarket ({ params, send, logger, marketEventPublisher, eventH
     logger.info('watchMarket: Wrote new market event to listener stream', {
       event: event.serialize()
     })
+  }
+
+  eventHandler.on(`market:${market.name}`, onMarketUpdate)
+
+  onError(() => {
+    eventHandler.removeListener(`market:${market.name}`, onMarketUpdate)
+  })
+
+  onCancel(() => {
+    eventHandler.removeListener(`market:${market.name}`, onMarketUpdate)
   })
 
   // We don't want to return execution context back to the method wrapper, as it will end the stream
