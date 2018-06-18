@@ -31,12 +31,14 @@ async function cancelOrder ({ params, eventHandler, logger, engine }) {
     DepositRefundInvoice.findOne({ foreignId: order._id })
   ])
 
-  await Promise.all([
-    engine.payInvoice(feeRefundInvoice.paymentRequest),
-    engine.payInvoice(depositRefundInvoice.paymentRequest)
-  ])
+  if (feeRefundInvoice && depositRefundInvoice) {
+    await Promise.all([
+      engine.payInvoice(feeRefundInvoice.paymentRequest),
+      engine.payInvoice(depositRefundInvoice.paymentRequest)
+    ])
 
-  logger.info('Refunding complete', orderId)
+    logger.info('Refunding complete', orderId)
+  }
 
   return {}
 }
