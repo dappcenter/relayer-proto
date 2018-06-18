@@ -50,7 +50,8 @@ describe('placeOrder', () => {
     engine = {
       isInvoicePaid: sinon.stub(),
       getInvoiceValue: sinon.stub(),
-      isBalanceSufficient: sinon.stub()
+      isBalanceSufficient: sinon.stub(),
+      payInvoice: sinon.stub()
     }
     params = {
       orderId: '1',
@@ -68,12 +69,13 @@ describe('placeOrder', () => {
     engine.getInvoiceValue.withArgs(depositInvoicePaymentRequest).resolves(depositInvoice.value)
     engine.isBalanceSufficient.withArgs('asdf1234', Big(1000), {outbound: true}).resolves(true)
     engine.isBalanceSufficient.withArgs('asdf1234', Big(100), {outbound: false}).resolves(true)
+    engine.payInvoice.resolves(null)
 
     feeInvoiceStub = { findOne: sinon.stub().resolves({paymentRequest: feeInvoicePaymentRequest}) }
     depositInvoiceStub = { findOne: sinon.stub().resolves({paymentRequest: depositInvoicePaymentRequest}) }
     feeRefundInvoiceStub = {create: sinon.stub()}
     depositRefundInvoiceStub = {create: sinon.stub()}
-    orderStub = { findOne: sinon.stub().resolves(order) }
+    orderStub = { findOne: sinon.stub().resolves(order), STATUSES: { CANCELLED: 'CANCELLED' } }
     eventHandler = {emit: sinon.stub()}
     EmptyResponse = sinon.stub()
     revertOrderStub = placeOrder.__set__('Order', orderStub)
@@ -191,6 +193,17 @@ describe('placeOrder', () => {
     await placeOrder({ params, logger, eventHandler, engine }, { EmptyResponse })
 
     expect(depositRefundInvoiceStub.create).to.have.been.calledWith({foreignId: 'asfd', paymentRequest: depositRefundPaymentRequest})
+  })
+
+  it('pays the refund invoices and returns if the order is in a cancelled state', async () => {
+    order = {orderId: '2', _id: 'asfd', place: placeStub, payTo: 'ln:asdf1234', counterAmount: Big(1000), baseAmount: Big(100), status: 'CANCELLED'}
+    orderStub = { findOne: sinon.stub().resolves(order), STATUSES: { CANCELLED: 'CANCELLED' } }
+    revertOrderStub = placeOrder.__set__('Order', orderStub)
+    await placeOrder({ params, logger, eventHandler, engine }, { EmptyResponse })
+
+    expect(engine.payInvoice).to.have.been.calledWith(feeRefundPaymentRequest)
+    expect(engine.payInvoice).to.have.been.calledWith(depositRefundPaymentRequest)
+    expect(placeStub).to.have.not.been.called()
   })
 
   it('places the order', async () => {

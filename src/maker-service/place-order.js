@@ -109,6 +109,16 @@ async function placeOrder ({ params, logger, eventHandler, engine }, { EmptyResp
 
   logger.info('Refund invoices have been stored on the Relayer')
 
+  if (order.status === Order.STATUSES.CANCELLED) {
+    logger.info('Order is in cancelled state, refunding', { orderId: order.orderId })
+    await Promise.all([
+      engine.payInvoice(feeRefundPaymentRequest),
+      engine.payInvoice(depositRefundPaymentRequest)
+    ])
+    logger.info('Refunding complete', { orderId: order.orderId })
+    return {}
+  }
+
   await order.place()
 
   eventHandler.emit('order:placed', order)
