@@ -118,13 +118,13 @@ async function placeOrder ({ params, logger, eventHandler, engine }, { EmptyResp
     ])
 
     if (!feeRefundInvoice.preimage) {
-      const feePreimage = await engine.payInvoice(feeRefundPaymentRequest)
+      const feePreimage = await engine.payInvoice(feeRefundInvoice.paymentRequest)
       feeRefundInvoice.preimage = feePreimage
       feeRefundInvoice.save()
     }
 
     if (!depositRefundInvoice.preimage) {
-      const depositPreimage = await engine.payInvoice(depositRefundPaymentRequest)
+      const depositPreimage = await engine.payInvoice(depositRefundInvoice.paymentRequest)
       depositRefundInvoice.preimage = depositPreimage
       depositRefundInvoice.save()
     }
