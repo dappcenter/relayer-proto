@@ -30,7 +30,8 @@ const invoiceSchema = new Schema({
   foreignType: { type: String, required: true, enum: Object.values(FOREIGN_TYPES) },
   paymentRequest: { type: String, required: true },
   type: { type: String, required: true, enum: Object.values(INVOICE_TYPES) },
-  purpose: { type: String, required: true, enum: Object.values(INVOICE_PURPOSES) }
+  purpose: { type: String, required: true, enum: Object.values(INVOICE_PURPOSES) },
+  preimage: { type: String, required: false }
 }, options)
 
 invoiceSchema.statics.TYPES = INVOICE_TYPES
@@ -42,25 +43,29 @@ const Invoice = mongoose.model('Invoice', invoiceSchema)
 const FeeInvoice = Invoice.discriminator('FeeInvoice', new mongoose.Schema({
   foreignType: { type: String, default: FOREIGN_TYPES.ORDER },
   type: { type: String, default: INVOICE_TYPES.INCOMING },
-  purpose: { type: String, default: INVOICE_PURPOSES.FEE }
+  purpose: { type: String, default: INVOICE_PURPOSES.FEE },
+  preimage: { type: String }
 }, options))
 
 const DepositInvoice = Invoice.discriminator('DepositInvoice', new mongoose.Schema({
   foreignType: { type: String, default: FOREIGN_TYPES.ORDER },
   type: { type: String, default: INVOICE_TYPES.INCOMING },
-  purpose: { type: String, default: INVOICE_PURPOSES.DEPOSIT }
+  purpose: { type: String, default: INVOICE_PURPOSES.DEPOSIT },
+  preimage: { type: String }
 }, options))
 
 const FeeRefundInvoice = Invoice.discriminator('FeeRefundInvoice', new mongoose.Schema({
   foreignType: { type: String, default: FOREIGN_TYPES.ORDER },
   type: { type: String, default: INVOICE_TYPES.OUTGOING },
-  purpose: { type: String, default: INVOICE_PURPOSES.FEE }
+  purpose: { type: String, default: INVOICE_PURPOSES.FEE },
+  preimage: { type: String }
 }, options))
 
 const DepositRefundInvoice = Invoice.discriminator('DepositRefundInvoice', new mongoose.Schema({
   foreignType: { type: String, default: FOREIGN_TYPES.ORDER },
   type: { type: String, default: INVOICE_TYPES.OUTGOING },
-  purpose: { type: String, default: INVOICE_PURPOSES.DEPOSIT }
+  purpose: { type: String, default: INVOICE_PURPOSES.DEPOSIT },
+  preimage: { type: String }
 }, options))
 
 module.exports = {

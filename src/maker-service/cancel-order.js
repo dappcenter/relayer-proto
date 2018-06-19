@@ -32,10 +32,17 @@ async function cancelOrder ({ params, eventHandler, logger, engine }) {
   ])
 
   if (feeRefundInvoice && depositRefundInvoice) {
-    await Promise.all([
-      engine.payInvoice(feeRefundInvoice.paymentRequest),
-      engine.payInvoice(depositRefundInvoice.paymentRequest)
-    ])
+    if (!feeRefundInvoice.preimage) {
+      const feePreimage = await engine.payInvoice(feeRefundInvoice.paymentRequest)
+      feeRefundInvoice.preimage = feePreimage
+      feeRefundInvoice.save()
+    }
+
+    if (!depositRefundInvoice.preimage) {
+      const depositPreimage = await engine.payInvoice(depositRefundInvoice.paymentRequest)
+      depositRefundInvoice.preimage = depositPreimage
+      depositRefundInvoice.save()
+    }
 
     logger.info('Refunding complete', orderId)
   }

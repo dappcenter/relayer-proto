@@ -111,10 +111,24 @@ async function placeOrder ({ params, logger, eventHandler, engine }, { EmptyResp
 
   if (order.status === Order.STATUSES.CANCELLED) {
     logger.info('Order is in cancelled state, refunding', { orderId: order.orderId })
-    await Promise.all([
-      engine.payInvoice(feeRefundPaymentRequest),
-      engine.payInvoice(depositRefundPaymentRequest)
+
+    const [feeRefundInvoice, depositRefundInvoice] = await Promise.all([
+      FeeRefundInvoice.findOne({ foreignId: order._id }),
+      DepositRefundInvoice.findOne({ foreignId: order._id })
     ])
+
+    if (!feeRefundInvoice.preimage) {
+      const feePreimage = await engine.payInvoice(feeRefundPaymentRequest)
+      feeRefundInvoice.preimage = feePreimage
+      feeRefundInvoice.save()
+    }
+
+    if (!depositRefundInvoice.preimage) {
+      const depositPreimage = await engine.payInvoice(depositRefundPaymentRequest)
+      depositRefundInvoice.preimage = depositPreimage
+      depositRefundInvoice.save()
+    }
+
     logger.info('Refunding complete', { orderId: order.orderId })
     return {}
   }
