@@ -22,7 +22,7 @@ async function executeOrder ({ params, logger, messenger }) {
   // TODO: add some time checking: make sure not too much time has passed
 
   if (order.status !== Order.STATUSES.FILLED) {
-    throw new Error('Only filled orders can be executed.')
+    throw new Error(`Cannot fill order in ${order.status} status.`)
   }
 
   const fill = await Fill.findOne({ order_id: order._id, status: Fill.STATUSES.ACCEPTED })
