@@ -57,6 +57,10 @@ localhost:27017 # MongoDB
 
 Make sure you have pulled the latest relayer code, built the project w/ `npm run build` and rebuilt all images with `docker-compose build --force-rm`. You can then run `npm run fund`.
 
+### Relayer CLI
+
+Add `alias relayer-cli="bash relayer-cli.sh"`. Inside of the relayer directory, you can then access `relayer-cli` which has a few most used commands for troubleshooting the status of the relayer during development.
+
 ### Opening a channel w/ the broker
 
 After you've received a host address and public key from the broker, you can run `npm run create-channel`. You will be prompted in terminal to supply both the address and key.
