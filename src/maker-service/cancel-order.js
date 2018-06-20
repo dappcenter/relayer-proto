@@ -34,6 +34,9 @@ async function cancelOrder ({ params, eventHandler, logger, engine }) {
     DepositRefundInvoice.findOne({ foreignId: order._id })
   ])
 
+  // the invoices could not exist if someone is cancelling an order before it is placed because
+  // the refund invoices get created in placed. We have code in place order that checks if the order
+  // is in a cancelled state, we refund them.
   if (feeRefundInvoice && depositRefundInvoice) {
     if (!feeRefundInvoice.paid()) {
       const feePreimage = await engine.payInvoice(feeRefundInvoice.paymentRequest)
