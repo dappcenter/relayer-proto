@@ -14,7 +14,10 @@ async function cancelOrder ({ params, eventHandler, logger, engine }) {
   const { orderId } = params
   const order = await Order.findOne({ orderId })
 
-  if (!order) throw PublicError(`Could not find order with orderId: ${orderId}`)
+  if (!order) {
+    logger.info(`Could not find order with orderId: ${orderId}`)
+    throw new PublicError(`Could not find order with orderId: ${orderId}`)
+  }
 
   logger.info('Cancelling order', orderId)
 
@@ -32,19 +35,19 @@ async function cancelOrder ({ params, eventHandler, logger, engine }) {
   ])
 
   if (feeRefundInvoice && depositRefundInvoice) {
-    if (!feeRefundInvoice.preimage) {
+    if (!feeRefundInvoice.paid()) {
       const feePreimage = await engine.payInvoice(feeRefundInvoice.paymentRequest)
-      feeRefundInvoice.preimage = feePreimage
-      feeRefundInvoice.save()
+      await feeRefundInvoice.markAsPaid(feePreimage)
     }
 
-    if (!depositRefundInvoice.preimage) {
+    if (!depositRefundInvoice.paid()) {
       const depositPreimage = await engine.payInvoice(depositRefundInvoice.paymentRequest)
-      depositRefundInvoice.preimage = depositPreimage
-      depositRefundInvoice.save()
+      depositRefundInvoice.markAsPaid(depositPreimage)
     }
 
     logger.info('Refunding complete', orderId)
+  } else {
+    logger.info('Invoices do not exist yet, could not refund', orderId)
   }
 
   return {}

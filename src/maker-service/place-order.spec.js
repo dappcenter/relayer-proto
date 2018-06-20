@@ -40,12 +40,12 @@ describe('placeOrder', () => {
     }
     feeInvoice = {settled: true, value: 100}
     depositInvoice = {settled: true, value: 100}
-    feeRefundInvoice = {value: 100}
-    depositRefundInvoice = {value: 100}
     feeInvoicePaymentRequest = 'asdfasdf'
     depositInvoicePaymentRequest = 'zxcvasdf'
     feeRefundPaymentRequest = 'asdf1234'
     depositRefundPaymentRequest = 'qwer1234'
+    feeRefundInvoice = { value: 100, paid: sinon.stub().returns(false), paymentRequest: feeRefundPaymentRequest, markAsPaid: sinon.stub() }
+    depositRefundInvoice = { value: 100, paid: sinon.stub().returns(false), paymentRequest: depositRefundPaymentRequest, markAsPaid: sinon.stub() }
 
     engine = {
       isInvoicePaid: sinon.stub(),
@@ -69,12 +69,13 @@ describe('placeOrder', () => {
     engine.getInvoiceValue.withArgs(depositInvoicePaymentRequest).resolves(depositInvoice.value)
     engine.isBalanceSufficient.withArgs('asdf1234', Big(1000), {outbound: true}).resolves(true)
     engine.isBalanceSufficient.withArgs('asdf1234', Big(100), {outbound: false}).resolves(true)
-    engine.payInvoice.resolves(null)
+    engine.payInvoice.withArgs(feeRefundPaymentRequest).resolves('feePreimage')
+    engine.payInvoice.withArgs(depositRefundPaymentRequest).resolves('depositPreimage')
 
     feeInvoiceStub = { findOne: sinon.stub().resolves({paymentRequest: feeInvoicePaymentRequest}) }
     depositInvoiceStub = { findOne: sinon.stub().resolves({paymentRequest: depositInvoicePaymentRequest}) }
-    feeRefundInvoiceStub = {create: sinon.stub()}
-    depositRefundInvoiceStub = {create: sinon.stub()}
+    feeRefundInvoiceStub = {create: sinon.stub(), findOne: sinon.stub().resolves(feeRefundInvoice)}
+    depositRefundInvoiceStub = {create: sinon.stub(), findOne: sinon.stub().resolves(depositRefundInvoice)}
     orderStub = { findOne: sinon.stub().resolves(order), STATUSES: { CANCELLED: 'CANCELLED' } }
     eventHandler = {emit: sinon.stub()}
     EmptyResponse = sinon.stub()
@@ -195,15 +196,57 @@ describe('placeOrder', () => {
     expect(depositRefundInvoiceStub.create).to.have.been.calledWith({foreignId: 'asfd', paymentRequest: depositRefundPaymentRequest})
   })
 
-  it('pays the refund invoices and returns if the order is in a cancelled state', async () => {
-    order = {orderId: '2', _id: 'asfd', place: placeStub, payTo: 'ln:asdf1234', counterAmount: Big(1000), baseAmount: Big(100), status: 'CANCELLED'}
-    orderStub = { findOne: sinon.stub().resolves(order), STATUSES: { CANCELLED: 'CANCELLED' } }
-    revertOrderStub = placeOrder.__set__('Order', orderStub)
-    await placeOrder({ params, logger, eventHandler, engine }, { EmptyResponse })
+  describe('order is in cancelled state', () => {
+    beforeEach(() => {
+      order = {orderId: '2', _id: 'asfd', place: placeStub, payTo: 'ln:asdf1234', counterAmount: Big(1000), baseAmount: Big(100), status: 'CANCELLED'}
+      orderStub = { findOne: sinon.stub().resolves(order), STATUSES: { CANCELLED: 'CANCELLED' } }
+      revertOrderStub = placeOrder.__set__('Order', orderStub)
+    })
 
-    expect(engine.payInvoice).to.have.been.calledWith(feeRefundPaymentRequest)
-    expect(engine.payInvoice).to.have.been.calledWith(depositRefundPaymentRequest)
-    expect(placeStub).to.have.not.been.called()
+    it('finds the fee and deposit refund invoices in the db', async () => {
+      await placeOrder({ params, logger, eventHandler, engine }, { EmptyResponse })
+
+      expect(feeRefundInvoiceStub.findOne).to.have.been.calledWith({foreignId: order._id})
+      expect(depositRefundInvoiceStub.findOne).to.have.been.calledWith({foreignId: order._id})
+    })
+
+    it('checks if the invoices have been paid already', async () => {
+      await placeOrder({ params, logger, eventHandler, engine }, { EmptyResponse })
+      expect(feeRefundInvoice.paid).to.have.been.called()
+      expect(depositRefundInvoice.paid).to.have.been.called()
+    })
+
+    it('pays the invoices if they have not already been paid', async () => {
+      await placeOrder({ params, logger, eventHandler, engine }, { EmptyResponse })
+
+      expect(engine.payInvoice).to.have.been.calledWith(feeRefundPaymentRequest)
+      expect(engine.payInvoice).to.have.been.calledWith(depositRefundPaymentRequest)
+      expect(feeRefundInvoice.markAsPaid).to.have.been.calledWith('feePreimage')
+      expect(depositRefundInvoice.markAsPaid).to.have.been.calledWith('depositPreimage')
+    })
+
+    it('returns before placing the order', async () => {
+      await placeOrder({ params, logger, eventHandler, engine }, { EmptyResponse })
+
+      expect(placeStub).to.have.not.been.called()
+    })
+
+    it('does not pay refund invoices if they have already been paid', async () => {
+      feeRefundInvoice = { value: 100, paid: sinon.stub().returns(true), paymentRequest: feeRefundPaymentRequest, markAsPaid: sinon.stub() }
+      depositRefundInvoice = { value: 100, paid: sinon.stub().returns(true), paymentRequest: depositRefundPaymentRequest, markAsPaid: sinon.stub() }
+      feeRefundInvoiceStub = {create: sinon.stub(), findOne: sinon.stub().resolves(feeRefundInvoice)}
+      depositRefundInvoiceStub = {create: sinon.stub(), findOne: sinon.stub().resolves(depositRefundInvoice)}
+      revertFeeRefundInvoiceStub = placeOrder.__set__('FeeRefundInvoice', feeRefundInvoiceStub)
+      revertDepositRefundInvoiceStub = placeOrder.__set__('DepositRefundInvoice', depositRefundInvoiceStub)
+
+      await placeOrder({ params, logger, eventHandler, engine }, { EmptyResponse })
+
+      expect(feeRefundInvoice.paid).to.have.been.called()
+      expect(depositRefundInvoice.paid).to.have.been.called()
+      expect(engine.payInvoice).to.have.not.been.called()
+      expect(feeRefundInvoice.markAsPaid).to.have.not.been.called()
+      expect(depositRefundInvoice.markAsPaid).to.have.not.been.called()
+    })
   })
 
   it('places the order', async () => {

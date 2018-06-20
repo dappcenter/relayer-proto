@@ -117,16 +117,14 @@ async function placeOrder ({ params, logger, eventHandler, engine }, { EmptyResp
       DepositRefundInvoice.findOne({ foreignId: order._id })
     ])
 
-    if (!feeRefundInvoice.preimage) {
+    if (!feeRefundInvoice.paid()) {
       const feePreimage = await engine.payInvoice(feeRefundInvoice.paymentRequest)
-      feeRefundInvoice.preimage = feePreimage
-      feeRefundInvoice.save()
+      await feeRefundInvoice.markAsPaid(feePreimage)
     }
 
-    if (!depositRefundInvoice.preimage) {
+    if (!depositRefundInvoice.paid()) {
       const depositPreimage = await engine.payInvoice(depositRefundInvoice.paymentRequest)
-      depositRefundInvoice.preimage = depositPreimage
-      depositRefundInvoice.save()
+      await depositRefundInvoice.markAsPaid(depositPreimage)
     }
 
     logger.info('Refunding complete', { orderId: order.orderId })

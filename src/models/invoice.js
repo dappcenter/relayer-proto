@@ -37,6 +37,15 @@ const invoiceSchema = new Schema({
 invoiceSchema.statics.TYPES = INVOICE_TYPES
 invoiceSchema.statics.PURPOSES = INVOICE_PURPOSES
 invoiceSchema.statics.FOREIGN_TYPES = FOREIGN_TYPES
+invoiceSchema.method({
+  paid () {
+    return (this.preimage !== null)
+  },
+  markAsPaid (preimage) {
+    this.preimage = preimage
+    this.save()
+  }
+})
 
 const Invoice = mongoose.model('Invoice', invoiceSchema)
 
