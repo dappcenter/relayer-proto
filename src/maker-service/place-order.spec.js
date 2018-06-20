@@ -198,9 +198,7 @@ describe('placeOrder', () => {
 
   describe('order is in cancelled state', () => {
     beforeEach(() => {
-      order = {orderId: '2', _id: 'asfd', place: placeStub, payTo: 'ln:asdf1234', counterAmount: Big(1000), baseAmount: Big(100), status: 'CANCELLED'}
-      orderStub = { findOne: sinon.stub().resolves(order), STATUSES: { CANCELLED: 'CANCELLED' } }
-      revertOrderStub = placeOrder.__set__('Order', orderStub)
+      order.status = 'CANCELLED'
     })
 
     it('finds the fee and deposit refund invoices in the db', async () => {
@@ -232,12 +230,8 @@ describe('placeOrder', () => {
     })
 
     it('does not pay refund invoices if they have already been paid', async () => {
-      feeRefundInvoice = { value: 100, paid: sinon.stub().returns(true), paymentRequest: feeRefundPaymentRequest, markAsPaid: sinon.stub() }
-      depositRefundInvoice = { value: 100, paid: sinon.stub().returns(true), paymentRequest: depositRefundPaymentRequest, markAsPaid: sinon.stub() }
-      feeRefundInvoiceStub = {create: sinon.stub(), findOne: sinon.stub().resolves(feeRefundInvoice)}
-      depositRefundInvoiceStub = {create: sinon.stub(), findOne: sinon.stub().resolves(depositRefundInvoice)}
-      revertFeeRefundInvoiceStub = placeOrder.__set__('FeeRefundInvoice', feeRefundInvoiceStub)
-      revertDepositRefundInvoiceStub = placeOrder.__set__('DepositRefundInvoice', depositRefundInvoiceStub)
+      feeRefundInvoice.paid = sinon.stub().returns(true)
+      depositRefundInvoice.paid = sinon.stub().returns(true)
 
       await placeOrder({ params, logger, eventHandler, engine }, { EmptyResponse })
 

@@ -92,10 +92,8 @@ describe('cancelOrder', () => {
   })
 
   it('logs if the refund invoices cannot be found', async () => {
-    feeRefundInvoiceStub = {findOne: sinon.stub().resolves(null)}
-    depositRefundInvoiceStub = {findOne: sinon.stub().resolves(null)}
-    revertFeeRefundInvoiceStub = cancelOrder.__set__('FeeRefundInvoice', feeRefundInvoiceStub)
-    revertDepositRefundInvoiceStub = cancelOrder.__set__('DepositRefundInvoice', depositRefundInvoiceStub)
+    feeRefundInvoiceStub.findOne = sinon.stub().resolves(null)
+    depositRefundInvoiceStub.findOne = sinon.stub().resolves(null)
 
     await cancelOrder({ params, logger, eventHandler, engine }, { })
 
@@ -119,12 +117,8 @@ describe('cancelOrder', () => {
   })
 
   it('does not try to pay the invoices if they have not been paid', async () => {
-    feeRefundInvoice = { paid: sinon.stub().returns(true), paymentRequest: feeRefundPaymentRequest, markAsPaid: sinon.stub() }
-    depositRefundInvoice = { paid: sinon.stub().returns(true), paymentRequest: depositRefundPaymentRequest, markAsPaid: sinon.stub() }
-    feeRefundInvoiceStub = {findOne: sinon.stub().resolves(feeRefundInvoice)}
-    depositRefundInvoiceStub = {findOne: sinon.stub().resolves(depositRefundInvoice)}
-    revertFeeRefundInvoiceStub = cancelOrder.__set__('FeeRefundInvoice', feeRefundInvoiceStub)
-    revertDepositRefundInvoiceStub = cancelOrder.__set__('DepositRefundInvoice', depositRefundInvoiceStub)
+    feeRefundInvoice.paid = sinon.stub().returns(true)
+    depositRefundInvoice.paid = sinon.stub().returns(true)
 
     await cancelOrder({ params, logger, eventHandler, engine }, { })
 
