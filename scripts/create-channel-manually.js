@@ -13,7 +13,7 @@ const LND_MACAROON = '/shared/lnd-engine-admin.macaroon'
 const MAX_LND_BALANCE = 16777215
 
 const args = process.argv.slice(2)
-const [host, pubKey, balance = MAX_LND_BALANCE] = args
+const [host, pubKey, symbol, balance = MAX_LND_BALANCE] = args
 
 const invalidBalance = (n) => isNaN(parseFloat(n))
 
@@ -23,4 +23,4 @@ if (invalidBalance(balance)) throw new Error('balance specified is not a valid n
 
 const lnd = new LndEngine(LND_HOST, { logger: console, tlsCertPath: LND_TLS_CERT, macaroonPath: LND_MACAROON })
 
-lnd.createChannel(host, pubKey, balance)
+lnd.createChannel(host, pubKey, balance, symbol)

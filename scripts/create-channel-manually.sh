@@ -26,16 +26,18 @@ ENV='DEV'
 BROKER_PATH=${BROKER_PATH:="../broker"}
 CHANNEL_BALANCE=${CHANNEL_BALANCE:=16777215}
 
-echo -n "Channel Destination Host: "
+echo -n "Destination *Lightning* Host: "
 read DESTINATION_HOST
 
-echo -n "Channel Destination public key: "
+echo -n "Destination *Lightning* public key: "
 read DESTINATION_PUB_KEY
 
+echo -n "Currency Symbol: "
+read SYMBOL
 
-echo "Create channel to $DESTINATION_HOST with $CHANNEL_BALANCE (sat) in LTC"
+echo "Create channel to $DESTINATION_HOST with $CHANNEL_BALANCE (sat) in $SYMBOL"
 
-docker-compose exec -T relayer bash -c "node ./scripts/create-channel-manually.js $DESTINATION_HOST $DESTINATION_PUB_KEY $CHANNEL_BALANCE"
+docker-compose exec -T relayer bash -c "node ./scripts/create-channel-manually.js $DESTINATION_HOST $DESTINATION_PUB_KEY $SYMBOL $CHANNEL_BALANCE"
 
 echo "Restarting the relayer"
 
