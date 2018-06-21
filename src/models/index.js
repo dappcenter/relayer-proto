@@ -1,5 +1,5 @@
 const Order = require('./order')
-const { FeeInvoice, DepositInvoice, FeeRefundInvoice, DepositRefundInvoice } = require('./invoice')
+const { FeeInvoice, DepositInvoice, FeeRefundInvoice, DepositRefundInvoice, Invoice } = require('./invoice')
 const Fill = require('./fill')
 const Market = require('./market')
 const MarketEvent = require('./market-event')
@@ -12,5 +12,6 @@ module.exports = {
   FeeInvoice,
   DepositInvoice,
   FeeRefundInvoice,
-  DepositRefundInvoice
+  DepositRefundInvoice,
+  Invoice
 }
