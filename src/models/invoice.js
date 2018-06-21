@@ -67,5 +67,6 @@ module.exports = {
   FeeInvoice,
   DepositInvoice,
   FeeRefundInvoice,
-  DepositRefundInvoice
+  DepositRefundInvoice,
+  Invoice
 }
