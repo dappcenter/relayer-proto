@@ -64,8 +64,8 @@ async function createOrder ({ params, logger, eventHandler, engine }, { CreateOr
 
   return new CreateOrderResponse({
     orderId: order.orderId,
-    depositRequest: depositInvoice.paymentRequest,
-    feeRequest: feeInvoice.paymentRequest
+    depositPaymentRequest: depositInvoice.paymentRequest,
+    feePaymentRequest: feeInvoice.paymentRequest
   })
 }
 

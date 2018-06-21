@@ -111,6 +111,6 @@ describe('createOrder', () => {
   it('returns a CreateOrderResponse', async () => {
     await createOrder({ params, logger, eventHandler, engine }, { CreateOrderResponse })
 
-    expect(CreateOrderResponse).to.have.been.calledWith({orderId: '2', depositRequest: '1234', feeRequest: '4321'})
+    expect(CreateOrderResponse).to.have.been.calledWith({orderId: '2', depositPaymentRequest: '1234', feePaymentRequest: '4321'})
   })
 })
