@@ -38,12 +38,3 @@ read SYMBOL
 echo "Create channel to $DESTINATION_HOST with $CHANNEL_BALANCE (sat) in $SYMBOL"
 
 docker-compose exec -T relayer bash -c "node ./scripts/create-channel-manually.js $DESTINATION_HOST $DESTINATION_PUB_KEY $SYMBOL $CHANNEL_BALANCE"
-
-echo "Restarting the relayer"
-
-docker-compose up -d --force-recreate
-
-if [ $ENV = 'DEV' ]; then
-  echo "Restarting the broker (development only)"
-  (cd $BROKER_PATH && docker-compose up -d --force-recreate)
-fi
