@@ -1,4 +1,11 @@
-const { Order, FeeInvoice, DepositInvoice, FeeRefundInvoice, DepositRefundInvoice, Fill } = require('../models')
+const {
+  Order,
+  FeeInvoice,
+  DepositInvoice,
+  FeeRefundInvoice,
+  DepositRefundInvoice,
+  Invoice,
+  Fill } = require('../models')
 const { PublicError } = require('../errors')
 /**
  * Given an fillId and refundInvoice, fill the order in the relayer. This will
@@ -17,10 +24,12 @@ const { PublicError } = require('../errors')
 const FRIENDLY_ERRORS = {
   INSUFFICIENT_FUNDS_OUTBOUND: id => `Outbound channel does not have sufficient balance. Order id: ${id}`,
   INSUFFICIENT_FUNDS_INBOUND: id => `Inbound channel does not have sufficient balance. Order id: ${id}`,
-  ORDER_NOT_PLACED: id => `Order is not in a placed status, refunds have been executed. Order id: ${id}`
+  ORDER_NOT_PLACED: id => `Order is not in a placed status, refunds have been executed. Order id: ${id}`,
+  FEE_VALUES_UNEQUAL: id => `Fee Invoice Refund value is not the same as Fee Invoice value. Order id: ${id}`,
+  DEPOSIT_VALUES_UNEQUAL: id => `Deposit Invoice Refund value is not the same as Deposit Invoice value. Order id: ${id}`
 }
 
-async function fillOrder ({ params, logger, messenger, engine }, { FillOrderResponse }) {
+async function fillOrder ({ params, logger, messenger, engine }) {
   const { fillId, feeRefundPaymentRequest, depositRefundPaymentRequest } = params
 
   const fill = await Fill.findOne({ fillId })
@@ -39,6 +48,26 @@ async function fillOrder ({ params, logger, messenger, engine }, { FillOrderResp
   if (!feeInvoicePaid) throw new Error(`Fee Invoice for Order ${order.orderId} has not been paid.`)
   if (!depositInvoicePaid) throw new Error(`Deposit Invoice for Order ${order.orderId} has not been paid.`)
 
+  const [feeValue, feeRefundValue] = await Promise.all([
+    engine.getInvoiceValue(feeInvoice.paymentRequest),
+    engine.getInvoiceValue(feeRefundPaymentRequest)
+  ])
+
+  if (feeValue !== feeRefundValue) {
+    logger.error('Fee invoice refund amount does not equal fee invoice amount', { orderId: order.orderId })
+    throw new PublicError(FRIENDLY_ERRORS.FEE_VALUES_UNEQUAL(order.orderId))
+  }
+
+  const [depositValue, depositRefundValue] = await Promise.all([
+    engine.getInvoiceValue(depositInvoice.paymentRequest),
+    engine.getInvoiceValue(depositRefundPaymentRequest)
+  ])
+
+  if (depositValue !== depositRefundValue) {
+    logger.error('Deposit invoice refund amount does not equal deposit invoice amount', { orderId: order.orderId })
+    throw new PublicError(FRIENDLY_ERRORS.DEPOSIT_VALUES_UNEQUAL(order.orderId))
+  }
+
   const { feeRefundInvoice, depositRefundInvoice } = await createRefundInvoices(fill._id, feeRefundPaymentRequest, depositRefundPaymentRequest)
   logger.info('Refund invoices have been stored on the Relayer', {
     deposit: depositRefundInvoice._id,
@@ -49,10 +78,14 @@ async function fillOrder ({ params, logger, messenger, engine }, { FillOrderResp
 
   // TODO: refund their payments if the order is no longer in a good status?
   if (order.status !== Order.STATUSES.PLACED) {
-    await Promise.all([
+    const [feePreimage, depositPreimage] = await Promise.all([
       engine.payInvoice(feeRefundPaymentRequest),
       engine.payInvoice(depositRefundPaymentRequest)
     ])
+
+    await feeRefundInvoice.markAsPaid(feePreimage)
+    await depositRefundInvoice.markAsPaid(depositPreimage)
+
     throw new PublicError(FRIENDLY_ERRORS.ORDER_NOT_PLACED(order.orderId))
   }
 
@@ -74,16 +107,16 @@ async function fillOrder ({ params, logger, messenger, engine }, { FillOrderResp
 async function invoicesForFill (_fillId) {
   const feeInvoice = await FeeInvoice.findOne({
     foreignId: _fillId,
-    foreignType: FeeInvoice.FOREIGN_TYPES.FILL,
-    type: FeeInvoice.TYPES.INCOMING,
-    purpose: FeeInvoice.PURPOSES.FEE
+    foreignType: Invoice.FOREIGN_TYPES.FILL,
+    type: Invoice.TYPES.INCOMING,
+    purpose: Invoice.PURPOSES.FEE
   })
 
   const depositInvoice = await DepositInvoice.findOne({
     foreignId: _fillId,
-    foreignType: DepositInvoice.FOREIGN_TYPES.FILL,
-    type: DepositInvoice.TYPES.INCOMING,
-    purpose: DepositInvoice.PURPOSES.DEPOSIT
+    foreignType: Invoice.FOREIGN_TYPES.FILL,
+    type: Invoice.TYPES.INCOMING,
+    purpose: Invoice.PURPOSES.DEPOSIT
   })
 
   if (!feeInvoice) {
@@ -106,17 +139,17 @@ async function invoicesForFill (_fillId) {
 async function createRefundInvoices (_fillId, feeRefundPaymentRequest, depositRefundPaymentRequest) {
   const feeRefundInvoice = await FeeRefundInvoice.create({
     foreignId: _fillId,
-    foreignType: FeeRefundInvoice.FOREIGN_TYPES.FILL,
+    foreignType: Invoice.FOREIGN_TYPES.FILL,
     paymentRequest: feeRefundPaymentRequest,
-    type: FeeRefundInvoice.TYPES.OUTGOING,
-    purpose: FeeRefundInvoice.PURPOSES.FEE
+    type: Invoice.TYPES.OUTGOING,
+    purpose: Invoice.PURPOSES.FEE
   })
   const depositRefundInvoice = await DepositRefundInvoice.create({
     foreignId: _fillId,
-    foreignType: DepositRefundInvoice.FOREIGN_TYPES.FILL,
+    foreignType: Invoice.FOREIGN_TYPES.FILL,
     paymentRequest: depositRefundPaymentRequest,
-    type: DepositRefundInvoice.TYPES.OUTGOING,
-    purpose: DepositRefundInvoice.PURPOSES.DEPOSIT
+    type: Invoice.TYPES.OUTGOING,
+    purpose: Invoice.PURPOSES.DEPOSIT
   })
 
   return { feeRefundInvoice, depositRefundInvoice }

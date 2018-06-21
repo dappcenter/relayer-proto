@@ -35,7 +35,7 @@ class MakerService {
       subscribeFill: new GrpcServerStreamingMethod(subscribeFill, this.messageId('subscribeFill'), { logger, eventHandler, messenger }, { SubscribeFillResponse }).register(),
       executeOrder: new GrpcUnaryMethod(executeOrder, this.messageId('executeOrder'), { logger, eventHandler, messenger }, { ExecuteOrderResponse }).register(),
       completeOrder: new GrpcUnaryMethod(completeOrder, this.messageId('completeOrder'), { logger, eventHandler }, { CompleteOrderResponse }).register(),
-      cancelOrder: new GrpcUnaryMethod(cancelOrder, this.messageId('cancelOrder'), { logger, eventHandler }, { CancelOrderResponse }).register()
+      cancelOrder: new GrpcUnaryMethod(cancelOrder, this.messageId('cancelOrder'), { logger, eventHandler, engine }, { CancelOrderResponse }).register()
     }
   }
 
