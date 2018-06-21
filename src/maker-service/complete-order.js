@@ -13,7 +13,7 @@ const { Order, Fill, Invoice } = require('../models')
  *
  * TODO: check that preimage matches swap hash
  */
-async function completeOrder ({ params, logger, eventHandler }, { CompleteOrderResponse }) {
+async function completeOrder ({ params, logger, eventHandler }) {
   const { orderId, swapPreimage } = params
 
   const order = await Order.findOne({ orderId })
@@ -68,7 +68,7 @@ async function completeOrder ({ params, logger, eventHandler }, { CompleteOrderR
 
   eventHandler.emit('order:completed', order)
 
-  return new CompleteOrderResponse({})
+  return {}
 }
 
 module.exports = completeOrder
