@@ -25,7 +25,7 @@ async function subscribeExecute ({ params, send, messenger }, { SubscribeExecute
   }
 
   if (order.status !== Order.STATUSES.FILLED) {
-    throw new Error(`Cannot setup execution listener for order in ${order.status} status`)
+    throw new Error(`Cannot setup execution listener for order in ${order.status} status.`)
   }
 
   const payTo = await messenger.get(`execute:${order._id}`)
