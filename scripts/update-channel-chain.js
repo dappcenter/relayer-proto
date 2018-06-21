@@ -33,7 +33,7 @@ lnd.client.updateChannelPolicy({
   feeRate: parseInt(chainFees[symbol], 10) / 1000000,
   timeLockDelta: 9
 }, (err) => {
-  if(err) {
+  if (err) {
     throw err
   }
 
