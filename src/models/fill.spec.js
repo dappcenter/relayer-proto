@@ -1,6 +1,4 @@
 const { chai, sinon, mock } = require('test/test-helper')
-const crypto = require('crypto')
-
 const { expect } = chai
 
 describe('Fill', () => {
@@ -9,14 +7,6 @@ describe('Fill', () => {
   mock('generate-safe-id', safeid)
 
   const Fill = require('./fill')
-  let hash
-  let swapHash
-
-  beforeEach(() => {
-    hash = crypto.createHash('sha256')
-    hash.update(Buffer.from('preimage', 'base64'))
-    swapHash = hash.digest('base64')
-  })
 
   afterEach(() => {
     safeid.resetHistory()
@@ -27,11 +17,11 @@ describe('Fill', () => {
       const fill = await Fill.create({
         order_id: 'asdf',
         fillAmount: 100,
-        swapHash: swapHash,
+        swapHash: 'CM9VlMahIx5kjlXHQ7lA9ponFrXg4ZC+QACukB26jzM=',
         takerPayTo: 'ln:asdf'
       })
 
-      const match = fill.matchesHash('preimage')
+      const match = fill.matchesHash('IzxHRP9Pk4gd/uUPAuzEqQ8J84SVThSx9X8HaDxZpqo=')
 
       expect(match).to.eql(true)
     })
@@ -40,7 +30,7 @@ describe('Fill', () => {
       const fill = await Fill.create({
         order_id: 'asdf',
         fillAmount: 100,
-        swapHash: swapHash,
+        swapHash: 'CM9VlMahIx5kjlXHQ7lA9ponFrXg4ZC+QACukB26jzM=',
         takerPayTo: 'ln:asdf'
       })
 
