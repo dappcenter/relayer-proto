@@ -1,6 +1,6 @@
 {
   "name": "kinesis-relayer",
-  "version": "1.0.0",
+  "version": "0.1.0-alpha-preview",
   "description": "",
   "main": "index.js",
   "config": {
@@ -28,6 +28,7 @@
     "metrics": "pm2 monit",
     "fund": "bash ./scripts/fund-simnet-wallet.sh",
     "fund-confirm": "bash ./scripts/confirm-simnet.sh",
+    "send-funds": "bash ./scripts/send-funds.sh",
     "create-channel": "bash ./scripts/create-channel-manually.sh",
     "proto": "pbjs -t proto3 constants.proto health.proto maker.proto taker.proto orderbook.proto payment-network.proto -p ./proto/src -o ./proto/relayer.proto"
   },

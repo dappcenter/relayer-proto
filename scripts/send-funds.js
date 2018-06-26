@@ -7,11 +7,15 @@ const LND_MACAROON = '/shared/lnd-engine-admin.macaroon'
 const lnd = new LndEngine(LND_HOST, { logger: console, tlsCertPath: LND_TLS_CERT, macaroonPath: LND_MACAROON })
 
 const args = process.argv.slice(2)
-const [lndPublicKey] = args
+const [lndPublicKey, amount] = args
 
-console.log(lndPublicKey)
+const invalidBalance = (n) => isNaN(parseFloat(n))
 
-lnd.client.sendCoins({ addr: lndPublicKey, amount: 100000000 }, (err, res) => {
+if (invalidBalance(amount)) throw new Error('Invalid amount specified for send-funds')
+
+const amountInSat = (parseInt(amount) * 10000000)
+
+lnd.client.sendCoins({ addr: lndPublicKey, amount: amountInSat }, (err, res) => {
   if (err) console.error(err)
   console.log(res)
 })
