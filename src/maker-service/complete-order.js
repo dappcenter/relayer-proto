@@ -34,7 +34,7 @@ async function completeOrder ({ params, logger, eventHandler, engine }) {
   }
 
   if (!fill.matchesHash(swapPreimage)) {
-    throw new Error(`Hash does not match preimage for Order ${order.orderId}.`)
+    throw new PublicError(`Hash does not match preimage for Order ${order.orderId}.`)
   }
 
   const orderDepositInvoice = await DepositInvoice.findOne({ foreignId: order._id })

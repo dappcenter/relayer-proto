@@ -7,7 +7,6 @@
 const safeid = require('generate-safe-id')
 const mongoose = require('mongoose')
 const crypto = require('crypto')
-const { PublicError } = require('../errors')
 require('mongoose-long')(mongoose)
 
 const { Schema } = mongoose
@@ -59,7 +58,7 @@ fillSchema.method({
   },
   matchesHash (preimage) {
     if (!this.swapHash) {
-      throw new PublicError(`No swap hash exists for fill ${this.fillId}`)
+      throw new Error('No swap hash exists for this fill.')
     }
     const hash = crypto.createHash('sha256')
     hash.update(Buffer.from(preimage, 'base64'))
