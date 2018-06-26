@@ -1,5 +1,5 @@
 const { Order, Fill, Invoice, DepositInvoice, DepositRefundInvoice } = require('../models')
-const { PublicError, messages: {FRIENDLY_ERRORS} } = require('../errors')
+const { PublicError, messages } = require('../errors')
 /**
  * Given an order ID, complete the order and refund deposits
  *
@@ -65,13 +65,11 @@ async function completeOrder ({ params, logger, eventHandler, engine }) {
 
   if (depositValue !== depositRefundValue) {
     logger.error('Deposit invoice refund amount does not equal deposit invoice amount', { orderId: order.orderId })
-    throw new PublicError(FRIENDLY_ERRORS.DEPOSIT_VALUES_UNEQUAL(order.orderId))
+    throw new PublicError(messages.DEPOSIT_VALUES_UNEQUAL(order.orderId))
   }
 
   if (!orderDepositRefundInvoice.paid()) {
-    console.log('yoyo')
     const depositPreimage = await engine.payInvoice(orderDepositRefundInvoice.paymentRequest)
-    console.log(depositPreimage)
     await orderDepositRefundInvoice.markAsPaid(depositPreimage)
   }
 
@@ -102,7 +100,7 @@ async function completeOrder ({ params, logger, eventHandler, engine }) {
 
   if (fillDepositInvoiceValue !== fillDepositRefundInvoiceValue) {
     logger.error('Deposit invoice refund amount does not equal deposit invoice amount', { fillId: fill.fillId })
-    throw new PublicError(FRIENDLY_ERRORS.DEPOSIT_VALUES_UNEQUAL(fill.fillId))
+    throw new PublicError(messages.DEPOSIT_VALUES_UNEQUAL(fill.fillId))
   }
 
   if (!fillDepositRefundInvoice.paid()) {

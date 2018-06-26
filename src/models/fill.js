@@ -61,8 +61,7 @@ fillSchema.method({
       throw new Error('No swap hash exists for this fill.')
     }
     const hash = crypto.createHash('sha256')
-    const buffer = Buffer.from(preimage, 'base64')
-    hash.update(buffer)
+    hash.update(Buffer.from(preimage, 'base64'))
     return this.swapHash === hash.digest('base64')
   }
 })
