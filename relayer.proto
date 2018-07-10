@@ -34,7 +34,7 @@ enum OrderStatus {
 
 message CreateOrderRequest {
 
-    string pay_to = 0;
+    string maker_address = 0;
     string owner_id = 1;
     string base_symbol = 2;
     string counter_symbol = 3;
@@ -98,7 +98,7 @@ message CreateFillRequest {
     string order_id = 0;
     bytes swap_hash = 1;
     int64 fill_amount = 2;
-    string taker_pay_to = 3;
+    string taker_address = 3;
 }
 
 message CreateFillResponse {
@@ -122,7 +122,7 @@ message SubscribeExecuteRequest {
 
 message SubscribeExecuteResponse {
 
-    string pay_to = 0;
+    string maker_address = 0;
 }
 service TakerService {
     rpc CreateFill (CreateFillRequest) returns (CreateFillResponse);
