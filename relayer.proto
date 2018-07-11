@@ -172,10 +172,15 @@ service OrderBookService {
     rpc WatchMarket (WatchMarketRequest) returns (stream WatchMarketResponse);
 }
 
-message GetPublicKeyResponse {
+message GetAddressRequest {
 
-    string public_key = 0;
+    string symbol = 0;
 }
-service PaymentNetworkService {
-    rpc GetPublicKey (google.protobuf.Empty) returns (GetPublicKeyResponse);
+
+message GetAddressResponse {
+
+    string address = 0;
+}
+service PaymentChannelNetworkService {
+    rpc GetAddress (GetAddressRequest) returns (GetAddressResponse);
 }
