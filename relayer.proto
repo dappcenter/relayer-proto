@@ -181,6 +181,14 @@ message GetAddressResponse {
 
     string address = 0;
 }
+
+message CreateChannelRequest {
+
+    string address = 0;
+    int64 balance = 1;
+    string symbol = 2;
+}
 service PaymentChannelNetworkService {
     rpc GetAddress (GetAddressRequest) returns (GetAddressResponse);
+    rpc CreateChannel (CreateChannelRequest) returns (google.protobuf.Empty);
 }
