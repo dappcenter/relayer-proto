@@ -41,12 +41,13 @@ enum OrderStatus {
 
 message CreateOrderRequest {
 
-    string maker_address = 0;
     string base_symbol = 2;
     string counter_symbol = 3;
     int64 base_amount = 4;
     int64 counter_amount = 5;
     Side side = 6;
+    string maker_base_address = 7;
+    string maker_counter_address = 8;
 }
 
 message CreateOrderResponse {
@@ -108,7 +109,8 @@ message CreateFillRequest {
     string order_id = 0;
     bytes swap_hash = 1;
     int64 fill_amount = 2;
-    string taker_address = 3;
+    string taker_base_address = 3;
+    string taker_counter_address = 4;
 }
 
 message CreateFillResponse {
