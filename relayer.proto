@@ -173,6 +173,7 @@ message WatchMarketResponse {
         NEW_EVENT = 1;
         EXISTING_EVENT = 2;
         EXISTING_EVENTS_DONE = 3;
+        START_OF_EVENTS = 4;
     }
 }
 
