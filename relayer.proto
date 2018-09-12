@@ -207,3 +207,11 @@ service PaymentChannelNetworkService {
     rpc GetAddress (GetAddressRequest) returns (GetAddressResponse);
     rpc CreateChannel (CreateChannelRequest) returns (google.protobuf.Empty);
 }
+
+message GetMarketsResponse {
+
+    repeated string markets = 1;
+}
+service InfoService {
+    rpc GetMarkets (google.protobuf.Empty) returns (GetMarketsResponse);
+}
