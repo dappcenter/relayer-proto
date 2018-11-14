@@ -168,6 +168,7 @@ message WatchMarketResponse {
 
     ResponseType type = 1;
     MarketEvent market_event = 2;
+    bytes checksum = 3;
 
     enum ResponseType {
 
