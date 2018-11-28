@@ -104,6 +104,17 @@ service MakerService {
     rpc CompleteOrder (CompleteOrderRequest) returns (google.protobuf.Empty);
 }
 
+enum Code {
+
+    ORDER_NOT_PLACED = 0;
+}
+
+message FillError {
+
+    string message = 0;
+    Code code = 1;
+}
+
 message CreateFillRequest {
 
     string order_id = 0;
@@ -118,6 +129,7 @@ message CreateFillResponse {
     string fill_id = 0;
     string fee_payment_request = 1;
     string deposit_payment_request = 2;
+    FillError fill_error = 10;
 }
 
 message FillOrderRequest {
@@ -126,6 +138,11 @@ message FillOrderRequest {
     string deposit_refund_payment_request = 1;
     string fee_refund_payment_request = 2;
     Authorization authorization = 10;
+}
+
+message FillOrderResponse {
+
+    FillError fill_error = 0;
 }
 
 message SubscribeExecuteRequest {
@@ -140,7 +157,7 @@ message SubscribeExecuteResponse {
 }
 service TakerService {
     rpc CreateFill (CreateFillRequest) returns (CreateFillResponse);
-    rpc FillOrder (FillOrderRequest) returns (google.protobuf.Empty);
+    rpc FillOrder (FillOrderRequest) returns (FillOrderResponse);
     rpc SubscribeExecute (SubscribeExecuteRequest) returns (stream SubscribeExecuteResponse);
 }
 
