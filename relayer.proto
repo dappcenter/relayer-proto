@@ -55,6 +55,8 @@ message CreateOrderResponse {
     string order_id = 0;
     string fee_payment_request = 1;
     string deposit_payment_request = 2;
+    bool fee_required = 3;
+    bool deposit_required = 4;
 }
 
 message PlaceOrderRequest {
@@ -129,6 +131,8 @@ message CreateFillResponse {
     string fill_id = 0;
     string fee_payment_request = 1;
     string deposit_payment_request = 2;
+    bool fee_required = 3;
+    bool deposit_required = 4;
     FillError fill_error = 10;
 }
 
