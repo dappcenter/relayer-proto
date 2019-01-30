@@ -239,3 +239,16 @@ message GetMarketsResponse {
 service InfoService {
     rpc GetMarkets (google.protobuf.Empty) returns (GetMarketsResponse);
 }
+
+message RegisterRequest {
+
+    string public_key = 1;
+}
+
+message RegisterResponse {
+
+    string entity_id = 1;
+}
+service AdminService {
+    rpc Register (RegisterRequest) returns (RegisterResponse);
+}
