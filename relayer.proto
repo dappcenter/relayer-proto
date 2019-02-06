@@ -6,13 +6,6 @@ enum Side {
     ASK = 1;
 }
 
-message Authorization {
-
-    int64 timestamp = 1;
-    bytes nonce = 2;
-    bytes signature = 3;
-}
-
 message HealthCheckResponse {
 
     string status = 0;
@@ -64,13 +57,11 @@ message PlaceOrderRequest {
     string order_id = 0;
     string deposit_refund_payment_request = 1;
     string fee_refund_payment_request = 2;
-    Authorization authorization = 10;
 }
 
 message CancelOrderRequest {
 
     string order_id = 0;
-    Authorization authorization = 10;
 }
 
 message Fill {
@@ -89,14 +80,12 @@ message PlaceOrderResponse {
 message ExecuteOrderRequest {
 
     string order_id = 0;
-    Authorization authorization = 10;
 }
 
 message CompleteOrderRequest {
 
     string order_id = 0;
     bytes swap_preimage = 1;
-    Authorization authorization = 10;
 }
 service MakerService {
     rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse);
@@ -141,7 +130,6 @@ message FillOrderRequest {
     string fill_id = 0;
     string deposit_refund_payment_request = 1;
     string fee_refund_payment_request = 2;
-    Authorization authorization = 10;
 }
 
 message FillOrderResponse {
@@ -152,7 +140,6 @@ message FillOrderResponse {
 message SubscribeExecuteRequest {
 
     string fill_id = 0;
-    Authorization authorization = 10;
 }
 
 message SubscribeExecuteResponse {
