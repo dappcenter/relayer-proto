@@ -6,23 +6,6 @@ enum Side {
     ASK = 1;
 }
 
-message HealthCheckResponse {
-
-    string status = 0;
-}
-service HealthService {
-    rpc Check (google.protobuf.Empty) returns (HealthCheckResponse);
-}
-
-message google {
-
-    message protobuf {
-
-        message Empty {
-        }
-    }
-}
-
 enum OrderStatus {
 
     CREATED = 0;
@@ -93,6 +76,15 @@ service MakerService {
     rpc CancelOrder (CancelOrderRequest) returns (google.protobuf.Empty);
     rpc ExecuteOrder (ExecuteOrderRequest) returns (google.protobuf.Empty);
     rpc CompleteOrder (CompleteOrderRequest) returns (google.protobuf.Empty);
+}
+
+message google {
+
+    message protobuf {
+
+        message Empty {
+        }
+    }
 }
 
 enum Code {
@@ -219,14 +211,6 @@ service PaymentChannelNetworkService {
     rpc CreateChannel (CreateChannelRequest) returns (google.protobuf.Empty);
 }
 
-message GetMarketsResponse {
-
-    repeated string markets = 1;
-}
-service InfoService {
-    rpc GetMarkets (google.protobuf.Empty) returns (GetMarketsResponse);
-}
-
 message RegisterRequest {
 
     string public_key = 1;
@@ -236,6 +220,18 @@ message RegisterResponse {
 
     string entity_id = 1;
 }
+
+message HealthCheckResponse {
+
+    string status = 1;
+}
+
+message GetMarketsResponse {
+
+    repeated string markets = 1;
+}
 service AdminService {
     rpc Register (RegisterRequest) returns (RegisterResponse);
+    rpc HealthCheck (google.protobuf.Empty) returns (HealthCheckResponse);
+    rpc GetMarkets (google.protobuf.Empty) returns (GetMarketsResponse);
 }
