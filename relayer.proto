@@ -192,19 +192,25 @@ service OrderBookService {
 
 message GetAddressRequest {
 
-    string symbol = 0;
+    string symbol = 1;
 }
 
 message GetAddressResponse {
 
-    string address = 0;
+    string address = 1;
+}
+
+message Channel {
+
+    string address = 1;
+    string symbol = 2;
+    int64 balance = 3;
 }
 
 message CreateChannelRequest {
 
-    string address = 0;
-    int64 balance = 1;
-    string symbol = 2;
+    Channel outbound = 1;
+    Channel inbound = 2;
 }
 service PaymentChannelNetworkService {
     rpc GetAddress (GetAddressRequest) returns (GetAddressResponse);
